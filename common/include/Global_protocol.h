@@ -21,6 +21,13 @@ enum class CmdID : uint16_t {
     RES_LOGIN = 1011,       // 공통: 로그인 응답
     REQ_SIGNUP = 1020,      // 공통: 통합 회원가입 요청
     RES_SIGNUP = 1021,      // 공통: 통합 회원가입 응답
+    REQ_LOGOUT = 1030,      // 공통: 로그아웃 요청
+    RES_LOGOUT = 1031,      // 공통: 로그아웃 응답
+    REQ_AUTH_CHECK = 1040,  // 공통: 인증 상태 확인 요청
+    RES_AUTH_CHECK = 1041,  // 공통: 인증 상태 확인 응답
+    REQ_PROFILE_UPDATE = 1050, // 공통: 프로필 업데이트 요청
+    RES_PROFILE_UPDATE = 1051, // 공통: 프로필 업데이트 응답
+
 
     // ---------------------------------------------------------
     // [2000번대] 고객(Customer) 파트
