@@ -1,10 +1,9 @@
 #pragma once
 #include <string>
-
-// 중요: ItsServer가 클래스라는 걸 미리 알려줌 (전방 선언)
-class ItsServer; 
+#include "../session/ClientSession.h" // ClientSession 참조를 위해 필요
 
 class UserHandler {
 public:
-    static void handleSignup(int clientFd, const std::string& jsonBody, ItsServer* server);
+    static void handleSignup(ClientSession* session, const std::string& jsonBody);
+    static void handleLogin(ClientSession* session, const std::string& jsonBody);
 };

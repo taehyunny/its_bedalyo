@@ -85,39 +85,3 @@ struct PacketHeader {   // 모든 패킷의 맨 앞에 위치하여 데이터의
     uint32_t bodySize;           // 뒤따라오는 JSON 바디의 실제 크기 (바이트 단위)
 };
 #pragma pack(pop) // [주의] DTO 선언 전에 반드시 pack 설정을 해제해야 함!
-
-// =========================================================================
-// 3. 데이터 전송 객체 (DTO) 정의
-// 각 역할(Role)에 상관없이 JSON 직렬화를 통해 유연하게 데이터를 주고받음
-// =========================================================================
-
-// 회원가입 요청 DTO (통합형)
-struct SignupDTO {     
-    // 공통 필드
-    std::string userId;    // 로그인 ID
-    std::string password;  // 비밀번호
-    std::string userName;  // 사용자 이름
-    std::string phoneNumber; // 전화번호
-    int role;              // 0: 고객, 1: 사장님, 2: 라이더
-
-    // 선택적 필드 (역할에 따라 클라이언트에서 선별적으로 채워 보냄)
-    std::string address;         // 고객용
-    std::string businessNumber;  // 사장님용
-    std::string storeName;       // 사장님용
-    std::string transportType;   // 라이더용
-
-    // JSON 자동 매핑 (변수명이 JSON의 Key가 됨)
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SignupDTO,  
-        userId, password, userName, phoneNumber, role,
-        address, businessNumber, storeName, transportType)
-};
-
-// 로그인 요청 DTO
-struct LoginDTO {  
-    std::string userId;  
-    std::string password; 
-    int role;              // 0: 고객, 1: 사장님, 2: 라이더
-
-    // JSON 자동 매핑
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginDTO, userId, password, role)  
-};

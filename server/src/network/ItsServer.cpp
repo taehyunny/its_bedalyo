@@ -224,3 +224,21 @@ void ItsServer::readFromClient(int clientFd)
         }
     }
 }
+void ItsServer::disconnectClient(int clientFd) {
+    std::cout << "[INFO] 클라이언트 접속 종료 (fd: " << clientFd << ")" << std::endl;
+    sessionManager->removeSession(clientFd);
+    epoll_ctl(epollFd, EPOLL_CTL_DEL, clientFd, nullptr);
+    close(clientFd);
+}
+
+void ItsServer::sendPacket(int clientFd, CmdID cmd, const json& responseData) {
+    std::string body = responseData.dump();
+    PacketHeader header;
+    header.cmdId = cmd;
+    header.bodySize = body.size();
+
+    // 실제로는 송신 버퍼(Write Buffer)를 통해 비동기로 보내는 것이 안전하지만, 
+    // 우선 직렬 송신으로 구현합니다.
+    write(clientFd, &header, sizeof(PacketHeader));
+    write(clientFd, body.c_str(), body.size());
+}
