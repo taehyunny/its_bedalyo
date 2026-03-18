@@ -48,9 +48,26 @@ enum class CmdID : uint16_t {
     RES_ORDER_ACCEPT = 3001,// 주문 수락 응답
     REQ_ORDER_REJECT = 3010,// 주문 거절 요청 (품절 등 사유 포함)
     RES_ORDER_REJECT = 3011,// 주문 거절 응답
-    REQ_CALL_RIDER = 3020,  // 조리 완료 임박, 배달 기사 호출 요청
-    RES_CALL_RIDER = 3021,  // 배달 기사 호출 응답
-
+    REQ_COOK_TIME_SET = 3020,  // 조리 시간 재설정 요청
+    RES_COOK_TIME_SET = 3021, //조리 시간 설정 응답
+    REQ_STORE_STATUS_SET = 3030,// 영업 상태 수정 요청
+    RES_STORE_STATUS_SET = 3031,// 영업 상태 응답
+    REQ_DELIVERY_POLICY_SET = 3040,// 배달 반경 및 배달료 수정 요청
+    RES_DELIVERY_POLICY_SET = 3041,// 배달 반경 및 배달료 수정 응답
+    REQ_MENU_SOLD_OUT  = 3050,// 메뉴 품절 처리
+    RES_MENU_SOLD_OUT = 3051,//  메뉴 품절 응답
+    REQ_MENU_EDIT = 3060,//  메뉴 정보 편집 요청
+    RES_MENU_EDIT = 3061,//  메뉴 정보 편집 응답
+    REQ_REVIEW_REPLY = 3070,// 리뷰 답글 작성 요청
+	RES_REVIEW_REPLY = 3071,// 리뷰 답글 작성 응답
+    REQ_SALES_STAT = 3090,// 매출 및 정산 대시보드 요청
+	RES_SALES_STAT = 3091,// 매출 및 정산 대시보드 응답
+    REQ_SETTLEMENT_INFO = 3100,// 정산 내역 조회 요청
+    RES_SETTLEMENT_INFO = 3101,// 정산 내역 조회 응답
+    REQ_COUPON_MANAGE = 3110,// 쿠폰 발급 요청
+    RES_COUPON_MANAGE = 3111,// 쿠폰 발급 응답
+    REQ_BLACKLIST_REQUEST = 3120,// 차단 요청
+    RES_BLACKLIST_REQUEST = 3121,// 차단 응답
     // ---------------------------------------------------------
     // [4000번대] 라이더(Rider) 파트
     // ---------------------------------------------------------
