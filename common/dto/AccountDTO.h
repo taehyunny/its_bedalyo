@@ -25,5 +25,9 @@ struct LoginResDTO {   // 로그인 응답 DTO
     std::string message; // 로그인 결과 메시지 (성공 시 "로그인 성공", 실패 시 구체적인 이유)
     std::string userName; // 환영 메시지용
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginResDTO, status, message, userName)
+    // 가게가 5개가 아니라 여러 개가 될 수도 있다는 제약 사항을 고려해 vector로 처리
+    std::vector<int> ownerStoreIds; // [추가된 부분] 사장님이 로그인했을 때 자신이 관리하는 상점 ID 목록을 받기 위함
+
+    // [수정] ownerStoreIds 추가
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginResDTO, status, message, userName, ownerStoreIds)
 };

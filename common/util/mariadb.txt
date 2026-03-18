@@ -136,3 +136,49 @@ CREATE TABLE CHAT_MESSAGES (
     FOREIGN KEY (sender_id) REFERENCES USERS(user_id)
 );
 CREATE INDEX idx_chat_order_time ON CHAT_MESSAGES (order_id, created_at); -- 채팅방 빠른 조회용 인덱스
+
+
+
+
+
+
+------------------------------------------- [사장파트] 관련 테이블 수정 -------------------------------------------
+
+[STORES 테이블 수정]
+ALTER TABLE STORES ADD cook_time INT DEFAULT 30;         -- [추가] 실시간 조리시간 (분 단위)
+
+[MENUS 테이블 수정]
+ALTER TABLE MENUS ADD description VARCHAR(255);          -- [추가] 메뉴 상세 설명
+
+[ORDERS 테이블 수정]
+ALTER TABLE ORDERS ADD reject_reason VARCHAR(100);       -- [추가] 주문 거절 사유 (수락/완료 시엔 NULL)
+
+[COUPON_MASTER 테이블 수정]
+ALTER TABLE COUPON_MASTER ADD store_id INT;              -- [추가] 쿠팡이츠 본사 쿠폰이 아닌 특정 매장 전용 쿠폰일 경우 매장ID 저장 (NULL이면 본사 쿠폰)
+ALTER TABLE COUPON_MASTER ADD FOREIGN KEY (store_id) REFERENCES STORES(store_id);
+
+-------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------- [사장파트] 관련 테이블 추가 -------------------------------------------
+
+[사장님 리뷰 답글 템플릿] - 자주 쓰는 말(템플릿) 관리 기능
+CREATE TABLE OWNER_REPLY_TEMPLATES (
+    template_id INT AUTO_INCREMENT PRIMARY KEY,
+    store_id INT NOT NULL,
+    title VARCHAR(50) NOT NULL,       -- 예: "친절한 감사인사"
+    content TEXT NOT NULL,            -- 예: "주문해주셔서 감사합니다! 늘 노력하는..."
+    FOREIGN KEY (store_id) REFERENCES STORES(store_id)
+);
+
+[악성 고객 차단 목록] - 특정 고객의 주문을 받지 않도록 차단 요청을 관리
+CREATE TABLE BLOCKED_CUSTOMERS (
+    block_id INT AUTO_INCREMENT PRIMARY KEY,
+    store_id INT NOT NULL,
+    user_id VARCHAR(50) NOT NULL,     -- 차단당한 고객 ID
+    reason VARCHAR(255),              -- 차단 사유
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (store_id) REFERENCES STORES(store_id),
+    FOREIGN KEY (user_id) REFERENCES USERS(user_id)
+);
+
+-------------------------------------------------------------------------------------------------------------------
