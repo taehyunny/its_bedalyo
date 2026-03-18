@@ -1,13 +1,16 @@
 #include "UserHandler.h"
 #include "../common/dto/AllDTOs.h"
 #include "../database/UserDAO.h"
+#include "../database/AuthDAO.h"
 #include <iostream>
 
-void UserHandler::handleSignup(ClientSession* session, const std::string& jsonBody) {
-    try {
+void UserHandler::handleSignup(ClientSession *session, const std::string &jsonBody)
+{
+    try
+    {
         // 1. 역직렬화 (DTO로 변환)
         auto req = nlohmann::json::parse(jsonBody).get<SignupReqDTO>();
-        
+
         // 2. DB 로직 (UserDAO 호출)
         bool success = UserDAO::getInstance().insertUser(req);
 
@@ -18,36 +21,44 @@ void UserHandler::handleSignup(ClientSession* session, const std::string& jsonBo
         res.userName = req.userName;
 
         // 4. 전송 (Session의 송신 로직 호출)
-        // session->sendPacket(CmdID::RES_SIGNUP, res);
+        session->sendPacket(CmdID::RES_SIGNUP, res);
         std::cout << "[UserHandler] 회원가입 처리 완료: " << req.userId << " (Status: " << res.status << ")" << std::endl;
-
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         std::cerr << "[UserHandler] Signup Error: " << e.what() << std::endl;
     }
 }
 
-void UserHandler::handleLogin(ClientSession* session, const std::string& jsonBody) {
-    try {
+void UserHandler::handleLogin(ClientSession *session, const std::string &jsonBody)
+{
+    try
+    {
         auto req = nlohmann::json::parse(jsonBody).get<LoginReqDTO>();
-        
+
         // DB 인증 로직 (가상)
-        auto userJson = UserDAO::getInstance().selectUser(req.userId, req.password);
+        auto userJson = AuthDAO::getInstance().validateLogin(req.userId, req.password);
 
         AuthResDTO res;
-        if (!userJson.empty()) {
+        if (!userJson.empty())
+        {
             res.status = 200;
-            res.userName = userJson["user_name"];
+            res.userName = userJson["user_name"].get<std::string>();
             res.message = "로그인 성공";
-            
+
             // 세션에 로그인 정보 박제 (핵심!)
-            session->authenticate(req.userId, userJson["role"]);
-        } else {
+            session->authenticate(req.userId, userJson["role"].get<int>());
+        }
+        else
+        {
             res.status = 401;
             res.message = "아이디 또는 비밀번호가 틀렸습니다.";
         }
 
-        // session->sendPacket(CmdID::RES_LOGIN, res);
-    } catch (const std::exception& e) {
+        session->sendPacket(CmdID::RES_LOGIN, res);
+    }
+    catch (const std::exception &e)
+    {
         std::cerr << "[UserHandler] Login Error: " << e.what() << std::endl;
     }
 }
