@@ -1,0 +1,8 @@
+{
+  "OutputFoldersPerTargetSystem": {
+    "Local Machine": [
+      "server\\build\\out\\build\\x64-Debug",
+      "server\\build\\out\\install\\x64-Debug"
+    ]
+  }
+}
