@@ -8,7 +8,7 @@
 #include "../../common/dto/AllDTOs.h"
 #include "thread/ThreadPool.h"
 
-// 1. 전역 스레드풀 선언 (Dispatcher가 이 녀석을 찾아서 씁니다)
+// 전역 스레드풀 선언 (Dispatcher가 이 녀석을 찾아서 씁니다)
 // 워커 스레드 4개를 생성합니다. (CPU 코어 수에 맞추는 것이 좋습니다)
 ThreadPool g_threadPool(4);
 
@@ -34,10 +34,10 @@ int main(int argc, char *argv[])
 
     try
     {
-        // 2. 서버 엔진 생성 (포트 바인딩 및 epoll 초기화)
+        // 서버 엔진 생성 (포트 바인딩 및 epoll 초기화)
         ItsServer server(port);
 
-        // 3. 메인 이벤트 루프 시작 (여기서 블로킹되어 계속 실행됨)
+        // 메인 이벤트 루프 시작 (여기서 블로킹되어 계속 실행됨)
         server.run();
     }
     catch (const std::exception &e)

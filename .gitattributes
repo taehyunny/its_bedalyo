@@ -1,0 +1,93 @@
+# =============================================================================
+# .gitattributes
+# Line ending settings for cross-platform team development
+#
+# Team environment
+#   Server          : Linux  (LF)
+#   Customer client : Linux  (LF)
+#   Owner MFC       : Windows (CRLF)
+# =============================================================================
+
+# Default - auto detect text files
+* text=auto
+
+# -----------------------------------------------------------------------------
+# Linux / Cross-platform (LF)
+# -----------------------------------------------------------------------------
+
+# C / C++ source
+*.c     text eol=lf
+*.cpp   text eol=lf
+*.h     text eol=lf
+*.hpp   text eol=lf
+
+# Python
+*.py    text eol=lf
+
+# Shell scripts
+*.sh    text eol=lf
+
+# CMake
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+
+# Makefile
+Makefile text eol=lf
+
+# SQL
+*.sql   text eol=lf
+
+# JSON / Config
+*.json  text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.toml  text eol=lf
+*.ini   text eol=lf
+*.env   text eol=lf
+
+# Markdown / Text
+*.md    text eol=lf
+*.txt   text eol=lf
+
+# Git
+.gitignore      text eol=lf
+.gitattributes  text eol=lf
+
+# -----------------------------------------------------------------------------
+# Windows MFC only (CRLF)
+# -----------------------------------------------------------------------------
+
+# Visual Studio project files
+*.sln       text eol=crlf
+*.slnx      text eol=crlf
+*.vcxproj   text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.vcxproj.user    text eol=crlf
+*.props     text eol=crlf
+
+# Resource files (MFC)
+*.rc        text eol=crlf
+*.rc2       text eol=crlf
+
+# Batch files
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# -----------------------------------------------------------------------------
+# Binary files - do not touch line endings
+# -----------------------------------------------------------------------------
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.exe   binary
+*.dll   binary
+*.lib   binary
+*.a     binary
+*.o     binary
+*.obj   binary
+*.so    binary
+*.zip   binary
+*.tar   binary
+*.gz    binary

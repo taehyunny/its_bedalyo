@@ -1,40 +1,52 @@
-﻿
-// MFCDlg.h: 헤더 파일
-//
-
 #pragma once
 
+#include "NetworkHelper.h" 
 
-// CMFCDlg 대화 상자
 class CMFCDlg : public CDialogEx
 {
-// 생성입니다.
 public:
-	CMFCDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
+    CMFCDlg(CWnd* pParent = nullptr);
 
-// 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_MFC_DIALOG };
+    enum { IDD = IDD_MFC_DIALOG };
 #endif
 
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 지원입니다.
-
-
-// 구현입니다.
 protected:
-	HICON m_hIcon;
+    virtual void DoDataExchange(CDataExchange* pDX);
+    virtual BOOL OnInitDialog();
+    afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+    afx_msg void OnPaint();
+    afx_msg HCURSOR OnQueryDragIcon();
+    DECLARE_MESSAGE_MAP()
 
-	// 생성된 메시지 맵 함수
-	virtual BOOL OnInitDialog();
-	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	afx_msg void OnPaint();
-	afx_msg HCURSOR OnQueryDragIcon();
-	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnEdit_ID();
-	afx_msg void OnBtnLogin();
-	afx_msg void OnEdit_PW();
-	afx_msg void OnBtnSign();
-	afx_msg void OnBtnCancel();
+    afx_msg void OnEdit_ID();
+    afx_msg void OnEdit_PW();
+    afx_msg void OnBtnLogin();   
+    afx_msg void OnBtnSign();     
+    afx_msg void OnBtnCancel();
+
+    afx_msg LRESULT OnPacketReceived(WPARAM wParam, LPARAM lParam);
+
+protected:
+    HICON m_hIcon;
+
+private:
+
+    CNetworkHelper  m_net;        
+
+
+    CString         m_strId;
+    CString         m_strPw;
+
+
+    int             m_storeId   = 0;
+    CString         m_storeName;
+
+
+    std::string     m_serverIp  = "10.10.10.123";
+    int             m_serverPort = 8080;
+
+
+    bool            m_waitingResponse = false;
 };
