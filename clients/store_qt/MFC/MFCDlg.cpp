@@ -135,17 +135,15 @@ void CMFCDlg::OnEdit_PW()
 
 void CMFCDlg::OnBtnLogin()
 {
-	// TODO: 추후 DB 연결 후 실제 인증 로직으로 교체
 	// 현재는 버튼 클릭 시 바로 메인 메뉴로 이동
 
 	CMainMenuDlg mainDlg;       // IDD_MAIN_MENU 다이얼로그 객체 생성
 	this->ShowWindow(SW_HIDE);  // 로그인 창 숨기기
-
 	mainDlg.DoModal();          // 메인 메뉴 실행 (블로킹)
-
 	this->ShowWindow(SW_SHOW);  // 메인 종료 시 로그인 창 다시 표시
-	// 완전 종료 원하면 아래 주석 해제
-	// OnCancel();
+	
+	// 로그인 창의 완전 종료 원하면 아래 주석 해제
+	//OnCancel();
 }
 
 void CMFCDlg::OnBtnSign()
