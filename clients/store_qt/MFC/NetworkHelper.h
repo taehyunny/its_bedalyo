@@ -17,7 +17,7 @@ using json = nlohmann::json;
 
 struct ReceivedPacket
 {
-    CmdID       cmdId;
+    CmdID       cmdId = CmdID::REQ_HEARTBEAT;
     std::string body;
 };
 
@@ -27,7 +27,10 @@ public:
     CNetworkHelper()
     {
         WSADATA wsa;
-        WSAStartup(MAKEWORD(2, 2), &wsa);
+        if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+        {
+            // WSA 초기화 실패 처리
+        }
     }
 
     ~CNetworkHelper()
@@ -90,6 +93,7 @@ public:
         std::string bodyStr = bodyJson.dump();
 
         PacketHeader header;
+        memset(&header, 0, sizeof(header));
         header.signature = 0x4543;
         header.cmdId = cmdId;
         header.bodySize = static_cast<uint32_t>(bodyStr.size());

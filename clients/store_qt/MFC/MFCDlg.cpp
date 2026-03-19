@@ -6,7 +6,7 @@
 #include "MFCDlg.h"
 #include "afxdialogex.h"
 #include "CMainMenuDlg.h"
-
+#include "SignupDlg.h"      // ← 추가
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -136,9 +136,18 @@ void CMFCDlg::OnBtnLogin()
 
 void CMFCDlg::OnBtnSign()
 {
-    MessageBox(L"회원가입 화면은 추후 구현 예정입니다.", L"안내", MB_OK);
+    if (!m_net.IsConnected())
+    {
+        if (!m_net.Connect(m_serverIp, m_serverPort, GetSafeHwnd()))
+        {
+            MessageBox(L"서버에 연결할 수 없습니다.", L"연결 실패", MB_ICONERROR);
+            return;
+        }
+    }
 
-
+    CSignupDlg signupDlg(&m_net, this);
+    if (signupDlg.DoModal() == IDOK)
+        MessageBox(L"가입이 완료됐습니다. 로그인해주세요.", L"안내", MB_OK);
 }
 
 LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
