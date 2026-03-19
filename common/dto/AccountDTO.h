@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
-#include <nlohmann/json.hpp>
+//#include <nlohmann/json.hpp>
+#include "json.hpp"
 
 // ---------------------------------------------------------
 // [1] 회원가입 요청 DTO (클라이언트 -> 서버)
