@@ -135,6 +135,7 @@ CREATE TABLE CHAT_MESSAGES (
     FOREIGN KEY (order_id) REFERENCES ORDERS(order_id),
     FOREIGN KEY (sender_id) REFERENCES USERS(user_id)
 );
+<<<<<<< Updated upstream
 CREATE INDEX idx_chat_order_time ON CHAT_MESSAGES (order_id, created_at); -- 채팅방 빠른 조회용 인덱스
 
 
@@ -182,3 +183,6 @@ CREATE TABLE BLOCKED_CUSTOMERS (
 );
 
 -------------------------------------------------------------------------------------------------------------------
+=======
+CREATE INDEX idx_chat_order_time ON CHAT_MESSAGES (order_id, created_at); -- 채팅방 빠른 조회용 인덱스
+>>>>>>> Stashed changes
