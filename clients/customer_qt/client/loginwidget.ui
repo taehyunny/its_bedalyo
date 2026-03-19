@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UI version="4.0">
+ <class>LoginWidget</class>
+ <widget class="QWidget" name="LoginWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>550</height>
+   </rect>
+  </property>
+  <property name="styleSheet">
+   <string>QWidget { background-color: #ffffff; }
+QLineEdit {
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #333333;
+}
+QLineEdit:focus { border: 1.5px solid #1565c0; }
+QPushButton#loginButton, QPushButton#signupButton {
+  background-color: #1565c0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  padding: 12px;
+}
+QPushButton#loginButton:hover, QPushButton#signupButton:hover {
+  background-color: #0d47a1;
+}
+QPushButton#tabLogin, QPushButton#tabSignup {
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 15px;
+  font-weight: bold;
+  color: #aaaaaa;
+  padding: 8px 0px;
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>12</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="label_logo">
+     <property name="text">
+      <string>it&apos;s 배달요 🛵</string>
+     </property>
+     <property name="styleSheet">
+      <string>font-size: 26px; font-weight: bold; color: #1565c0;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_sub">
+     <property name="text">
+      <string>빠르고 맛있는 배달 서비스</string>
+     </property>
+     <property name="styleSheet">
+      <string>font-size: 13px; color: #999999;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="tabLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="tabLogin">
+       <property name="text">
+        <string>로그인</string>
+       </property>
+       <property name="styleSheet">
+        <string>color: #1565c0; border-bottom: 2px solid #1565c0; background: transparent; font-size: 15px; font-weight: bold; padding: 8px 0px; border-top: none; border-left: none; border-right: none;</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="tabSignup">
+       <property name="text">
+        <string>회원가입</string>
+       </property>
+       <property name="styleSheet">
+        <string>color: #aaaaaa; border-bottom: 2px solid transparent; background: transparent; font-size: 15px; font-weight: bold; padding: 8px 0px; border-top: none; border-left: none; border-right: none;</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QStackedWidget" name="formStack">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="loginPage">
+      <layout class="QVBoxLayout" name="loginLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QLineEdit" name="idEdit">
+         <property name="placeholderText">
+          <string>아이디를 입력하세요</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="pwEdit">
+         <property name="placeholderText">
+          <string>비밀번호를 입력하세요</string>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="loginButton">
+         <property name="text">
+          <string>로그인</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="signupPage">
+      <layout class="QVBoxLayout" name="signupLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QLineEdit" name="signupIdEdit">
+         <property name="placeholderText">
+          <string>아이디를 입력하세요</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="signupPwEdit">
+         <property name="placeholderText">
+          <string>비밀번호를 입력하세요</string>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="nameEdit">
+         <property name="placeholderText">
+          <string>이름을 입력하세요</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="phoneEdit">
+         <property name="placeholderText">
+          <string>전화번호를 입력하세요</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="signupButton">
+         <property name="text">
+          <string>회원가입</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</UI>
