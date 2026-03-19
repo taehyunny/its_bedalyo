@@ -15,13 +15,30 @@ MARIADB 접속 계정
 ---
 ## 🚩 진행 상황 (Status)
 - [x] **[필독]** 필수 사항 Git pull 후 현재 진행 상황 확인 부탁드립니다.
-- [ ] JSON 헤더 + 바디 설계중
-- [ ] 로그인, 상점, 주문 , 기본 DTO 설계 완료 ( 참조 하여 설계 )
-- [ ] 공통 프로토콜 헤더(`Global_protocol.h`) 정의 중
-- [ ] 각 파트별 프로토콜 요구사항 정의 중
-- [ ] 이번주 금요일 하나의 흐름으로 회원가입 목표
+- [x] **[서버]** 서버와 깃 분리 했으니 팀원분들 깃 조율 해주세요
+- [x] JSON 헤더 + 바디 설계중 (현재 완료)
+- [x] 로그인, 상점, 주문 , 기본 DTO 설계 완료 ( 참조 하여 설계 )
+- [ ] 회원가입 및 로그인 확인 완료 ( 테이블 저장 확인해봐야함 )
+- [ ] 상점 1개 추가 완료 했으니 DB 접속하시고 확인해보세요
 ---
 ## 🔄 업데이트 이력 (Release Notes)
+ver 0.0.15
+- DB 테이블 상점, 메뉴 에 칼럼 추가
+- STORES 테이블에 누락된 상용화 디테일 컬럼 추가
+ALTER TABLE STORES 
+ADD image_url VARCHAR(255),                            -- 가게 썸네일 이미지 링크
+ADD min_order_amount INT DEFAULT 0,                    -- 최소 주문 금액
+ADD rating DECIMAL(2,1) DEFAULT 0.0,                   -- 별점 (예: 4.5, 0.0으로 초기화)
+ADD review_count INT DEFAULT 0,                        -- 리뷰 개수
+ADD delivery_time_range VARCHAR(50) DEFAULT '20~30분'; -- 예상 배달 시간 (기본값 세팅)
+
+- MENUS 테이블에 누락된 상용화 디테일 컬럼 추가
+ALTER TABLE MENUS 
+ADD image_url VARCHAR(255),                            -- 음식 사진 링크
+ADD menu_category VARCHAR(50) DEFAULT '기본 메뉴',        -- 메뉴 그룹명
+ADD is_popular TINYINT(1) DEFAULT 0;                   -- 1: 인기메뉴(BEST), 0: 일반
+- StoreDTO 수정 완료
+
 ver 0.0.12
 - 사용자 클라이언트 포토토콜 정의
 - 가게(사장님) MFC 회원가입 부분 수정중
