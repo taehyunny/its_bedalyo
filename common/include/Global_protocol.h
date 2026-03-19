@@ -40,6 +40,12 @@ enum class CmdID : uint16_t
     RES_ORDER_CREATE = 2021,            // 주문 생성 응답
     REQ_REVIEW_WRITE = 2030,            // 사진 첨부 리뷰 작성 요청
     RES_REVIEW_WRITE = 2031,            // 리뷰 작성 응답
+    REQ_ADDRESS_SAVE = 2070,            //  (주소 저장 요청)
+    RES_ADDRESS_SAVE = 2071,            //  (주소 저장 응답)
+    REQ_ADDRESS_LIST = 2072,            //  (주소 목록 조회 요청)
+    RES_ADDRESS_LIST = 2073,            //  (주소 목록 조회 응답)
+    REQ_ADDRESS_DELETE = 2074,          //  (주소 삭제 요청)
+    RES_ADDRESS_DELETE = 2075,          //  (주소 삭제 응답)
 
     // ---------------------------------------------------------
     // [3000번대] 사장님(Owner) 파트
