@@ -82,7 +82,7 @@ object_script.*
 *.dll
 *.exe
 *.res
-*.rc2
+# *.rc2 는 제외 금지! res/MFC.rc2 는 소스 파일임
 *.tlb
 *.tlh
 *.sbr
