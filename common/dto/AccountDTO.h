@@ -40,5 +40,5 @@ struct AuthResDTO
     std::string userName;
 
     // 🚀 이 매크로가 반드시 구조체 정의 바로 아래(혹은 안)에 있어야 합니다!
-    NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AuthResDTO, status, message, userName)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(AuthResDTO, status, message, userName)
 };
