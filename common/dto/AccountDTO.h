@@ -26,8 +26,8 @@ struct SignupReqDTO
 
     // ⚠️ 매크로 업데이트 필수!
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(SignupReqDTO,
-        userId, password, userName, phoneNumber, role,
-        address, businessNumber, accountNumber, storeName, category, storeAddress)
+                                   userId, password, userName, phoneNumber, role,
+                                   address, businessNumber, accountNumber, storeName, category, storeAddress)
 };
 // ---------------------------------------------------------
 // [2] 로그인 요청 DTO (클라이언트 -> 서버)

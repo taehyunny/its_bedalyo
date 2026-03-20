@@ -1,39 +1,48 @@
 #pragma once
 #include <QWidget>
-#include <QListWidgetItem>
+#include <QScrollArea>
+#include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QMouseEvent>
+#include <QEvent>
 #include "NetworkManager.h"
-#include "StoreItemWidget.h"
-
-// ============================================================
-// HomeWidget — 홈 화면
-//
-// 가게 목록 흐름:
-//   1. 탭 진입 or 카테고리 선택
-//      → NetworkManager::sendStoreListRequest(category) 호출 (TODO)
-//   2. 서버 응답 수신
-//      → onStoreListReceived(stores) 슬롯에서 populateStoreList() 호출
-//   3. 각 StoreItemWidget::setData() 로 UI 채움
-//   4. 이미지 URL 따로 수신 후 setMainImage() 교체
-// ============================================================
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class HomeWidget; }
 QT_END_NAMESPACE
 
-// 서버에서 받아올 가게 데이터 구조체
-// 추후 공용 DTO(StoreListResDTO 등)로 교체 예정
+struct CategoryInfo {
+    int     categoryId = 0;
+    QString name;
+    QString imageUrl;
+};
+
 struct StoreInfo {
-    int         storeId       = 0;
-    QString     name;
-    QString     category;
-    double      rating        = 0.0;
-    int         reviewCount   = 0;
-    double      distanceKm    = 0.0;
-    int         minDeliveryTime = 0;
-    int         maxDeliveryTime = 0;
-    int         deliveryFee   = 0;
-    int         minOrderAmount = 0;
-    QStringList tags;
+    int     storeId         = 0;
+    QString name;
+    QString category;
+    double  rating          = 0.0;
+    int     reviewCount     = 0;
+    int     deliveryFee     = 0;
+    int     minDeliveryTime = 0;
+    int     maxDeliveryTime = 0;
+    int     minOrderAmount  = 0;
+    QString imageUrl;
+};
+
+class DragScrollArea : public QScrollArea {
+    Q_OBJECT
+public:
+    explicit DragScrollArea(QWidget *parent = nullptr);
+protected:
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
+private:
+    bool   m_dragging = false;
+    QPoint m_lastPos;
 };
 
 class HomeWidget : public QWidget {
@@ -44,31 +53,43 @@ public:
     ~HomeWidget();
 
     void setUserName(const QString &userName);
+    void setAddress(const QString &address);
 
-    // 서버 응답 수신 후 외부에서 호출 (NetworkManager 시그널 연결 시 사용)
+    void populateCategories1(const QList<CategoryInfo> &categories);
+    void populateCategories2(const QList<CategoryInfo> &categories);
     void populateStoreList(const QList<StoreInfo> &stores);
 
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
 signals:
+    void categorySelected(int categoryId, const QString &categoryName);
     void storeSelected(int storeId);
+    void searchRequested();
+    void favoriteRequested();
     void orderListRequested();
     void mypageRequested();
-    void searchRequested();
     void logoutRequested();
 
 private slots:
-    void onCategoryClicked(const QString &category);
-    void on_storeList_itemClicked(QListWidgetItem *item);
+    void on_btnSearch_clicked();
     void on_navHome_clicked();
     void on_navSearch_clicked();
+    void on_navFavorite_clicked();
     void on_navOrder_clicked();
-    void on_navMypage_clicked();
+    void on_navMy_clicked();
 
 private:
     Ui::HomeWidget *ui;
     NetworkManager *m_network;
     QString         m_userName;
-    QString         m_currentCategory = "전체";
+    QString         m_address;
 
-    void updateCategoryStyle(const QString &selectedCategory);
-    void requestStoreList(const QString &category);
+    QWidget* makeCategoryItem(const CategoryInfo &cat);
+    QWidget* makeStoreCard(const StoreInfo &store);
+
+    static QString formatWon(int amount);
+    static QString formatDeliveryFee(int fee);
+    static QString formatTime(int min, int max);
+    static QString placeholderColorForCard(const QString &category);
+    static QString categoryEmoji(const QString &category);
 };
