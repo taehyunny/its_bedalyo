@@ -28,7 +28,6 @@ protected:
     afx_msg void OnBnClickedBtnSignup();
     afx_msg void OnBnClickedBtnCancel();
 
-    // ID / 사업자번호 수정 감지
     afx_msg void OnChangeEditId();
     afx_msg void OnChangeEditStoreId();
 
@@ -45,36 +44,33 @@ private:
 
     CNetworkHelper* m_pNet;
 
-    // USERS
+    // ── USERS ──────────────────────────────────────────────────────
     CEdit       m_editId;
     CEdit       m_editPw;
     CEdit       m_editPwConfirm;
     CEdit       m_editName;
     CEdit       m_editPhone;
 
-    // STORES
+    // ── STORES ─────────────────────────────────────────────────────
+    // open_time / close_time RC 컨트롤 없음 → DDX 바인딩 없음
     CEdit       m_editStoreName;
     CComboBox   m_comboCategory;
-    CEdit       m_editOpenTime;
-    CEdit       m_editCloseTime;
-    CEdit       m_editStoreId;
     CEdit       m_editStoreAddress;
-    // Buttons
+    CEdit       m_editStoreId;       // business_number
+
+    // ── 버튼 / 상태 라벨 ───────────────────────────────────────────
     CButton     m_btnIdCheck;
     CButton     m_btnStoreCheck;
-
-    // Status labels
     CStatic     m_staticIdStatus;
     CStatic     m_staticStoreStatus;
 
-    // Colors
+    // ── 색상 / 플래그 ──────────────────────────────────────────────
     COLORREF    m_idStatusColor = RGB(0, 0, 0);
     COLORREF    m_storeStatusColor = RGB(0, 0, 0);
-
-    // Flags
     bool        m_idAvailable = false;
     bool        m_storeAvailable = false;
     bool        m_waitingResponse = false;
+
 public:
     afx_msg void OnEnChangePhone();
 };
