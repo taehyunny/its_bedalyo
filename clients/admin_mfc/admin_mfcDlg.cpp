@@ -80,19 +80,19 @@ BOOL CadminmfcDlg::OnInitDialog()
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 
-	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != nullptr)
-	{
-		BOOL bNameValid;
-		CString strAboutMenu;
-		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
-		ASSERT(bNameValid);
-		if (!strAboutMenu.IsEmpty())
-		{
-			pSysMenu->AppendMenu(MF_SEPARATOR);
-			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
-		}
-	}
+	//CMenu* pSysMenu = GetSystemMenu(FALSE);
+	//if (pSysMenu != nullptr)
+	//{
+	//	BOOL bNameValid;
+	//	CString strAboutMenu;
+	//	bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+	//	ASSERT(bNameValid);
+	//	if (!strAboutMenu.IsEmpty())
+	//	{
+	//		pSysMenu->AppendMenu(MF_SEPARATOR);
+	//		pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+	//	}
+	//}
 
 	// 이 대화 상자의 아이콘을 설정합니다.  응용 프로그램의 주 창이 대화 상자가 아닐 경우에는
 	//  프레임워크가 이 작업을 자동으로 수행합니다.
