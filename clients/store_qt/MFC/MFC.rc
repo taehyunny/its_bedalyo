@@ -50,10 +50,10 @@ BEGIN
     "\r\n"
     "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)\r\n"
     "LANGUAGE 18, 1\r\n"
-    "#include ""res\\MFC.rc2""  // Microsoft Visual C++ ??곸뇚????삘뀲 ?袁㏓럡?癒?퐣 ?紐꾩춿???귐딅꺖??쇱뿯??덈뼄.\r\n"
-    "#include ""l.KOR\\afxres.rc""      // ??? ?닌딄쉐 ?遺용꺖\r\n"
+    "#include ""res\\MFC.rc2""  // Microsoft Visual C++ ??怨몃뇶?????섎??熬곥룗???????筌뤾쑴異???洹먮봾爰???깅엷???덈펲.\r\n"
+    "#include ""l.KOR\\afxres.rc""      // ??? ??뚮봽????븐슜爰?\n"
     "#if !defined(_AFXDLL)\r\n"
-    "#include ""l.KOR\\afxribbon.rc""   // MFC ?귐됰궚 獄??뚢뫂?껅에?筌띾맧? ?귐딅꺖??\n"
+    "#include ""l.KOR\\afxribbon.rc""   // MFC ?洹먮맧沅??????쳜?猿낆뿉?嶺뚮씭留? ?洹먮봾爰??\n"
     "#endif\r\n"
     "#endif\r\n"
     "\0"
@@ -92,13 +92,15 @@ BEGIN
     PUSHBUTTON      "로그인",IDC_BUTTON1,205,58,33,30
 END
 
-IDD_MAIN_MENU DIALOGEX 0, 0, 439, 209
+IDD_MAIN_MENU DIALOGEX 0, 0, 320, 154
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Dialog"
 FONT 16, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "확인",IDOK,313,189,23,11
-    PUSHBUTTON      "취소",IDCANCEL,340,189,23,11
+    LTEXT           "Static",IDC_STATIC_STATUS,266,12,39,15
+    CONTROL         "",IDC_TAB_STATUS_SET,"SysTabControl32",0x0,7,34,306,111
+    LTEXT           "Static",IDC_STATIC_NAMEBAR,96,12,83,16
+    GROUPBOX        "",IDC_STATIC_UPBAR,7,7,306,23
 END
 
 IDD_SIGNUP DIALOGEX 0, 0, 346, 198
@@ -132,6 +134,47 @@ BEGIN
     LTEXT           " - 제외 ",IDC_STATIC,121,116,23,8
     LTEXT           "매장 주소",IDC_STATIC_STORE_ADDRESS,179,56,29,8
     EDITTEXT        IDC_EDIT_STOREADDRESS,210,52,105,14,ES_AUTOHSCROLL
+END
+
+IDD_TAB_STORE DIALOGEX 0, 0, 504, 246
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_BORDER | WS_VSCROLL | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "저장",IDC_BTN_SAVE,379,201,50,14
+    PUSHBUTTON      "변경 취소",IDC_BTN_CANCEL,433,201,50,14
+    LTEXT           "매장명",IDC_STATIC,7,14,32,8
+    LTEXT           "카테고리",IDC_STATIC,7,36,32,8
+    LTEXT           "매장 주소",IDC_STATIC,7,64,32,8
+    LTEXT           "사업자 번호",IDC_STATIC,7,91,39,8
+    LTEXT           "조리시간",IDC_STATIC,7,114,32,8
+    LTEXT           "최소 주문 금액",IDC_STATIC,7,135,50,8
+    LTEXT           "영업 시간",IDC_STATIC,7,157,32,8
+    LTEXT           "영업 상태",IDC_STATIC,7,195,32,8
+    EDITTEXT        IDC_EDIT_STORE_NAME,49,11,114,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_NAME,168,11,24,14
+    COMBOBOX        IDC_COMBO_CATEGORY,49,34,58,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_CATEGORY,114,34,24,14
+    EDITTEXT        IDC_EDIT_STORE_ADDRESS,49,60,168,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_ADDRESS,227,61,24,14
+    EDITTEXT        IDC_EDIT_STORE_BIZNUM,49,88,168,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_COOK_TIME,49,111,57,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MIN_ORDER,69,132,75,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_OPEN_TIME,51,154,61,14,ES_AUTOHSCROLL
+    LTEXT           "-",IDC_STATIC,120,157,8,8
+    EDITTEXT        IDC_EDIT_CLOSE_TIME,134,154,61,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "영업 중",IDC_BTN_STORE_OPEN,51,182,50,34
+    PUSHBUTTON      "영업 종료",IDC_BTN_STORE_CLOSE,118,183,50,34
+    LTEXT           "이름",IDC_STATIC,287,14,16,8
+    LTEXT           "전화번호",IDC_STATIC,287,39,30,8
+    LTEXT           "정산 계좌",IDC_STATIC,287,63,32,8
+    LTEXT           "승인 상태",IDC_STATIC,287,86,32,8
+    LTEXT           "승인 여부",IDC_STATIC_APPROVAL,339,86,32,8
+    EDITTEXT        IDC_EDIT_OWNER_NAME,339,11,57,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_OWNER_NAME,406,11,24,14
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_OWNER_PHONE,459,32,24,14
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_ACCOUNT,459,60,24,14
+    EDITTEXT        IDC_EDIT_OWNER_PHONE,339,32,114,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_ACCOUNT,339,60,114,14,ES_AUTOHSCROLL
 END
 
 
@@ -193,9 +236,9 @@ BEGIN
     IDD_MAIN_MENU, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 432
+        RIGHTMARGIN, 313
         TOPMARGIN, 7
-        BOTTOMMARGIN, 200
+        BOTTOMMARGIN, 145
     END
 
     IDD_SIGNUP, DIALOG
@@ -204,6 +247,14 @@ BEGIN
         RIGHTMARGIN, 332
         TOPMARGIN, 6
         BOTTOMMARGIN, 191
+    END
+
+    IDD_TAB_STORE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 486
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 239
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -225,6 +276,11 @@ BEGIN
 END
 
 IDD_SIGNUP AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TAB_STORE AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

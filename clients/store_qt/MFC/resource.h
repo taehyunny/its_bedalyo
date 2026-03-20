@@ -9,6 +9,7 @@
 #define IDD_MAIN_MENU                   130
 #define IDD_SIGNUP_DLG                  131
 #define IDD_SIGNUP                      132
+#define IDD_TAB_STORE                   134
 #define IDC_EDIT1                       1000
 #define IDC_EDIT2                       1001
 #define IDC_BUTTON1                     1002
@@ -45,14 +46,35 @@
 #define IDC_REPWEdit                    1129
 #define IDC_STATIC_STORE_ADDRESS        1130
 #define IDC_STATIC_CHECKLOGIN           1131
+#define IDC_STATIC_NAMEBAR              1132
+#define IDC_TAB_STATUS_SET              1133
+#define IDC_STATIC_UPBAR                1134
+#define IDC_EDIT_STORE_ADDRESS          1136
+#define IDC_BTN_EDIT_ADDRESS            1137
+#define IDC_EDIT_STORE_BIZNUM           1138
+#define IDC_BTN_EDIT_BIZNUM             1139
+#define IDC_EDIT_MIN_ORDER              1141
+#define IDC_BTN_STORE_OPEN              1144
+#define IDC_BTN_STORE_CLOSE             1145
+#define IDC_EDIT_OWNER_NAME             1146
+#define IDC_BTN_EDIT_OWNER_NAME         1147
+#define IDC_BTN_EDIT_OWNER_PHONE        1148
+#define IDC_BTN_EDIT_ACCOUNT            1149
+#define IDC_EDIT_OWNER_PHONE            1150
+#define IDC_EDIT_ACCOUNT                1151
+#define IDC_BTN_EDIT_NAME               1153
+#define IDC_BTN_EDIT_CATEGORY           1154
+#define IDC_STATIC_APPROVAL             1155
+#define IDC_BTN_SAVE                    1156
+#define IDC_BTN_CANCEL                  1157
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        134
+#define _APS_NEXT_RESOURCE_VALUE        136
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1132
+#define _APS_NEXT_CONTROL_VALUE         1158
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
