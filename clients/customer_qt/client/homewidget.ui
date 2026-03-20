@@ -1,611 +1,280 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ui version="4.0">
+<UI version="4.0">
  <class>HomeWidget</class>
  <widget class="QWidget" name="HomeWidget">
   <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>390</width>
-    <height>844</height>
-   </rect>
+   <rect><x>0</x><y>0</y><width>390</width><height>844</height></rect>
   </property>
   <property name="styleSheet">
    <string>
-QWidget#HomeWidget {
-  background-color: #f5f5f5;
-}
+QWidget#HomeWidget { background-color: #ffffff; }
 
-/* ── 상단 헤더 ── */
-QWidget#headerWidget {
-  background-color: #ffffff;
-}
-QLabel#label_appName {
-  font-size: 22px;
-  font-weight: bold;
-  color: #1565c0;
-}
-QLabel#label_location {
-  font-size: 13px;
-  color: #555555;
-}
+/* ── 헤더 ── */
+QWidget#headerWidget { background-color: #ffffff; border-bottom: 1px solid #f0f0f0; }
+QLabel#label_address { font-size: 13px; font-weight: bold; color: #111111; }
 QPushButton#btnNotification {
-  background: transparent;
-  border: none;
-  font-size: 20px;
-  padding: 4px;
-}
-QPushButton#btnNotification:hover {
-  background-color: #f0f0f0;
-  border-radius: 20px;
+  background: transparent; border: none; font-size: 20px; padding: 4px;
+  min-width: 36px; min-height: 36px;
 }
 
-/* ── 배너 ── */
-QWidget#bannerWidget {
-  background-color: #1565c0;
-  border-radius: 14px;
-}
-QLabel#label_bannerTitle {
-  font-size: 16px;
-  font-weight: bold;
-  color: #ffffff;
-  background: transparent;
-}
-QLabel#label_bannerSub {
-  font-size: 12px;
-  color: rgba(255,255,255,0.85);
-  background: transparent;
-}
-QLabel#label_bannerIcon {
-  font-size: 40px;
-  background: transparent;
-}
+/* ── 검색바 ── */
+QWidget#searchAreaWidget { background: #ffffff; }
 
-/* ── 카테고리 버튼 ── */
-QPushButton#btnCatAll, QPushButton#btnCatKorean,
-QPushButton#btnCatChinese, QPushButton#btnCatJapanese,
-QPushButton#btnCatWestern, QPushButton#btnCatCafe,
-QPushButton#btnCatBakery, QPushButton#btnCatChicken {
-  background-color: #ffffff;
-  border: 1.5px solid #e8e8e8;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: bold;
-  color: #444444;
-  padding: 6px 14px;
-  min-height: 34px;
-}
-QPushButton#btnCatAll {
-  background-color: #1565c0;
-  color: #ffffff;
-  border: 1.5px solid #1565c0;
-}
-QPushButton#btnCatAll:hover,
-QPushButton#btnCatKorean:hover, QPushButton#btnCatChinese:hover,
-QPushButton#btnCatJapanese:hover, QPushButton#btnCatWestern:hover,
-QPushButton#btnCatCafe:hover, QPushButton#btnCatBakery:hover,
-QPushButton#btnCatChicken:hover {
-  background-color: #e3f0ff;
-  border-color: #1565c0;
-  color: #1565c0;
-}
+/* ── 카테고리 공통 ── */
+QScrollArea#catScroll1, QScrollArea#catScroll2 { background: transparent; border: none; }
+QWidget#catContent1, QWidget#catContent2 { background: transparent; }
 
 /* ── 섹션 제목 ── */
-QLabel#label_sectionTitle {
-  font-size: 17px;
-  font-weight: bold;
-  color: #111111;
-}
-QLabel#label_sectionSub {
-  font-size: 12px;
-  color: #999999;
-}
+QLabel#label_storeSection { font-size: 16px; font-weight: bold; color: #111111; }
 
 /* ── 가게 목록 ── */
-QListWidget#storeList {
-  background-color: transparent;
-  border: none;
-  outline: none;
-}
-QListWidget#storeList::item {
-  background-color: #ffffff;
-  border-radius: 12px;
-  margin: 4px 16px;
-  padding: 0px;
-}
-QListWidget#storeList::item:selected {
-  background-color: #e8f0ff;
-}
-QListWidget#storeList::item:hover {
-  background-color: #f5f9ff;
-}
+QScrollArea#storeScrollArea { background: transparent; border: none; }
+QWidget#storeContent { background: transparent; }
 
-/* ── 하단 내비게이션 바 ── */
+/* ── 하단 내비 ── */
 QWidget#navBar {
   background-color: #ffffff;
   border-top: 1px solid #eeeeee;
 }
 QPushButton#navHome, QPushButton#navSearch,
-QPushButton#navOrder, QPushButton#navMypage {
+QPushButton#navFavorite, QPushButton#navOrder, QPushButton#navMy {
   background: transparent;
   border: none;
-  font-size: 11px;
-  color: #999999;
-  padding: 6px 4px;
+  font-size: 10px;
+  color: #aaaaaa;
+  padding: 4px 0px 4px 0px;
 }
-QPushButton#navHome {
-  color: #1565c0;
-}
-QPushButton#navHome:hover, QPushButton#navSearch:hover,
-QPushButton#navOrder:hover, QPushButton#navMypage:hover {
-  color: #1565c0;
-}
+QPushButton#navHome { color: #1565c0; font-weight: bold; }
    </string>
   </property>
+
   <layout class="QVBoxLayout" name="mainLayout">
-   <property name="spacing">
-    <number>0</number>
-   </property>
-   <property name="margin" stdset="0">
-    <number>0</number>
-   </property>
+   <property name="spacing"><number>0</number></property>
+   <property name="margin"><number>0</number></property>
+
+   <!-- ══ 1. 상단 헤더 (고정) ══ -->
    <item>
-    <layout class="QVBoxLayout" name="headerVLayout">
-     <property name="spacing">
-      <number>2</number>
-     </property>
-     <property name="leftMargin">
-      <number>20</number>
-     </property>
-     <property name="topMargin">
-      <number>14</number>
-     </property>
-     <property name="rightMargin">
-      <number>16</number>
-     </property>
-     <property name="bottomMargin">
-      <number>10</number>
-     </property>
-     <item>
-      <layout class="QHBoxLayout" name="headerTopLayout">
-       <property name="spacing">
-        <number>4</number>
-       </property>
-       <item>
-        <layout class="QVBoxLayout" name="locationLayout">
-         <property name="spacing">
-          <number>2</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="label_location">
-           <property name="text">
-            <string>📍 광주 소촌동 인덕개발원</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_appName">
-           <property name="text">
-            <string>it's 배달요</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
+    <widget class="QWidget" name="headerWidget">
+     <property name="minimumHeight"><number>56</number></property>
+     <property name="maximumHeight"><number>56</number></property>
+     <layout class="QHBoxLayout" name="headerLayout">
+      <property name="leftMargin"><number>16</number></property>
+      <property name="topMargin"><number>8</number></property>
+      <property name="rightMargin"><number>12</number></property>
+      <property name="bottomMargin"><number>8</number></property>
+      <property name="spacing"><number>8</number></property>
+      <item>
+       <layout class="QVBoxLayout">
+        <property name="spacing"><number>1</number></property>
+        <item>
+         <widget class="QLabel" name="label_addressHint">
+          <property name="text"><string>배달 주소</string></property>
+          <property name="styleSheet"><string>font-size:11px; color:#999999;</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_address">
+          <property name="text"><string>주소를 불러오는 중...</string></property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer>
+        <property name="orientation"><enum>Qt::Horizontal</enum></property>
+        <property name="sizeHint" stdset="0"><size><width>40</width><height>0</height></size></property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnNotification">
+        <property name="text"><string>🔔</string></property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- ══ 2. 검색바 (고정) ══ -->
+   <item>
+    <widget class="QWidget" name="searchAreaWidget">
+     <property name="maximumHeight"><number>64</number></property>
+     <layout class="QHBoxLayout" name="searchAreaLayout">
+      <property name="leftMargin"><number>16</number></property>
+      <property name="topMargin"><number>8</number></property>
+      <property name="rightMargin"><number>16</number></property>
+      <property name="bottomMargin"><number>8</number></property>
+      <item>
+       <widget class="QPushButton" name="btnSearch">
+        <property name="minimumHeight"><number>44</number></property>
+        <property name="styleSheet">
+         <string>
+QPushButton#btnSearch {
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 22px;
+  text-align: left;
+  padding-left: 16px;
+  font-size: 14px;
+  color: #aaaaaa;
+}
+QPushButton#btnSearch:hover { background-color: #eeeeee; }
+         </string>
+        </property>
+        <property name="text"><string>🔍  음식, 가게 검색</string></property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- ══ 3. 카테고리 1줄 (고정, 드래그 슬라이드) ══ -->
+   <item>
+    <widget class="QScrollArea" name="catScroll1">
+     <property name="minimumHeight"><number>88</number></property>
+     <property name="maximumHeight"><number>88</number></property>
+     <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+     <property name="verticalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+     <property name="widgetResizable"><bool>true</bool></property>
+     <widget class="QWidget" name="catContent1">
+      <layout class="QHBoxLayout" name="catLayout1">
+       <property name="leftMargin"><number>16</number></property>
+       <property name="topMargin"><number>8</number></property>
+       <property name="rightMargin"><number>16</number></property>
+       <property name="bottomMargin"><number>8</number></property>
+       <property name="spacing"><number>16</number></property>
        <item>
         <spacer>
-         <property name="orientation">
-          <enum>Qt::Orientation::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
+         <property name="orientation"><enum>Qt::Horizontal</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
         </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnNotification">
-         <property name="minimumSize">
-          <size>
-           <width>40</width>
-           <height>40</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>40</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>🔔</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QScrollArea" name="scrollArea">
-     <property name="styleSheet">
-      <string>QScrollArea { background-color: #f5f5f5; border: none; }</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::Shape::NoFrame</enum>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <widget class="QWidget" name="scrollContent">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>390</width>
-        <height>700</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string>QWidget#scrollContent { background-color: #f5f5f5; }</string>
-      </property>
-      <layout class="QVBoxLayout" name="contentLayout">
-       <property name="spacing">
-        <number>16</number>
-       </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>12</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>12</number>
-       </property>
-       <item>
-        <layout class="QHBoxLayout" name="bannerLayout">
-         <property name="leftMargin">
-          <number>20</number>
-         </property>
-         <property name="topMargin">
-          <number>16</number>
-         </property>
-         <property name="rightMargin">
-          <number>16</number>
-         </property>
-         <property name="bottomMargin">
-          <number>16</number>
-         </property>
-         <item>
-          <layout class="QVBoxLayout" name="bannerTextLayout">
-           <property name="spacing">
-            <number>6</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="label_bannerTag">
-             <property name="styleSheet">
-              <string>
-font-size: 11px;
-color: rgba(255,255,255,0.8);
-background-color: rgba(255,255,255,0.2);
-border-radius: 8px;
-padding: 2px 8px;
-font-weight: bold;
-               </string>
-             </property>
-             <property name="text">
-              <string>오늘의 추천</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_bannerTitle">
-             <property name="text">
-              <string>점심 특가 배달비 0원!</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_bannerSub">
-             <property name="text">
-              <string>오전 11시 ~ 오후 1시 한정</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_bannerIcon">
-           <property name="text">
-            <string>🍱</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QScrollArea" name="catScrollArea">
-         <property name="styleSheet">
-          <string>QScrollArea { background: transparent; border: none; }</string>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::Shape::NoFrame</enum>
-         </property>
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="catScrollContent">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>712</width>
-            <height>52</height>
-           </rect>
-          </property>
-          <property name="styleSheet">
-           <string>QWidget { background: transparent; }</string>
-          </property>
-          <layout class="QHBoxLayout" name="catLayout">
-           <property name="spacing">
-            <number>8</number>
-           </property>
-           <property name="leftMargin">
-            <number>16</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>16</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QPushButton" name="btnCatAll">
-             <property name="text">
-              <string>전체</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnCatChicken">
-             <property name="text">
-              <string>🍗 치킨</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnCatKorean">
-             <property name="text">
-              <string>🍚 한식</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnCatChinese">
-             <property name="text">
-              <string>🥟 중식</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnCatJapanese">
-             <property name="text">
-              <string>🍱 일식</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnCatWestern">
-             <property name="text">
-              <string>🍕 양식</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnCatCafe">
-             <property name="text">
-              <string>☕ 카페</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnCatBakery">
-             <property name="text">
-              <string>🥐 베이커리</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer>
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>8</width>
-               <height>0</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </widget>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="subTabLayout">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <property name="leftMargin">
-          <number>16</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>16</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QPushButton" name="subTabDelivery">
-           <property name="text">
-            <string>배달 빨리됨</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="subTabPopular">
-           <property name="text">
-            <string>배달 놀인도</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="subTabMart">
-           <property name="text">
-            <string>주전소</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer>
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>0</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QFrame" name="divider">
-         <property name="styleSheet">
-          <string>color: #eeeeee; margin-left: 16px; margin-right: 16px;</string>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::Shape::HLine</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Shadow::Plain</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QListWidget" name="storeList">
-         <property name="frameShape">
-          <enum>QFrame::Shape::NoFrame</enum>
-         </property>
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="spacing">
-          <number>4</number>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
     </widget>
    </item>
+
+   <!-- 카테고리 구분선 -->
    <item>
-    <layout class="QHBoxLayout" name="navLayout">
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <property name="leftMargin">
-      <number>0</number>
-     </property>
-     <property name="topMargin">
-      <number>4</number>
-     </property>
-     <property name="rightMargin">
-      <number>0</number>
-     </property>
-     <property name="bottomMargin">
-      <number>8</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="navHome">
-       <property name="styleSheet">
-        <string>background: transparent; border: none; font-size: 11px; color: #1565c0; font-weight: bold; padding: 4px;</string>
-       </property>
-       <property name="text">
-        <string>🏠
-홈</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="navSearch">
-       <property name="styleSheet">
-        <string>background: transparent; border: none; font-size: 11px; color: #999999; padding: 4px;</string>
-       </property>
-       <property name="text">
-        <string>🔍
-검색</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="navOrder">
-       <property name="styleSheet">
-        <string>background: transparent; border: none; font-size: 11px; color: #999999; padding: 4px;</string>
-       </property>
-       <property name="text">
-        <string>📋
-주문내역</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="navMypage">
-       <property name="styleSheet">
-        <string>background: transparent; border: none; font-size: 11px; color: #999999; padding: 4px;</string>
-       </property>
-       <property name="text">
-        <string>👤
-My이츠</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QFrame" name="catDivider">
+     <property name="frameShape"><enum>QFrame::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Plain</enum></property>
+     <property name="styleSheet"><string>color: #f0f0f0; margin: 0 16px;</string></property>
+     <property name="maximumHeight"><number>1</number></property>
+    </widget>
    </item>
+
+   <!-- ══ 4. 카테고리 2줄 (고정, 드래그 슬라이드) ══ -->
+   <item>
+    <widget class="QScrollArea" name="catScroll2">
+     <property name="minimumHeight"><number>88</number></property>
+     <property name="maximumHeight"><number>88</number></property>
+     <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+     <property name="verticalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+     <property name="widgetResizable"><bool>true</bool></property>
+     <widget class="QWidget" name="catContent2">
+      <layout class="QHBoxLayout" name="catLayout2">
+       <property name="leftMargin"><number>16</number></property>
+       <property name="topMargin"><number>8</number></property>
+       <property name="rightMargin"><number>16</number></property>
+       <property name="bottomMargin"><number>8</number></property>
+       <property name="spacing"><number>16</number></property>
+       <item>
+        <spacer>
+         <property name="orientation"><enum>Qt::Horizontal</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+
+   <!-- ══ 5. 가게 목록 섹션 타이틀 (고정) ══ -->
+   <item>
+    <widget class="QWidget" name="storeTitleWidget">
+     <property name="maximumHeight"><number>40</number></property>
+     <property name="styleSheet"><string>background: #ffffff;</string></property>
+     <layout class="QHBoxLayout" name="storeTitleLayout">
+      <property name="leftMargin"><number>16</number></property>
+      <property name="topMargin"><number>8</number></property>
+      <property name="rightMargin"><number>16</number></property>
+      <property name="bottomMargin"><number>4</number></property>
+      <item>
+       <widget class="QLabel" name="label_storeSection">
+        <property name="text"><string>🏪 카테고리별 추천</string></property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- ══ 6. 가게 목록 (스크롤/드래그 가능) ══ -->
+   <item>
+    <widget class="QScrollArea" name="storeScrollArea">
+     <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+     <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+     <property name="verticalScrollBarPolicy"><enum>Qt::ScrollBarAsNeeded</enum></property>
+     <property name="widgetResizable"><bool>true</bool></property>
+     <widget class="QWidget" name="storeContent">
+      <layout class="QVBoxLayout" name="storeLayout">
+       <property name="spacing"><number>0</number></property>
+       <property name="margin"><number>0</number></property>
+       <item>
+        <spacer>
+         <property name="orientation"><enum>Qt::Vertical</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+
+   <!-- ══ 7. 하단 내비 (고정) ══ -->
+   <item>
+    <widget class="QWidget" name="navBar">
+     <property name="minimumHeight"><number>60</number></property>
+     <property name="maximumHeight"><number>60</number></property>
+     <layout class="QHBoxLayout" name="navLayout">
+      <property name="spacing"><number>0</number></property>
+      <property name="margin"><number>0</number></property>
+      <item>
+       <widget class="QPushButton" name="navHome">
+        <property name="text"><string>🏠
+홈</string></property>
+        <property name="toolTip"><string>홈</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navSearch">
+        <property name="text"><string>🔍
+검색</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navFavorite">
+        <property name="text"><string>🤍
+즐겨찾기</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navOrder">
+        <property name="text"><string>📋
+주문내역</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navMy">
+        <property name="text"><string>👤
+마이이츠</string></property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
   </layout>
  </widget>
  <resources/>
  <connections/>
-</ui>
+</UI>

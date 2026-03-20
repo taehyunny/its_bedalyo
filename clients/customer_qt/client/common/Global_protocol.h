@@ -50,6 +50,8 @@ enum class CmdID : uint16_t
     // [마이페이지]       2100 ~ 2109
     // ---------------------------------------------------------
 
+	REQ_BUISNESS_NUM_CHECK = 2006,          // 사업자번호 중복 확인 요청 (사장님 회원가입 시)
+	RES_BUISNESS_NUM_CHECK = 2007,      // 사업자번호 중복 확인 응답
     // 매장 / 메뉴 조회 (2000 ~ 2019)
     REQ_STORE_LIST = 2000,              // 배달 가능 반경 내 상점 목록 요청 (정렬·필터 파라미터 포함)
     RES_STORE_LIST = 2001,              // 상점 목록 응답 (최소주문금액, 배달예상시간, 별점 등 포함)
@@ -197,3 +199,17 @@ struct PacketHeader
     uint32_t bodySize;           // 뒤따라오는 JSON 바디의 실제 크기 (바이트 단위)
 };
 #pragma pack(pop) // [주의] DTO 선언 전에 반드시 pack 설정을 해제해야 함!
+
+enum class SignupResult {
+    SUCCESS = 1,
+    DUPLICATE_ID = -1,
+    DUPLICATE_PHONE = -2, // 태현님 DTO에 맞춰서 전화번호 중복으로 예시를 들게요! (이메일이면 PHONE 대신 EMAIL 사용)
+    SERVER_ERROR = -99
+};
+
+enum class LoginResult {
+    SUCCESS = 1,
+    ID_NOT_FOUND = -1,
+    WRONG_PASSWORD = -2,
+    SERVER_ERROR = -99
+};

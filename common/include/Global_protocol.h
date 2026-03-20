@@ -199,3 +199,17 @@ struct PacketHeader
     uint32_t bodySize;           // 뒤따라오는 JSON 바디의 실제 크기 (바이트 단위)
 };
 #pragma pack(pop) // [주의] DTO 선언 전에 반드시 pack 설정을 해제해야 함!
+
+enum class SignupResult {
+    SUCCESS = 1,
+    DUPLICATE_ID = -1,
+    DUPLICATE_PHONE = -2, // 태현님 DTO에 맞춰서 전화번호 중복으로 예시를 들게요! (이메일이면 PHONE 대신 EMAIL 사용)
+    SERVER_ERROR = -99
+};
+
+enum class LoginResult {
+    SUCCESS = 1,
+    ID_NOT_FOUND = -1,
+    WRONG_PASSWORD = -2,
+    SERVER_ERROR = -99
+};
