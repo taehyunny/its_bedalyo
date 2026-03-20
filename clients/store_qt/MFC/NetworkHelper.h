@@ -35,7 +35,11 @@ public:
         Disconnect();
         WSACleanup();
     }
+
     bool IsValid() const { return m_wsaOk; }
+
+    // ✅ [추가] SignupDlg ↔ MFCDlg 전환 시 패킷 수신 대상 HWND 교체용
+    void SetNotifyHwnd(HWND hWnd) { m_hNotify = hWnd; }
 
     bool Connect(const std::string& ip, int port, HWND hNotify)
     {
@@ -94,7 +98,7 @@ public:
         PacketHeader header;
         memset(&header, 0, sizeof(header));
 
-        // htons/htonl 로 빅엔디안 변환 후 전송
+        // 빅엔디안 변환 후 전송 (서버가 ntohs/ntohl로 읽음)
         header.signature = htons(0x4543);
         header.cmdId = static_cast<CmdID>(htons(static_cast<uint16_t>(cmdId)));
         header.bodySize = htonl(static_cast<uint32_t>(bodyStr.size()));
@@ -125,14 +129,30 @@ private:
                 break;
             }
 
-            // 수신한 빅엔디안 값을 리틀엔디안으로 변환
+            // ✅ 빅엔디안 → 리틀엔디안 변환 (주석 해제)
             header.signature = ntohs(header.signature);
             header.cmdId = static_cast<CmdID>(ntohs(static_cast<uint16_t>(header.cmdId)));
             header.bodySize = ntohl(header.bodySize);
 
-            if (header.signature != 0x4543) continue; // 검증은 변환 후에
+            OutputDebugStringA(("[RecvLoop] signature: " + std::to_string(header.signature) + "\n").c_str());
+            OutputDebugStringA(("[RecvLoop] cmdId: " + std::to_string(static_cast<uint16_t>(header.cmdId)) + "\n").c_str());
+            OutputDebugStringA(("[RecvLoop] bodySize: " + std::to_string(header.bodySize) + "\n").c_str());
 
-            // Use vector<char> instead of string to avoid const data() issue
+            if (header.signature != 0x4543)
+            {
+                // ✅ [수정] 시그니처 불일치 시 바디까지 소진 후 continue
+                // continue만 하면 바디 데이터가 소켓 버퍼에 남아 다음 헤더 읽기가 꼬임
+                OutputDebugStringA("[RecvLoop] ❌ 시그니처 불일치! 바디 소진 후 재시도\n");
+                if (header.bodySize > 0 && header.bodySize < 1024 * 1024) // 1MB 이하만 소진
+                {
+                    std::vector<char> trash(header.bodySize);
+                    RecvExact(trash.data(), header.bodySize);
+                }
+                continue;
+            }
+
+            OutputDebugStringA("[RecvLoop] ✅ 시그니처 OK!\n");
+
             std::vector<char> bodyBuf;
             if (header.bodySize > 0)
             {
@@ -176,5 +196,5 @@ private:
     HWND                m_hNotify = nullptr;
     std::atomic<bool>   m_connected{ false };
     std::thread         m_recvThread;
-    bool m_wsaOk = false;
+    bool                m_wsaOk = false;
 };

@@ -1,12 +1,10 @@
-﻿
-
-#include "pch.h"
+﻿#include "pch.h"
 #include "framework.h"
 #include "MFC.h"
 #include "MFCDlg.h"
 #include "afxdialogex.h"
 #include "CMainMenuDlg.h"
-#include "SignupDlg.h"      // ← 추가
+#include "SignupDlg.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -15,11 +13,11 @@ BEGIN_MESSAGE_MAP(CMFCDlg, CDialogEx)
     ON_WM_SYSCOMMAND()
     ON_WM_PAINT()
     ON_WM_QUERYDRAGICON()
-    ON_EN_CHANGE(IDC_EDIT1,   &CMFCDlg::OnEdit_ID)
-    ON_EN_CHANGE(IDC_EDIT2,   &CMFCDlg::OnEdit_PW)
+    ON_EN_CHANGE(IDC_EDIT1, &CMFCDlg::OnEdit_ID)
+    ON_EN_CHANGE(IDC_EDIT2, &CMFCDlg::OnEdit_PW)
     ON_BN_CLICKED(IDC_BUTTON1, &CMFCDlg::OnBtnLogin)
     ON_BN_CLICKED(IDC_BUTTON2, &CMFCDlg::OnBtnSign)
-    ON_BN_CLICKED(IDCANCEL,    &CMFCDlg::OnBtnCancel)
+    ON_BN_CLICKED(IDCANCEL, &CMFCDlg::OnBtnCancel)
     ON_MESSAGE(WM_PACKET_RECEIVED, &CMFCDlg::OnPacketReceived)
 END_MESSAGE_MAP()
 
@@ -76,8 +74,8 @@ void CMFCDlg::OnPaint()
         int cyIcon = GetSystemMetrics(SM_CYICON);
         CRect rect;
         GetClientRect(&rect);
-        dc.DrawIcon((rect.Width()  - cxIcon + 1) / 2,
-                    (rect.Height() - cyIcon + 1) / 2, m_hIcon);
+        dc.DrawIcon((rect.Width() - cxIcon + 1) / 2,
+            (rect.Height() - cyIcon + 1) / 2, m_hIcon);
     }
     else
     {
@@ -124,9 +122,9 @@ void CMFCDlg::OnBtnLogin()
     }
 
     json body;
-    body["user_id"]  = CT2A(m_strId);   
-    body["password"] = CT2A(m_strPw);
-    body["role"]     = "owner";         
+    // ✅ camelCase 키 + CP_UTF8 변환 / role 제거 (LoginReqDTO에 없는 필드)
+    body["userId"] = CT2A(m_strId, CP_UTF8);
+    body["password"] = CT2A(m_strPw, CP_UTF8);
 
     m_net.Send(CmdID::REQ_LOGIN, body);
 
@@ -160,33 +158,35 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 
     if (pkt->cmdId == CmdID::RES_LOGIN)
     {
+        OutputDebugStringA("[OnPacketReceived] ✅ RES_LOGIN 수신!\n");
+        OutputDebugStringA(("[OnPacketReceived] body: " + pkt->body + "\n").c_str());
+
         try
         {
             json resJson = json::parse(pkt->body);
 
-            bool success = resJson.value("success", false);
+            // ✅ AuthResDTO 기준: "success" 없음 → status == 200 으로 판단
+            bool success = (resJson.value("status", 0) == 200);
 
             if (success)
             {
-
-                m_storeId   = resJson.value("store_id", 0);
-                std::string name = resJson.value("store_name", "");
+                m_storeId = resJson.value("storeId", 0);
+                std::string name = resJson.value("storeName", "");
                 m_storeName = CA2W(name.c_str());
-
 
                 ShowWindow(SW_HIDE);
 
                 CMainMenuDlg mainDlg;
                 mainDlg.DoModal();
 
-
                 ShowWindow(SW_SHOW);
             }
             else
             {
-
                 std::string msg = resJson.value("message", "로그인에 실패했습니다.");
-                MessageBox(CA2W(msg.c_str()), L"로그인 실패", MB_ICONWARNING);
+
+                // CP_UTF8 추가
+                MessageBox(CA2W(msg.c_str(), CP_UTF8), L"로그인 실패", MB_ICONWARNING);
             }
         }
         catch (...)
@@ -196,7 +196,6 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         }
     }
 
-
     delete pkt;
     return 0;
 }
@@ -204,7 +203,6 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 // ── 취소(나가기) 버튼 ────────────────────────────────────────────────────
 void CMFCDlg::OnBtnCancel()
 {
-    // 앱 종료 전 소켓 정리
     m_net.Disconnect();
     CDialogEx::OnCancel();
 }
