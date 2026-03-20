@@ -66,7 +66,7 @@ Makefile text eol=lf
 *.props     text eol=crlf
 
 # Resource files (MFC)
-*.rc        text eol=crlf
+*.rc        binary
 *.rc2       text eol=crlf
 
 # Batch files
