@@ -14,7 +14,7 @@ BEGIN_MESSAGE_MAP(CSignupDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTNSTORECHECK, &CSignupDlg::OnBnClickedBtnStoreCheck)
     ON_BN_CLICKED(IDOK, &CSignupDlg::OnBnClickedBtnSignup)
     ON_BN_CLICKED(IDCANCEL, &CSignupDlg::OnBnClickedBtnCancel)
-    ON_EN_CHANGE(IDC_ID, &CSignupDlg::OnChangeEditId)
+    ON_EN_CHANGE(IDC_EDIT_USER_ID, &CSignupDlg::OnChangeEditId)
     ON_EN_CHANGE(IDC_STOREID, &CSignupDlg::OnChangeEditStoreId)
     ON_MESSAGE(WM_PACKET_RECEIVED, &CSignupDlg::OnPacketReceived)
     ON_WM_CTLCOLOR()
@@ -29,7 +29,7 @@ CSignupDlg::~CSignupDlg() {}
 void CSignupDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_ID, m_editId);
+    DDX_Control(pDX, IDC_EDIT_USER_ID, m_editId);
     DDX_Control(pDX, IDC_PWEdit, m_editPw);
     DDX_Control(pDX, IDC_REPWEdit, m_editPwConfirm);
     DDX_Control(pDX, IDC_NAMEEDIT, m_editName);
@@ -96,6 +96,7 @@ void CSignupDlg::OnBnClickedBtnIdCheck()
 {
     CString strId;
     m_editId.GetWindowText(strId);
+    strId.Trim();  // ← 앞뒤 공백 제거
 
     if (strId.IsEmpty())
     {

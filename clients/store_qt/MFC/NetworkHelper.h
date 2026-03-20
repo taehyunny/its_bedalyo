@@ -27,10 +27,7 @@ public:
     CNetworkHelper()
     {
         WSADATA wsa;
-        if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-        {
-            // WSA 초기화 실패 처리
-        }
+        m_wsaOk = (WSAStartup(MAKEWORD(2, 2), &wsa) == 0);
     }
 
     ~CNetworkHelper()
@@ -38,9 +35,11 @@ public:
         Disconnect();
         WSACleanup();
     }
+    bool IsValid() const { return m_wsaOk; }
 
     bool Connect(const std::string& ip, int port, HWND hNotify)
     {
+        if (!m_wsaOk) return false;
         if (m_connected.load()) return false;
 
         m_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -168,6 +167,7 @@ private:
 
     SOCKET              m_socket = INVALID_SOCKET;
     HWND                m_hNotify = nullptr;
-    std::atomic<bool>   m_connected;
+    std::atomic<bool>   m_connected{ false };
     std::thread         m_recvThread;
+    bool m_wsaOk = false;
 };

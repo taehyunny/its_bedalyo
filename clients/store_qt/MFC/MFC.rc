@@ -1,9 +1,10 @@
-﻿// Microsoft Visual C++ generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
+#pragma code_page(65001)
+
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
-/////////////////////////////////////////////////////////////////////////////
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
@@ -11,17 +12,14 @@
 #include "afxres.h"
 #include "verrsrc.h"
 
-/////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
-/////////////////////////////////////////////////////////////////////////////
 // 한국어(대한민국) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
 LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
 
 #ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
 //
 // TEXTINCLUDE
 //
@@ -60,7 +58,7 @@ END
 #endif    // APSTUDIO_INVOKED
 
 
-/////////////////////////////////////////////////////////////////////////////
+
 //
 // Icon
 //
@@ -70,7 +68,6 @@ END
 IDR_MAINFRAME           ICON                    "res\\MFC.ico"
 
 
-/////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
@@ -108,7 +105,7 @@ BEGIN
     PUSHBUTTON      "뒤로가기",IDCANCEL,279,174,50,14
     CTEXT           "Its_Bedalyo",IDC_STATIC,102,10,150,11
     LTEXT           "ID",IDC_ID,29,34,8,8
-    EDITTEXT        IDC_EDIT1,42,32,79,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_USER_ID,42,32,79,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_PWEdit,42,52,79,14,ES_AUTOHSCROLL
     LTEXT           "PW",IDC_STATIC,26,54,11,8
     LTEXT           "PW 확인",IDC_STATIC,12,75,25,8
@@ -134,7 +131,6 @@ BEGIN
 END
 
 
-/////////////////////////////////////////////////////////////////////////////
 //
 // Version
 //
@@ -172,8 +168,6 @@ BEGIN
     END
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
 //
 // DESIGNINFO
 //
@@ -207,8 +201,6 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-
-/////////////////////////////////////////////////////////////////////////////
 //
 // AFX_DIALOG_LAYOUT
 //
@@ -228,8 +220,6 @@ BEGIN
     0
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
@@ -240,12 +230,9 @@ BEGIN
 END
 
 #endif    // 한국어(대한민국) resources
-/////////////////////////////////////////////////////////////////////////////
-
 
 
 #ifndef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
@@ -263,6 +250,5 @@ LANGUAGE 18, 1
 #endif
 #endif
 
-/////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
