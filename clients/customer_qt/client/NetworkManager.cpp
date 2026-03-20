@@ -25,6 +25,8 @@ void NetworkManager::connectToServer(const QString &ip, quint16 port)
     m_socket->connectToHost(ip, port);
 }
 
+// ── 송신 함수들 ──
+
 void NetworkManager::sendLogin(const LoginReqDTO &dto)
 {
     qDebug() << "[NetworkManager] 로그인 요청 -" << QString::fromStdString(dto.userId);
@@ -34,16 +36,29 @@ void NetworkManager::sendLogin(const LoginReqDTO &dto)
 
 void NetworkManager::sendSignup(const SignupReqDTO &dto)
 {
-    qDebug() << "[NetworkManager] 회원가입 요청 -" << QString::fromStdString(dto.userId)
-        << "role:" << dto.role;
-    nlohmann::json j = dto;
+    qDebug() << "[NetworkManager] 회원가입 요청 -" << QString::fromStdString(dto.userId);
+    nlohmann::json j;
+    to_json(j, dto); // to_json 명시 호출 (friend 함수)
     sendPacket(CmdID::REQ_SIGNUP, j);
 }
 
+void NetworkManager::sendIdCheck(const AuthCheckReqDTO &dto)
+{
+    qDebug() << "[NetworkManager] 아이디 중복확인 -" << QString::fromStdString(dto.userId);
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_AUTH_CHECK, j);
+}
+
+void NetworkManager::sendPhoneCheck(const PhoneCheckReqDTO &dto)
+{
+    qDebug() << "[NetworkManager] 전화번호 중복확인 -"
+             << QString::fromStdString(dto.phoneNumber) << "role:" << dto.role;
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_PHONE_CHECK, j);
+}
+
 // ============================================================
-// 패킷 조립 및 전송
-// 서버: memcpy로 raw 읽기 → ntohs/ntohl 변환 → 비교
-// 클라이언트: Little Endian(호스트 바이트 오더)으로 전송
+// 패킷 조립 및 전송 (BigEndian)
 // ============================================================
 void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
 {
@@ -63,8 +78,8 @@ void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
     stream << quint32(jsonBytes.size());
     packet.append(jsonBytes);
 
-    qDebug() << "[NetworkManager] 패킷 전송 CmdID:" << static_cast<uint16_t>(cmdId)
-             << "bodySize:" << jsonBytes.size()
+    qDebug() << "[NetworkManager] 전송 CmdID:" << static_cast<uint16_t>(cmdId)
+             << "size:" << jsonBytes.size()
              << "body:" << jsonBytes;
 
     qint64 written = m_socket->write(packet);
@@ -74,12 +89,11 @@ void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
 
 // ============================================================
 // 데이터 수신 처리
-// 서버도 동일하게 Little Endian으로 전송하므로 수신도 동일하게 파싱
 // ============================================================
 void NetworkManager::handleReadyRead()
 {
     m_buffer.append(m_socket->readAll());
-    qDebug() << "[NetworkManager] 데이터 수신, 버퍼 크기:" << m_buffer.size();
+    qDebug() << "[NetworkManager] 수신 버퍼 크기:" << m_buffer.size();
 
     while (m_buffer.size() >= static_cast<int>(sizeof(PacketHeader)))
     {
@@ -98,42 +112,60 @@ void NetworkManager::handleReadyRead()
 
         int totalSize = sizeof(PacketHeader) + bodySize;
         if (m_buffer.size() < totalSize) {
-            qDebug() << "[NetworkManager] 패킷 미완성, 대기중..."
-                     << m_buffer.size() << "/" << totalSize;
+            qDebug() << "[NetworkManager] 패킷 미완성 대기:" << m_buffer.size() << "/" << totalSize;
             break;
         }
 
         QByteArray body = m_buffer.mid(sizeof(PacketHeader), bodySize);
         m_buffer.remove(0, totalSize);
 
-        qDebug() << "[NetworkManager] 패킷 수신 완료 CmdID:" << cmdIdRaw
-                 << "body:" << body;
-
+        qDebug() << "[NetworkManager] 수신 CmdID:" << cmdIdRaw << "body:" << body;
         processPacket(static_cast<CmdID>(cmdIdRaw), body);
     }
 }
 
+// ============================================================
+// 패킷 처리 - DTO로 역직렬화 후 시그널 emit
+// ============================================================
 void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 {
     try {
         nlohmann::json j = nlohmann::json::parse(body.constData());
 
+        // ── 로그인 / 회원가입 응답 ──
         if (cmdId == CmdID::RES_LOGIN || cmdId == CmdID::RES_SIGNUP) {
             AuthResDTO dto = j.get<AuthResDTO>();
-            qDebug() << "[NetworkManager] 인증 응답 - status:" << dto.status
-                     << "message:" << QString::fromStdString(dto.message)
+            qDebug() << "[NetworkManager] 인증응답 status:" << dto.status
                      << "userName:" << QString::fromStdString(dto.userName);
             emit onAuthResponse(dto.status,
                                 QString::fromStdString(dto.message),
                                 QString::fromStdString(dto.userName));
+
+        // ── 아이디 중복확인 응답 ──
+        } else if (cmdId == CmdID::RES_AUTH_CHECK) {
+            AuthCheckResDTO dto = j.get<AuthCheckResDTO>();
+            qDebug() << "[NetworkManager] 아이디확인 status:" << dto.status
+                     << "isAvailable:" << dto.isAvailable;
+            emit onIdCheckResponse(dto.status,
+                                   QString::fromStdString(dto.message),
+                                   dto.isAvailable);
+
+        // ── 전화번호 중복확인 응답 ──
+        } else if (cmdId == CmdID::RES_PHONE_CHECK) {
+            PhoneCheckResDTO dto = j.get<PhoneCheckResDTO>();
+            qDebug() << "[NetworkManager] 전화번호확인 status:" << dto.status
+                     << "isAvailable:" << dto.isAvailable;
+            emit onPhoneCheckResponse(dto.status,
+                                      QString::fromStdString(dto.message),
+                                      dto.isAvailable);
+
         } else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"
                        << static_cast<uint16_t>(cmdId);
         }
 
     } catch (const std::exception &e) {
-        qWarning() << "[NetworkManager] JSON 파싱 오류:" << e.what()
-            << "body:" << body;
+        qWarning() << "[NetworkManager] JSON 파싱 오류:" << e.what() << "body:" << body;
     }
 }
 
@@ -145,6 +177,5 @@ void NetworkManager::handleConnected()
 
 void NetworkManager::handleError(QAbstractSocket::SocketError err)
 {
-    qWarning() << "[NetworkManager] 소켓 에러:" << err
-               << "-" << m_socket->errorString();
+    qWarning() << "[NetworkManager] 소켓 에러:" << err << "-" << m_socket->errorString();
 }
