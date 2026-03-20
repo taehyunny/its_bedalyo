@@ -1,6 +1,7 @@
 #include "NetworkManager.h"
 #include "json.hpp"
 #include <QDebug>
+#include <QDataStream>
 #include <cstring>
 
 NetworkManager::NetworkManager(QObject *parent)
@@ -9,15 +10,11 @@ NetworkManager::NetworkManager(QObject *parent)
 {
     connect(m_socket, &QTcpSocket::connected,
             this, &NetworkManager::handleConnected);
-
     connect(m_socket, &QTcpSocket::readyRead,
             this, &NetworkManager::handleReadyRead);
-
     connect(m_socket, &QAbstractSocket::errorOccurred,
             this, &NetworkManager::handleError);
-
-    // ── 연결 끊김 감지 추가 ──
-    connect(m_socket, &QTcpSocket::disconnected, this, [this]() {
+    connect(m_socket, &QTcpSocket::disconnected, this, []() {
         qWarning() << "[NetworkManager] 서버 연결 끊김";
     });
 }
@@ -43,35 +40,42 @@ void NetworkManager::sendSignup(const SignupReqDTO &dto)
     sendPacket(CmdID::REQ_SIGNUP, j);
 }
 
+// ============================================================
+// 패킷 조립 및 전송
+// 서버: memcpy로 raw 읽기 → ntohs/ntohl 변환 → 비교
+// 클라이언트: Little Endian(호스트 바이트 오더)으로 전송
+// ============================================================
 void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
 {
-    // ── 소켓 연결 상태 확인 ──
     if (m_socket->state() != QAbstractSocket::ConnectedState) {
         qWarning() << "[NetworkManager] 패킷 전송 실패: 소켓 미연결 상태 ="
                    << m_socket->state();
         return;
     }
 
-    std::string bodyStr = body.dump();
-    qDebug() << "[NetworkManager] 패킷 전송 CmdID:" << static_cast<uint16_t>(cmdId)
-             << "bodySize:" << bodyStr.size()
-             << "body:" << QString::fromStdString(bodyStr);
-
-    PacketHeader header;
-    header.signature = 0x4543;
-    header.cmdId     = cmdId;
-    header.bodySize  = static_cast<uint32_t>(bodyStr.size());
+    QByteArray jsonBytes = QByteArray::fromStdString(body.dump());
 
     QByteArray packet;
-    packet.append(reinterpret_cast<const char*>(&header), sizeof(PacketHeader));
-    packet.append(bodyStr.c_str(), bodyStr.size());
+    QDataStream stream(&packet, QIODevice::WriteOnly);
+    stream.setByteOrder(QDataStream::BigEndian);
+    stream << quint16(0x4543);
+    stream << quint16(static_cast<uint16_t>(cmdId));
+    stream << quint32(jsonBytes.size());
+    packet.append(jsonBytes);
+
+    qDebug() << "[NetworkManager] 패킷 전송 CmdID:" << static_cast<uint16_t>(cmdId)
+             << "bodySize:" << jsonBytes.size()
+             << "body:" << jsonBytes;
 
     qint64 written = m_socket->write(packet);
     m_socket->flush();
-
     qDebug() << "[NetworkManager] 전송 완료, 바이트:" << written;
 }
 
+// ============================================================
+// 데이터 수신 처리
+// 서버도 동일하게 Little Endian으로 전송하므로 수신도 동일하게 파싱
+// ============================================================
 void NetworkManager::handleReadyRead()
 {
     m_buffer.append(m_socket->readAll());
@@ -79,30 +83,33 @@ void NetworkManager::handleReadyRead()
 
     while (m_buffer.size() >= static_cast<int>(sizeof(PacketHeader)))
     {
-        PacketHeader header;
-        std::memcpy(&header, m_buffer.constData(), sizeof(PacketHeader));
+        QDataStream headerStream(m_buffer);
+        headerStream.setByteOrder(QDataStream::BigEndian);
 
-        if (header.signature != 0x4543) {
-            qWarning() << "[NetworkManager] 잘못된 시그니처:" << header.signature;
+        quint16 signature, cmdIdRaw;
+        quint32 bodySize;
+        headerStream >> signature >> cmdIdRaw >> bodySize;
+
+        if (signature != 0x4543) {
+            qWarning() << "[NetworkManager] 잘못된 시그니처:" << Qt::hex << signature;
             m_buffer.clear();
             return;
         }
 
-        int totalSize = sizeof(PacketHeader) + header.bodySize;
+        int totalSize = sizeof(PacketHeader) + bodySize;
         if (m_buffer.size() < totalSize) {
-            qDebug() << "[NetworkManager] 패킷 미완성, 대기중... 버퍼:"
+            qDebug() << "[NetworkManager] 패킷 미완성, 대기중..."
                      << m_buffer.size() << "/" << totalSize;
             break;
         }
 
-        QByteArray body = m_buffer.mid(sizeof(PacketHeader), header.bodySize);
+        QByteArray body = m_buffer.mid(sizeof(PacketHeader), bodySize);
         m_buffer.remove(0, totalSize);
 
-        qDebug() << "[NetworkManager] 패킷 수신 완료 CmdID:"
-                 << static_cast<uint16_t>(header.cmdId)
+        qDebug() << "[NetworkManager] 패킷 수신 완료 CmdID:" << cmdIdRaw
                  << "body:" << body;
 
-        processPacket(header.cmdId, body);
+        processPacket(static_cast<CmdID>(cmdIdRaw), body);
     }
 }
 

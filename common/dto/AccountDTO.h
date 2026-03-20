@@ -17,7 +17,7 @@ struct SignupReqDTO
     // 👤 [고객 전용 - Role 0]
     std::string address;
 
-    // 👨🍳 [사장님 & 매장 전용 - Role 1]
+    // 👨‍🍳 [사장님 & 매장 전용 - Role 1]
     std::string businessNumber; // 사업자 번호
     std::string accountNumber;  // 정산 계좌
     std::string storeName;      // 가게 이름
