@@ -169,23 +169,24 @@ void CSignupDlg::OnBnClickedBtnSignup()
     m_comboCategory.GetLBText(nCategory, strCategory);
 
     json body;
+    // ── USERS (공통) ──────────────────────────────────────────────────────
     body["userId"] = CT2A(strId, CP_UTF8);
     body["password"] = CT2A(strPw, CP_UTF8);
-    body["userName"] = CT2A(strName, CP_UTF8);  
+    body["userName"] = CT2A(strName, CP_UTF8);
     body["phoneNumber"] = CT2A(strPhone, CP_UTF8);
     body["role"] = 1;
 
-    body["storeName"] = CT2A(strStoreName, CP_UTF8);  
-    body["category"] = CT2A(strCategory, CP_UTF8); 
-    body["storeAddress"] = CT2A(strStoreAddress, CP_UTF8); 
-    body["storeId"] = CT2A(strBizNum, CP_UTF8);
-    body["openTime"] = "09:00";
-    body["closeTime"] = "22:00";
-    body["delivery_fees"] = "{}";
-    body["cook_time"] = 30;
-    body["status"] = 1;
+    // ── 고객 전용 (Role 0) - 사장님이라 빈값으로 채움 ─────────────────────
+    body["address"] = "";
 
+    // ── 사장님 & 매장 전용 (Role 1) ───────────────────────────────────────
+    body["businessNumber"] = CT2A(strBizNum, CP_UTF8);  // ✅ storeId → businessNumber
+    body["accountNumber"] = "";                               // ✅ 추가 (일단 빈값)
+    body["storeName"] = CT2A(strStoreName, CP_UTF8);
+    body["category"] = CT2A(strCategory, CP_UTF8);
+    body["storeAddress"] = CT2A(strStoreAddress, CP_UTF8);
     m_pNet->Send(CmdID::REQ_SIGNUP, body);
+
     m_waitingResponse = true;
     GetDlgItem(IDOK)->EnableWindow(FALSE);
 }

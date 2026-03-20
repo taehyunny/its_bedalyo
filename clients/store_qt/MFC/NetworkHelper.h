@@ -93,9 +93,11 @@ public:
 
         PacketHeader header;
         memset(&header, 0, sizeof(header));
-        header.signature = 0x4543;
-        header.cmdId = cmdId;
-        header.bodySize = static_cast<uint32_t>(bodyStr.size());
+
+        // htons/htonl 로 빅엔디안 변환 후 전송
+        header.signature = htons(0x4543);
+        header.cmdId = static_cast<CmdID>(htons(static_cast<uint16_t>(cmdId)));
+        header.bodySize = htonl(static_cast<uint32_t>(bodyStr.size()));
 
         if (send(m_socket,
             reinterpret_cast<const char*>(&header),
@@ -123,7 +125,12 @@ private:
                 break;
             }
 
-            if (header.signature != 0x4543) continue;
+            // 수신한 빅엔디안 값을 리틀엔디안으로 변환
+            header.signature = ntohs(header.signature);
+            header.cmdId = static_cast<CmdID>(ntohs(static_cast<uint16_t>(header.cmdId)));
+            header.bodySize = ntohl(header.bodySize);
+
+            if (header.signature != 0x4543) continue; // 검증은 변환 후에
 
             // Use vector<char> instead of string to avoid const data() issue
             std::vector<char> bodyBuf;
