@@ -44,9 +44,9 @@ struct StoreDTO
 
     // ⚠️ 매크로 마지막 부분에 새 변수 3개를 꼭 추가해야 합니다!
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(StoreDTO,
-                                   storeId, storeName, category, status, deliveryFees, cookTime,
-                                   imageUrl, minOrderAmount, rating, reviewCount, deliveryTimeRange,
-                                   storeAddress, openTime, closeTime, popularMenu)
+        storeId, storeName, category, status, deliveryFees, cookTime,
+        imageUrl, minOrderAmount, rating, reviewCount, deliveryTimeRange,
+        storeAddress, openTime, closeTime, popularMenu)
 };
 
 // 3. StoreListResDTO (가게 목록 전송용 껍데기)

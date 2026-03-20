@@ -5,6 +5,7 @@
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
@@ -12,14 +13,17 @@
 #include "afxres.h"
 #include "verrsrc.h"
 
+/////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
+/////////////////////////////////////////////////////////////////////////////
 // 한국어(대한민국) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
 LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
 
 #ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
 //
 // TEXTINCLUDE
 //
@@ -46,10 +50,10 @@ BEGIN
     "\r\n"
     "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)\r\n"
     "LANGUAGE 18, 1\r\n"
-    "#include ""res\\MFC.rc2""  // Microsoft Visual C++ 이외의 다른 도구에서 편집한 리소스입니다.\r\n"
-    "#include ""l.KOR\\afxres.rc""      // 표준 구성 요소\r\n"
+    "#include ""res\\MFC.rc2""  // Microsoft Visual C++ ?댁쇅???ㅻⅨ ?꾧뎄?먯꽌 ?몄쭛??由ъ냼?ㅼ엯?덈떎.\r\n"
+    "#include ""l.KOR\\afxres.rc""      // ?쒖? 援ъ꽦 ?붿냼\r\n"
     "#if !defined(_AFXDLL)\r\n"
-    "#include ""l.KOR\\afxribbon.rc""   // MFC 리본 및 컨트롤 막대 리소스\r\n"
+    "#include ""l.KOR\\afxribbon.rc""   // MFC 由щ낯 諛?而⑦듃濡?留됰? 由ъ냼??\n"
     "#endif\r\n"
     "#endif\r\n"
     "\0"
@@ -58,7 +62,7 @@ END
 #endif    // APSTUDIO_INVOKED
 
 
-
+/////////////////////////////////////////////////////////////////////////////
 //
 // Icon
 //
@@ -68,6 +72,7 @@ END
 IDR_MAINFRAME           ICON                    "res\\MFC.ico"
 
 
+/////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
@@ -87,13 +92,13 @@ BEGIN
     PUSHBUTTON      "로그인",IDC_BUTTON1,205,58,33,30
 END
 
-IDD_MAIN_MENU DIALOGEX 0, 0, 309, 176
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_MAIN_MENU DIALOGEX 0, 0, 439, 209
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Dialog"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
+FONT 16, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "확인",IDOK,198,155,50,14
-    PUSHBUTTON      "취소",IDCANCEL,252,155,50,14
+    DEFPUSHBUTTON   "확인",IDOK,313,189,23,11
+    PUSHBUTTON      "취소",IDCANCEL,340,189,23,11
 END
 
 IDD_SIGNUP DIALOGEX 0, 0, 346, 198
@@ -106,10 +111,10 @@ BEGIN
     CTEXT           "Its_Bedalyo",IDC_STATIC,102,10,150,11
     LTEXT           "ID",IDC_ID,29,34,8,8
     EDITTEXT        IDC_EDIT_USER_ID,42,32,79,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_PWEdit,42,52,79,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PWEdit,42,52,79,14,ES_PASSWORD | ES_AUTOHSCROLL
     LTEXT           "PW",IDC_STATIC,26,54,11,8
     LTEXT           "PW 확인",IDC_STATIC,12,75,25,8
-    EDITTEXT        IDC_REPWEdit,42,72,79,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_REPWEdit,42,72,79,14,ES_PASSWORD | ES_AUTOHSCROLL
     PUSHBUTTON      "중복 확인",IDC_BtnIDCHECK,124,32,30,14
     LTEXT           "이름",IDC_STATIC,23,96,14,8
     LTEXT           "전화번호",IDC_STATIC,11,114,26,8
@@ -117,20 +122,20 @@ BEGIN
     EDITTEXT        IDC_PHONE,42,113,79,14,ES_AUTOHSCROLL
     LTEXT           "매장명",IDC_STATIC,188,35,20,8
     EDITTEXT        IDC_STORENAME,210,33,105,14,ES_AUTOHSCROLL
-    LTEXT           "카테고리",IDC_CATEGORY,181,55,27,8
-    LTEXT           "영업 시간",IDC_STATIC,173,75,35,8
-    EDITTEXT        IDC_OPENTIME,211,74,40,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_CLOSETIME,265,74,40,14,ES_AUTOHSCROLL
-    LTEXT           "~",IDC_STATIC,254,77,8,8
-    LTEXT           "사업자 번호",IDC_STATIC,173,98,35,8
-    EDITTEXT        IDC_STOREID,211,97,94,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "인증",IDC_BTNSTORECHECK,307,97,23,14
+    LTEXT           "카테고리",IDC_CATEGORY,181,74,27,8
+    LTEXT           "사업자 번호",IDC_STATIC,173,95,35,8
+    EDITTEXT        IDC_STOREID,211,92,94,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "인증",IDC_BTNSTORECHECK,307,93,23,14
     LTEXT           "",IDC_IDCHECK,42,19,112,9
     LTEXT           "",IDC_STOREID_CHECK,191,117,133,9
-    COMBOBOX        IDC_COMBO_CATEGORY,211,52,48,107,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_CATEGORY,211,73,48,107,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " - 제외 ",IDC_STATIC,121,116,23,8
+    LTEXT           "매장 주소",IDC_STATIC_STORE_ADDRESS,179,56,29,8
+    EDITTEXT        IDC_EDIT_STOREADDRESS,210,52,105,14,ES_AUTOHSCROLL
 END
 
 
+/////////////////////////////////////////////////////////////////////////////
 //
 // Version
 //
@@ -168,6 +173,8 @@ BEGIN
     END
 END
 
+
+/////////////////////////////////////////////////////////////////////////////
 //
 // DESIGNINFO
 //
@@ -186,9 +193,9 @@ BEGIN
     IDD_MAIN_MENU, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 302
+        RIGHTMARGIN, 432
         TOPMARGIN, 7
-        BOTTOMMARGIN, 169
+        BOTTOMMARGIN, 200
     END
 
     IDD_SIGNUP, DIALOG
@@ -201,6 +208,8 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
+
+/////////////////////////////////////////////////////////////////////////////
 //
 // AFX_DIALOG_LAYOUT
 //
@@ -220,6 +229,8 @@ BEGIN
     0
 END
 
+
+/////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
@@ -230,9 +241,12 @@ BEGIN
 END
 
 #endif    // 한국어(대한민국) resources
+/////////////////////////////////////////////////////////////////////////////
+
 
 
 #ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
@@ -243,12 +257,13 @@ END
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
 LANGUAGE 18, 1
-#include "res\MFC.rc2"  // Microsoft Visual C++ 이외의 다른 도구에서 편집한 리소스입니다.
-#include "l.KOR\afxres.rc"      // 표준 구성 요소
+#include "res\MFC.rc2"  // Microsoft Visual C++ ?댁쇅???ㅻⅨ ?꾧뎄?먯꽌 ?몄쭛??由ъ냼?ㅼ엯?덈떎.
+#include "l.KOR\afxres.rc"      // ?쒖? 援ъ꽦 ?붿냼
 #if !defined(_AFXDLL)
-#include "l.KOR\afxribbon.rc"   // MFC 리본 및 컨트롤 막대 리소스
+#include "l.KOR\afxribbon.rc"   // MFC 由щ낯 諛?而⑦듃濡?留됰? 由ъ냼??
 #endif
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

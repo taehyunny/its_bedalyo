@@ -36,13 +36,12 @@ void CSignupDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_PHONE, m_editPhone);
     DDX_Control(pDX, IDC_STORENAME, m_editStoreName);
     DDX_Control(pDX, IDC_COMBO_CATEGORY, m_comboCategory);
-    DDX_Control(pDX, IDC_OPENTIME, m_editOpenTime);
-    DDX_Control(pDX, IDC_CLOSETIME, m_editCloseTime);
     DDX_Control(pDX, IDC_STOREID, m_editStoreId);
     DDX_Control(pDX, IDC_BtnIDCHECK, m_btnIdCheck);
     DDX_Control(pDX, IDC_BTNSTORECHECK, m_btnStoreCheck);
     DDX_Control(pDX, IDC_IDCHECK, m_staticIdStatus);
     DDX_Control(pDX, IDC_STOREID_CHECK, m_staticStoreStatus);
+    DDX_Control(pDX, IDC_EDIT_STOREADDRESS, m_editStoreAddress);
 }
 
 BOOL CSignupDlg::OnInitDialog()
@@ -53,9 +52,6 @@ BOOL CSignupDlg::OnInitDialog()
     for (int i = 0; i < CATEGORY_COUNT; i++)
         m_comboCategory.AddString(CATEGORY_LIST[i]);
     m_comboCategory.SetCurSel(0);
-
-    m_editOpenTime.SetWindowText(L"09:00");
-    m_editCloseTime.SetWindowText(L"22:00");
 
     // 완료 버튼 초기 비활성화
     GetDlgItem(IDOK)->EnableWindow(FALSE);
@@ -107,8 +103,8 @@ void CSignupDlg::OnBnClickedBtnIdCheck()
     if (m_waitingResponse) return;
 
     json body;
-    body["check_type"] = "user_id";
-    body["user_id"] = CT2A(strId);
+    body["check_type"] = "userId";
+    body["userId"] = CT2A(strId);
 
     m_pNet->Send(CmdID::REQ_AUTH_CHECK, body);
     m_waitingResponse = true;
@@ -171,12 +167,12 @@ void CSignupDlg::OnBnClickedBtnSignup()
     operatingHours["close"] = CT2A(strClose);
 
     json body;
-    body["user_id"] = CT2A(strId);
+    body["userId"] = CT2A(strId);
     body["password"] = CT2A(strPw);
-    body["user_name"] = CT2A(strName);
-    body["phone_number"] = CT2A(strPhone);
+    body["userName"] = CT2A(strName);
+    body["phoneNumber"] = CT2A(strPhone);
     body["role"] = 2;
-    body["store_name"] = CT2A(strStoreName);
+    body["storeName"] = CT2A(strStoreName);
     body["category"] = CT2A(strCategory);
     body["operating_hours"] = operatingHours.dump();
     body["biz_num"] = CT2A(strBizNum);
@@ -252,7 +248,7 @@ LRESULT CSignupDlg::OnPacketReceived(WPARAM /*wParam*/, LPARAM lParam)
         std::string type = resJson.value("check_type", "");
 
         // ID 중복 확인 응답
-        if (pkt->cmdId == CmdID::RES_AUTH_CHECK && type == "user_id")
+        if (pkt->cmdId == CmdID::RES_AUTH_CHECK && type == "userId")
         {
             m_btnIdCheck.EnableWindow(TRUE);
             m_idAvailable = success;
