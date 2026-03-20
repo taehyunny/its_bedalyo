@@ -24,8 +24,10 @@ enum class CmdID : uint16_t
     RES_SIGNUP = 1021,                  // 공통: 통합 회원가입 응답
     REQ_LOGOUT = 1030,                  // 공통: 로그아웃 요청
     RES_LOGOUT = 1031,                  // 공통: 로그아웃 응답
-    REQ_AUTH_CHECK = 1040,              // 공통: 인증 상태 확인 요청
-    RES_AUTH_CHECK = 1041,              // 공통: 인증 상태 확인 응답
+    REQ_AUTH_CHECK = 1040,              // 공통: 아이디 중복 확인 요청
+    RES_AUTH_CHECK = 1041,              // 공통: 아이디 중복 확인 응답
+    REQ_PHONE_CHECK = 1042,             // 공통: 전화번호 중복 확인 요청
+    RES_PHONE_CHECK = 1043,             // 공통: 전화번호 중복 확인 응답
     REQ_PROFILE_UPDATE = 1050,          // 공통: 프로필 업데이트 요청
     RES_PROFILE_UPDATE = 1051,          // 공통: 프로필 업데이트 응답
 
