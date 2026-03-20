@@ -10,21 +10,37 @@ SOURCES += \
     loginwidget.cpp \
     main.cpp \
     mainwindow.cpp \
-    NetworkManager.cpp
+    NetworkManager.cpp \
+    homewidget.cpp \
+    storeitemwidget.cpp
 
 HEADERS += \
     loginwidget.h \
     mainwindow.h \
-    NetworkManager.h
+    NetworkManager.h \
+    homewidget.h \
+    storeitemwidget.h
 
 FORMS += \
     loginwidget.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    homewidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-INCLUDEPATH += ../../../common/include
-INCLUDEPATH += ../../../common/dto
+# ============================================================
+# 공용 헤더 경로 설정 (환경변수 방식)
+# 각자 PC에서 ITS_COMMON 환경변수를 common 폴더 경로로 설정하세요.
+# 설정 방법은 README.md 참고
+# ============================================================
+COMMON_PATH = $$(ITS_COMMON)
+
+isEmpty(COMMON_PATH) {
+    error("[ 빌드 오류 ] 환경변수 ITS_COMMON 이 설정되지 않았습니다. README.md 를 확인하세요.")
+}
+
+INCLUDEPATH += $$COMMON_PATH/include
+INCLUDEPATH += $$COMMON_PATH/dto
