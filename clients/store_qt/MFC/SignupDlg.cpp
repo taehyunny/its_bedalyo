@@ -26,22 +26,31 @@ CSignupDlg::CSignupDlg(CNetworkHelper* pNet, CWnd* pParent)
 
 CSignupDlg::~CSignupDlg() {}
 
+// =========================================================================
+// 컨트롤 바인딩
+// =========================================================================
 void CSignupDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
+
+    // ── USERS ────────────────────────────────────────────────────────────
     DDX_Control(pDX, IDC_EDIT_USER_ID, m_editId);
     DDX_Control(pDX, IDC_PWEdit, m_editPw);
     DDX_Control(pDX, IDC_REPWEdit, m_editPwConfirm);
     DDX_Control(pDX, IDC_NAMEEDIT, m_editName);
     DDX_Control(pDX, IDC_PHONE, m_editPhone);
+
+    // ── STORES ───────────────────────────────────────────────────────────
     DDX_Control(pDX, IDC_STORENAME, m_editStoreName);
     DDX_Control(pDX, IDC_COMBO_CATEGORY, m_comboCategory);
+    DDX_Control(pDX, IDC_EDIT_STOREADDRESS, m_editStoreAddress);
     DDX_Control(pDX, IDC_STOREID, m_editStoreId);
+
+    // ── 버튼 / 상태 라벨 ─────────────────────────────────────────────────
     DDX_Control(pDX, IDC_BtnIDCHECK, m_btnIdCheck);
     DDX_Control(pDX, IDC_BTNSTORECHECK, m_btnStoreCheck);
     DDX_Control(pDX, IDC_IDCHECK, m_staticIdStatus);
     DDX_Control(pDX, IDC_STOREID_CHECK, m_staticStoreStatus);
-    DDX_Control(pDX, IDC_EDIT_STOREADDRESS, m_editStoreAddress);
 }
 
 BOOL CSignupDlg::OnInitDialog()
@@ -53,14 +62,12 @@ BOOL CSignupDlg::OnInitDialog()
         m_comboCategory.AddString(CATEGORY_LIST[i]);
     m_comboCategory.SetCurSel(0);
 
-    // 완료 버튼 초기 비활성화
-    GetDlgItem(IDOK)->EnableWindow(FALSE);
-
+    //GetDlgItem(IDOK)->EnableWindow(FALSE);
     return TRUE;
 }
 
 // =========================================================================
-// ID 입력 변경 감지 - 수정 시 확인 상태 초기화
+// ID 입력 변경 감지
 // =========================================================================
 void CSignupDlg::OnChangeEditId()
 {
@@ -73,7 +80,7 @@ void CSignupDlg::OnChangeEditId()
 }
 
 // =========================================================================
-// 사업자번호 입력 변경 감지 - 수정 시 확인 상태 초기화
+// 사업자번호 입력 변경 감지
 // =========================================================================
 void CSignupDlg::OnChangeEditStoreId()
 {
@@ -87,19 +94,19 @@ void CSignupDlg::OnChangeEditStoreId()
 
 // =========================================================================
 // ID 중복 확인 버튼
+// REQ_AUTH_CHECK(1040) → RES_AUTH_CHECK(1041), check_type: "userId"
 // =========================================================================
 void CSignupDlg::OnBnClickedBtnIdCheck()
 {
     CString strId;
     m_editId.GetWindowText(strId);
-    strId.Trim();  // ← 앞뒤 공백 제거
+    strId.Trim();
 
     if (strId.IsEmpty())
     {
         SetIdStatus(L"ID를 입력하세요.", RGB(255, 0, 0));
         return;
     }
-
     if (m_waitingResponse) return;
 
     json body;
@@ -114,6 +121,7 @@ void CSignupDlg::OnBnClickedBtnIdCheck()
 
 // =========================================================================
 // 사업자번호 조회 버튼
+// REQ_BUISNESS_NUM_CHECK(2006) → RES_BUISNESS_NUM_CHECK(2007)
 // =========================================================================
 void CSignupDlg::OnBnClickedBtnStoreCheck()
 {
@@ -125,14 +133,12 @@ void CSignupDlg::OnBnClickedBtnStoreCheck()
         SetStoreStatus(L"사업자번호를 입력하세요.", RGB(255, 0, 0));
         return;
     }
-
     if (m_waitingResponse) return;
 
     json body;
-    body["check_type"] = "biz_num";
     body["biz_num"] = CT2A(strBizNum);
 
-    m_pNet->Send(CmdID::REQ_AUTH_CHECK, body);
+    m_pNet->Send(CmdID::REQ_BUISNESS_NUM_CHECK, body);
     m_waitingResponse = true;
     m_btnStoreCheck.EnableWindow(FALSE);
     SetStoreStatus(L"조회 중...", RGB(0, 0, 255));
@@ -140,14 +146,15 @@ void CSignupDlg::OnBnClickedBtnStoreCheck()
 
 // =========================================================================
 // 완료(가입하기) 버튼
+// REQ_SIGNUP(1020) → RES_SIGNUP(1021)
 // =========================================================================
 void CSignupDlg::OnBnClickedBtnSignup()
 {
-    if (!ValidateInputs()) return;
-    if (m_waitingResponse) return;
+    if (!ValidateInputs())  return;
+    if (m_waitingResponse)  return;
 
     CString strId, strPw, strName, strPhone;
-    CString strStoreName, strOpen, strClose, strBizNum;
+    CString strStoreName, strStoreAddress, strBizNum;
     int nCategory = m_comboCategory.GetCurSel();
 
     m_editId.GetWindowText(strId);
@@ -155,27 +162,25 @@ void CSignupDlg::OnBnClickedBtnSignup()
     m_editName.GetWindowText(strName);
     m_editPhone.GetWindowText(strPhone);
     m_editStoreName.GetWindowText(strStoreName);
-    m_editOpenTime.GetWindowText(strOpen);
-    m_editCloseTime.GetWindowText(strClose);
+    m_editStoreAddress.GetWindowText(strStoreAddress);
     m_editStoreId.GetWindowText(strBizNum);
 
     CString strCategory;
     m_comboCategory.GetLBText(nCategory, strCategory);
 
-    json operatingHours;
-    operatingHours["open"] = CT2A(strOpen);
-    operatingHours["close"] = CT2A(strClose);
-
     json body;
-    body["userId"] = CT2A(strId);
-    body["password"] = CT2A(strPw);
-    body["userName"] = CT2A(strName);
-    body["phoneNumber"] = CT2A(strPhone);
-    body["role"] = 2;
-    body["storeName"] = CT2A(strStoreName);
-    body["category"] = CT2A(strCategory);
-    body["operating_hours"] = operatingHours.dump();
-    body["biz_num"] = CT2A(strBizNum);
+    body["userId"] = CT2A(strId, CP_UTF8);
+    body["password"] = CT2A(strPw, CP_UTF8);
+    body["userName"] = CT2A(strName, CP_UTF8);  
+    body["phoneNumber"] = CT2A(strPhone, CP_UTF8);
+    body["role"] = 1;
+
+    body["storeName"] = CT2A(strStoreName, CP_UTF8);  
+    body["category"] = CT2A(strCategory, CP_UTF8); 
+    body["storeAddress"] = CT2A(strStoreAddress, CP_UTF8); 
+    body["storeId"] = CT2A(strBizNum, CP_UTF8);
+    body["openTime"] = "09:00";
+    body["closeTime"] = "22:00";
     body["delivery_fees"] = "{}";
     body["cook_time"] = 30;
     body["status"] = 1;
@@ -190,38 +195,36 @@ void CSignupDlg::OnBnClickedBtnSignup()
 // =========================================================================
 bool CSignupDlg::ValidateInputs()
 {
-    if (!m_idAvailable)
-    {
-        SetIdStatus(L"ID 중복 확인을 먼저 해주세요.", RGB(255, 0, 0));
-        return false;
-    }
+    //if (!m_idAvailable)
+    //{
+    //    SetIdStatus(L"ID 중복 확인을 먼저 해주세요.", RGB(255, 0, 0));
+    //    return false;
+    //}
+    //if (!m_storeAvailable)
+    //{
+    //    SetStoreStatus(L"사업자번호 조회를 먼저 해주세요.", RGB(255, 0, 0));
+    //    return false;
+    //}
 
-    if (!m_storeAvailable)
-    {
-        SetStoreStatus(L"사업자번호 조회를 먼저 해주세요.", RGB(255, 0, 0));
-        return false;
-    }
-
-    CString strPw, strPwConfirm, strName, strPhone, strStoreName;
+    CString strPw, strPwConfirm, strName, strPhone, strStoreName, strStoreAddress;
     m_editPw.GetWindowText(strPw);
     m_editPwConfirm.GetWindowText(strPwConfirm);
     m_editName.GetWindowText(strName);
     m_editPhone.GetWindowText(strPhone);
     m_editStoreName.GetWindowText(strStoreName);
+    m_editStoreAddress.GetWindowText(strStoreAddress);
 
     if (strPw.IsEmpty() || strName.IsEmpty() ||
-        strPhone.IsEmpty() || strStoreName.IsEmpty())
+        strPhone.IsEmpty() || strStoreName.IsEmpty() || strStoreAddress.IsEmpty())
     {
         MessageBox(L"모든 필수 항목을 입력하세요.", L"알림", MB_OK);
         return false;
     }
-
     if (strPw != strPwConfirm)
     {
         MessageBox(L"비밀번호가 일치하지 않습니다.", L"알림", MB_OK);
         return false;
     }
-
     if (strPw.GetLength() < 4)
     {
         MessageBox(L"비밀번호는 4자 이상이어야 합니다.", L"알림", MB_OK);
@@ -233,6 +236,9 @@ bool CSignupDlg::ValidateInputs()
 
 // =========================================================================
 // 서버 응답 처리
+// - ID 확인   : RES_AUTH_CHECK → check_type 으로 분기
+// - 사업자번호 : RES_BUISNESS_NUM_CHECK → CmdID 로 직접 분기
+// - 회원가입   : RES_SIGNUP → CmdID 로 직접 분기
 // =========================================================================
 LRESULT CSignupDlg::OnPacketReceived(WPARAM /*wParam*/, LPARAM lParam)
 {
@@ -245,41 +251,33 @@ LRESULT CSignupDlg::OnPacketReceived(WPARAM /*wParam*/, LPARAM lParam)
     {
         json resJson = json::parse(pkt->body);
         bool success = resJson.value("success", false);
-        std::string type = resJson.value("check_type", "");
 
-        // ID 중복 확인 응답
-        if (pkt->cmdId == CmdID::RES_AUTH_CHECK && type == "userId")
+        // ── ID 중복 확인 응답 ────────────────────────────────────────────
+        if (pkt->cmdId == CmdID::RES_AUTH_CHECK)
         {
             m_btnIdCheck.EnableWindow(TRUE);
             m_idAvailable = success;
-
             if (success)
                 SetIdStatus(L"사용 가능한 ID입니다.", RGB(0, 150, 0));
             else
                 SetIdStatus(L"이미 사용 중인 ID입니다.", RGB(255, 0, 0));
-
             UpdateSignupButton();
         }
-
-        // 사업자번호 조회 응답
-        else if (pkt->cmdId == CmdID::RES_AUTH_CHECK && type == "biz_num")
+        // ── 사업자번호 조회 응답 ─────────────────────────────────────────
+        else if (pkt->cmdId == CmdID::RES_BUISNESS_NUM_CHECK)
         {
             m_btnStoreCheck.EnableWindow(TRUE);
             m_storeAvailable = success;
-
             if (success)
                 SetStoreStatus(L"사용 가능한 사업자번호입니다.", RGB(0, 150, 0));
             else
                 SetStoreStatus(L"이미 등록된 사업자번호입니다.", RGB(255, 0, 0));
-
             UpdateSignupButton();
         }
-
-        // 회원가입 응답
+        // ── 회원가입 응답 ────────────────────────────────────────────────
         else if (pkt->cmdId == CmdID::RES_SIGNUP)
         {
             GetDlgItem(IDOK)->EnableWindow(TRUE);
-
             if (success)
             {
                 MessageBox(L"회원가입이 완료되었습니다.", L"가입 완료", MB_OK);
@@ -299,8 +297,7 @@ LRESULT CSignupDlg::OnPacketReceived(WPARAM /*wParam*/, LPARAM lParam)
 }
 
 // =========================================================================
-// 완료 버튼 활성화 조건 체크
-// ID + 사업자번호 둘 다 확인 완료 시에만 활성화
+// 완료 버튼 활성화 (ID + 사업자번호 둘 다 확인 완료 시)
 // =========================================================================
 void CSignupDlg::UpdateSignupButton()
 {
