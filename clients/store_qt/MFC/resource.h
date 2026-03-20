@@ -44,6 +44,7 @@
 #define IDC_STOREID_CHECK               1128
 #define IDC_REPWEdit                    1129
 #define IDC_STATIC_STORE_ADDRESS        1130
+#define IDC_STATIC_CHECKLOGIN           1131
 
 // Next default values for new objects
 // 
@@ -51,7 +52,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1131
+#define _APS_NEXT_CONTROL_VALUE         1132
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
