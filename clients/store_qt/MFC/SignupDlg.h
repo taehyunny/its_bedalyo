@@ -58,7 +58,7 @@ private:
     CEdit       m_editOpenTime;
     CEdit       m_editCloseTime;
     CEdit       m_editStoreId;
-
+    CEdit       m_editStoreAddress;
     // Buttons
     CButton     m_btnIdCheck;
     CButton     m_btnStoreCheck;
@@ -75,4 +75,6 @@ private:
     bool        m_idAvailable = false;
     bool        m_storeAvailable = false;
     bool        m_waitingResponse = false;
+public:
+    afx_msg void OnEnChangePhone();
 };

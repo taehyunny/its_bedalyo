@@ -12,7 +12,6 @@
 #define IDC_EDIT1                       1000
 #define IDC_EDIT2                       1001
 #define IDC_BUTTON1                     1002
-#define IDC_REPWEdit                    1129
 #define IDC_BUTTON2                     1004
 #define IDC_EDIT_USER_ID                1100
 #define IDC_BTN_ID_CHECK                1101
@@ -27,7 +26,6 @@
 #define IDC_EDIT_COOK_TIME              1111
 #define IDC_BTN_SIGNUP                  1112
 #define IDC_STATIC_STATUS               1113
-#define IDC_STOREID_CHECK               1128
 #define IDC_ID                          1114
 #define IDC_NAMEEDIT                    1115
 #define IDC_PHONE                       1116
@@ -41,6 +39,11 @@
 #define IDC_PWEdit                      1124
 #define IDC_CATEGORY                    1125
 #define IDC_COMBO_CATEGORY              1126
+#define IDC_EDIT_STORE                  1127
+#define IDC_EDIT_STOREADDRESS           1127
+#define IDC_STOREID_CHECK               1128
+#define IDC_REPWEdit                    1129
+#define IDC_STATIC_STORE_ADDRESS        1130
 
 // Next default values for new objects
 // 
@@ -48,7 +51,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1127
+#define _APS_NEXT_CONTROL_VALUE         1131
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
