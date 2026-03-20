@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::onLogoutRequested);
 
     // ── 서버 연결 시도 ──
-    m_network->connectToServer("10.10.10.123", 8080);
+    m_network->connectToServer("10.10.10.123", 8010);
 }
 
 MainWindow::~MainWindow()
