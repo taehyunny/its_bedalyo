@@ -150,6 +150,7 @@ void CMFCDlg::OnBtnSign()
 
 LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 {
+    (void)wParam;
     auto* pkt = reinterpret_cast<ReceivedPacket*>(lParam);
     if (!pkt) return 0;
 
@@ -158,7 +159,7 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 
     if (pkt->cmdId == CmdID::RES_LOGIN)
     {
-        OutputDebugStringA("[OnPacketReceived] ✅ RES_LOGIN 수신!\n");
+        OutputDebugStringA("[OnPacketReceived] RES_LOGIN 수신!\n");
         OutputDebugStringA(("[OnPacketReceived] body: " + pkt->body + "\n").c_str());
 
         try
@@ -176,7 +177,7 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 
                 ShowWindow(SW_HIDE);
 
-                CMainMenuDlg mainDlg;
+                CMainMenuDlg mainDlg(m_storeId, m_storeName, this);
                 mainDlg.DoModal();
 
                 ShowWindow(SW_SHOW);

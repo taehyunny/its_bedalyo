@@ -1,24 +1,35 @@
 ﻿#pragma once
 #include "afxdialogex.h"
-
-
-// CMainMenuDlg 대화 상자
+#include "CTabStoreDlg.h"
 
 class CMainMenuDlg : public CDialogEx
 {
-	DECLARE_DYNAMIC(CMainMenuDlg)
+    DECLARE_DYNAMIC(CMainMenuDlg)
 
 public:
-	CMainMenuDlg(CWnd* pParent = nullptr);   // 표준 생성자입니다.
-	virtual ~CMainMenuDlg();
+    // ✅ 매장 정보를 받는 생성자로 변경
+    CMainMenuDlg(int storeId, const CString& storeName, CWnd* pParent = nullptr);
+    virtual ~CMainMenuDlg();
 
-// 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_MAIN_MENU };
+    enum { IDD = IDD_MAIN_MENU };
 #endif
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
+    virtual void DoDataExchange(CDataExchange* pDX);
+    virtual BOOL OnInitDialog();
+    DECLARE_MESSAGE_MAP()
 
-	DECLARE_MESSAGE_MAP()
+private:
+    // ── 매장 정보 ──────────────────────────────────────────
+    int         m_storeId = 0;
+    CString     m_storeName;
+    CTabStoreDlg m_tabStoreDlg;  // 매장 설정 탭
+
+    // ── 컨트롤 바인딩 ───────────────────────────────────────
+    CStatic     m_staticNameBar;   // IDC_STATIC_NAMEBAR
+    CStatic     m_staticStatus;    // IDC_STATIC_STATUS
+    CTabCtrl    m_tabCtrl;         // IDC_TAB_STATUS_SET
+public:
+    afx_msg void OnTcnSelchangeTabStatusSet(NMHDR* pNMHDR, LRESULT* pResult);
 };

@@ -189,6 +189,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CMainMenuDlg.h" />
+    <ClInclude Include="CTabStoreDlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Global_protocol.h" />
     <ClInclude Include="json.hpp" />
@@ -202,6 +203,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CMainMenuDlg.cpp" />
+    <ClCompile Include="CTabStoreDlg.cpp" />
     <ClCompile Include="MFC.cpp" />
     <ClCompile Include="MFCDlg.cpp" />
     <ClCompile Include="pch.cpp">
