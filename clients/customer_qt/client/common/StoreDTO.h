@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include "json.hpp"
-#include "BaseDTO.h"  // ← 이 줄 추가
 
 // 1. 순서 교정: MenuDTO가 먼저 와야 다른 곳에서 쓸 수 있습니다.
 struct MenuDTO
@@ -96,6 +95,7 @@ struct TopStoreInfo     //  카테고리별 1등 매장 정보 DTO
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(TopStoreInfo, storeId, storeName, category, iconPath,
         deliveryTimeRange, rating, reviewCount, minOrderAmount, deliveryFee)
 };
+
 
 // 🚀 메인 화면용 '통합' 응답 패킷!
 struct MainHomeResDTO

@@ -25,8 +25,6 @@ void NetworkManager::connectToServer(const QString &ip, quint16 port)
     m_socket->connectToHost(ip, port);
 }
 
-// ── 송신 함수들 ──
-
 void NetworkManager::sendLogin(const LoginReqDTO &dto)
 {
     qDebug() << "[NetworkManager] 로그인 요청 -" << QString::fromStdString(dto.userId);
@@ -38,7 +36,7 @@ void NetworkManager::sendSignup(const SignupReqDTO &dto)
 {
     qDebug() << "[NetworkManager] 회원가입 요청 -" << QString::fromStdString(dto.userId);
     nlohmann::json j;
-    to_json(j, dto); // to_json 명시 호출 (friend 함수)
+    to_json(j, dto);
     sendPacket(CmdID::REQ_SIGNUP, j);
 }
 
@@ -57,14 +55,10 @@ void NetworkManager::sendPhoneCheck(const PhoneCheckReqDTO &dto)
     sendPacket(CmdID::REQ_PHONE_CHECK, j);
 }
 
-// ============================================================
-// 패킷 조립 및 전송 (BigEndian)
-// ============================================================
 void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
 {
     if (m_socket->state() != QAbstractSocket::ConnectedState) {
-        qWarning() << "[NetworkManager] 패킷 전송 실패: 소켓 미연결 상태 ="
-                   << m_socket->state();
+        qWarning() << "[NetworkManager] 패킷 전송 실패: 소켓 미연결";
         return;
     }
 
@@ -79,21 +73,15 @@ void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
     packet.append(jsonBytes);
 
     qDebug() << "[NetworkManager] 전송 CmdID:" << static_cast<uint16_t>(cmdId)
-             << "size:" << jsonBytes.size()
-             << "body:" << jsonBytes;
+             << "size:" << jsonBytes.size();
 
-    qint64 written = m_socket->write(packet);
+    m_socket->write(packet);
     m_socket->flush();
-    qDebug() << "[NetworkManager] 전송 완료, 바이트:" << written;
 }
 
-// ============================================================
-// 데이터 수신 처리
-// ============================================================
 void NetworkManager::handleReadyRead()
 {
     m_buffer.append(m_socket->readAll());
-    qDebug() << "[NetworkManager] 수신 버퍼 크기:" << m_buffer.size();
 
     while (m_buffer.size() >= static_cast<int>(sizeof(PacketHeader)))
     {
@@ -105,28 +93,22 @@ void NetworkManager::handleReadyRead()
         headerStream >> signature >> cmdIdRaw >> bodySize;
 
         if (signature != 0x4543) {
-            qWarning() << "[NetworkManager] 잘못된 시그니처:" << Qt::hex << signature;
+            qWarning() << "[NetworkManager] 잘못된 시그니처";
             m_buffer.clear();
             return;
         }
 
         int totalSize = sizeof(PacketHeader) + bodySize;
-        if (m_buffer.size() < totalSize) {
-            qDebug() << "[NetworkManager] 패킷 미완성 대기:" << m_buffer.size() << "/" << totalSize;
-            break;
-        }
+        if (m_buffer.size() < totalSize) break;
 
         QByteArray body = m_buffer.mid(sizeof(PacketHeader), bodySize);
         m_buffer.remove(0, totalSize);
 
-        qDebug() << "[NetworkManager] 수신 CmdID:" << cmdIdRaw << "body:" << body;
+        qDebug() << "[NetworkManager] 수신 CmdID:" << cmdIdRaw;
         processPacket(static_cast<CmdID>(cmdIdRaw), body);
     }
 }
 
-// ============================================================
-// 패킷 처리 - DTO로 역직렬화 후 시그널 emit
-// ============================================================
 void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 {
     try {
@@ -144,8 +126,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         // ── 아이디 중복확인 응답 ──
         } else if (cmdId == CmdID::RES_AUTH_CHECK) {
             AuthCheckResDTO dto = j.get<AuthCheckResDTO>();
-            qDebug() << "[NetworkManager] 아이디확인 status:" << dto.status
-                     << "isAvailable:" << dto.isAvailable;
             emit onIdCheckResponse(dto.status,
                                    QString::fromStdString(dto.message),
                                    dto.isAvailable);
@@ -153,11 +133,42 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         // ── 전화번호 중복확인 응답 ──
         } else if (cmdId == CmdID::RES_PHONE_CHECK) {
             PhoneCheckResDTO dto = j.get<PhoneCheckResDTO>();
-            qDebug() << "[NetworkManager] 전화번호확인 status:" << dto.status
-                     << "isAvailable:" << dto.isAvailable;
             emit onPhoneCheckResponse(dto.status,
                                       QString::fromStdString(dto.message),
                                       dto.isAvailable);
+
+        // ── 메인 화면 데이터 (연결 시 서버가 자동 push) ──
+        } else if (cmdId == CmdID::RES_CATEGORY) {
+            MainHomeResDTO dto = j.get<MainHomeResDTO>();
+            qDebug() << "[NetworkManager] 메인홈 수신 - 카테고리:"
+                     << dto.categories.size() << "가게:" << dto.topStores.size();
+
+            // C++ DTO → Qt 구조체 변환
+            QList<CategoryInfoQt> categories;
+            for (const auto &c : dto.categories) {
+                CategoryInfoQt item;
+                item.id       = c.id;
+                item.name     = QString::fromStdString(c.name);
+                item.iconPath = QString::fromStdString(c.iconPath);
+                categories.append(item);
+            }
+
+            QList<TopStoreInfoQt> topStores;
+            for (const auto &s : dto.topStores) {
+                TopStoreInfoQt item;
+                item.storeId          = s.storeId;
+                item.storeName        = QString::fromStdString(s.storeName);
+                item.category         = QString::fromStdString(s.category);
+                item.iconPath         = QString::fromStdString(s.iconPath);
+                item.deliveryTimeRange = QString::fromStdString(s.deliveryTimeRange);
+                item.rating           = s.rating;
+                item.reviewCount      = s.reviewCount;
+                item.minOrderAmount   = s.minOrderAmount;
+                item.deliveryFee      = s.deliveryFee;
+                topStores.append(item);
+            }
+
+            emit onMainHomeReceived(categories, topStores);
 
         } else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"
@@ -165,7 +176,7 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         }
 
     } catch (const std::exception &e) {
-        qWarning() << "[NetworkManager] JSON 파싱 오류:" << e.what() << "body:" << body;
+        qWarning() << "[NetworkManager] JSON 파싱 오류:" << e.what();
     }
 }
 

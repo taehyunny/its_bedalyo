@@ -106,9 +106,9 @@ struct AuthCheckResDTO
 // 1042: 폰번호 중복 확인 요청
 struct PhoneCheckReqDTO
 {
-    std::string phoneNumber; // 전화번호 (핸들러의 req.phoneNumber에 대응)
-    int role;                // 🚀 핵심: 사장님(1)인지 손님(0)인지 구분!
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(PhoneCheckReqDTO, phoneNumber, role)
+    std::string phoneNumber;                                            // 전화번호 (핸들러의 req.phoneNumber에 대응)
+    int role;                                                           // 🚀 핵심: 사장님(1)인지 손님(0)인지 구분!
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(PhoneCheckReqDTO, phoneNumber, role) // JSON <-> Struct 자동 변환 매크로
 };
 
 // 1043: 폰번호 중복 확인 응답

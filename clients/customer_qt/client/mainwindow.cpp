@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_homeWidget, &HomeWidget::logoutRequested,
             this, &MainWindow::onLogoutRequested);
 
-    m_network->connectToServer("10.10.10.123", 8010);
+    m_network->connectToServer("10.10.10.123", 8040);
 }
 
 MainWindow::~MainWindow() { delete ui; }
