@@ -9,18 +9,22 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     NetworkManager.cpp \
-    homewidget.cpp
+    homewidget.cpp \
+    menucategori.cpp
 
 HEADERS += \
     loginwidget.h \
     mainwindow.h \
     NetworkManager.h \
-    homewidget.h
+    homewidget.h \
+    menucategori.h \
+    UserSession.h
 
 FORMS += \
     loginwidget.ui \
     mainwindow.ui \
-    homewidget.ui
+    homewidget.ui \
+    menucategori.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

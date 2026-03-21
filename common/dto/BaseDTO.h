@@ -30,4 +30,3 @@ struct CategoryListResDTO
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(CategoryListResDTO, status, categories)
 };
-

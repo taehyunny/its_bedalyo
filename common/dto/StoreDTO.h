@@ -120,8 +120,8 @@ struct MainHomeResDTO
 // 🚀 클라이언트 -> 서버: "이 카테고리 매장 다 주세요!" (예: REQ_STORES_BY_CATEGORY)
 struct StoreListReqDTO
 {
-    std::string category; // 예: "한식"
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(StoreListReqDTO, category)
+    int categoryId;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(StoreListReqDTO, categoryId)
 };
 
 // 🚀 서버 -> 클라이언트: "여기 주문하신 매장 리스트입니다!" (예: RES_STORES_BY_CATEGORY)

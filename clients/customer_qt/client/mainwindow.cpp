@@ -2,49 +2,54 @@
 #include "ui_mainwindow.h"
 #include "UserSession.h"
 
-// ============================================================
-// 생성자
-// ============================================================
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_network(new NetworkManager(this))
     , m_loginWidget(new LoginWidget(m_network, this))
     , m_homeWidget(new HomeWidget(m_network, this))
+    , m_menuWidget(new menucategori(m_network, this))
 {
-    // 타이틀바 제거 (setupUi 이전에 호출해야 적용됨)
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-
     ui->setupUi(this);
     setFixedSize(390, 844);
 
-    // QMainWindow 기본 여백 제거
     centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
     centralWidget()->layout()->setSpacing(0);
 
-    // 화면 등록
+    // ── 화면 등록 ──
     ui->stackedWidget->addWidget(m_loginWidget);
     ui->stackedWidget->addWidget(m_homeWidget);
+    ui->stackedWidget->addWidget(m_menuWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
 
-    // 시그널 연결
+    // ── 시그널 연결 ──
     connect(m_loginWidget, &LoginWidget::loginSuccess,
             this, &MainWindow::onLoginSuccess);
     connect(m_homeWidget, &HomeWidget::logoutRequested,
             this, &MainWindow::onLogoutRequested);
+    connect(m_homeWidget, &HomeWidget::categorySelected,
+            this, &MainWindow::onCategorySelected);
+    connect(m_menuWidget, &menucategori::backRequested,
+            this, &MainWindow::onBackToHome);
 
-    // 서버 연결
-    m_network->connectToServer("10.10.10.123", 8012);
+    // ── 카테고리 데이터 캐싱 ──
+    // HomeWidget이 받은 데이터를 MainWindow도 같이 받아서 캐싱
+    // menucategori는 여기서 직접 연결 안 하고 setCategory() 호출 시 전달
+    connect(m_network, &NetworkManager::onMainHomeReceived,
+            this, &MainWindow::onMainHomeReceived);
+
+    // ── 서버 연결 ──
+    m_network->connectToServer("10.10.10.123", 8010);
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
 // ============================================================
-// 로그인/회원가입 성공 → UserSession에서 정보 꺼내 홈 화면에 적용
+// 로그인/회원가입 성공 → 홈 화면으로 전환
 // ============================================================
 void MainWindow::onLoginSuccess()
 {
-    // UserSession에 저장된 값을 HomeWidget에 전달
     m_homeWidget->setUserName(UserSession::instance().userName);
     m_homeWidget->setAddress(UserSession::instance().address);
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
@@ -57,6 +62,34 @@ void MainWindow::onLogoutRequested()
 {
     UserSession::instance().clear();
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
+}
+
+// ============================================================
+// 카테고리 데이터 캐싱
+// HomeWidget이 RES_CATEGORY 받을 때 MainWindow도 같이 받아서 저장
+// ============================================================
+void MainWindow::onMainHomeReceived(QList<CategoryInfoQt> categories,
+                                     QList<TopStoreInfoQt> /*topStores*/)
+{
+    m_cachedCategories = categories;
+}
+
+// ============================================================
+// 홈에서 카테고리 클릭 → menucategori 화면으로 전환
+// 캐싱된 카테고리 목록을 넘겨주고 가게 목록은 서버에 새로 요청
+// ============================================================
+void MainWindow::onCategorySelected(int categoryId, const QString &categoryName)
+{
+    m_menuWidget->setCategory(categoryId, categoryName, m_cachedCategories);
+    ui->stackedWidget->setCurrentWidget(m_menuWidget);
+}
+
+// ============================================================
+// menucategori 뒤로가기 → 홈으로 복귀
+// ============================================================
+void MainWindow::onBackToHome()
+{
+    ui->stackedWidget->setCurrentWidget(m_homeWidget);
 }
 
 void MainWindow::showLogin() { ui->stackedWidget->setCurrentWidget(m_loginWidget); }

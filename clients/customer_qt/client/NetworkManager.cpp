@@ -25,6 +25,8 @@ void NetworkManager::connectToServer(const QString &ip, quint16 port)
     m_socket->connectToHost(ip, port);
 }
 
+// ── 인증 관련 ──
+
 void NetworkManager::sendLogin(const LoginReqDTO &dto)
 {
     qDebug() << "[NetworkManager] 로그인 요청 -" << QString::fromStdString(dto.userId);
@@ -53,6 +55,15 @@ void NetworkManager::sendPhoneCheck(const PhoneCheckReqDTO &dto)
              << QString::fromStdString(dto.phoneNumber) << "role:" << dto.role;
     nlohmann::json j = dto;
     sendPacket(CmdID::REQ_PHONE_CHECK, j);
+}
+
+// ── 카테고리별 가게 목록 요청 (REQ_STORE_LIST = 2000) ──
+void NetworkManager::sendStoreListRequest(int categoryId)
+{
+    qDebug() << "[NetworkManager] 가게 목록 요청 categoryId:" << categoryId;
+    nlohmann::json j;
+    j["categoryId"] = categoryId;
+    sendPacket(CmdID::REQ_STORE_LIST, j);
 }
 
 void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
@@ -125,7 +136,7 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                                  QString::fromStdString(dto.userName),
                                  QString::fromStdString(dto.address));
 
-        // ── 회원가입 응답 ── (서버는 성공/실패만 알려줌, userName/address는 클라 입력값 사용)
+        // ── 회원가입 응답 ──
         } else if (cmdId == CmdID::RES_SIGNUP) {
             AuthResDTO dto = j.get<AuthResDTO>();
             qDebug() << "[NetworkManager] 회원가입 응답 status:" << dto.status;
@@ -146,13 +157,12 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                                       QString::fromStdString(dto.message),
                                       dto.isAvailable);
 
-        // ── 메인 화면 데이터 (연결 시 서버가 자동 push) ──
+        // ── 메인 홈 데이터 수신 (RES_CATEGORY) ──
         } else if (cmdId == CmdID::RES_CATEGORY) {
             MainHomeResDTO dto = j.get<MainHomeResDTO>();
             qDebug() << "[NetworkManager] 메인홈 수신 - 카테고리:"
                      << dto.categories.size() << "가게:" << dto.topStores.size();
 
-            // C++ DTO → Qt 구조체 변환
             QList<CategoryInfoQt> categories;
             for (const auto &c : dto.categories) {
                 CategoryInfoQt item;
@@ -178,6 +188,31 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             }
 
             emit onMainHomeReceived(categories, topStores);
+
+        // ── 카테고리별 가게 목록 수신 (RES_STORE_LIST = 2001) ──
+        // 서버 구조: { "status": 200, "message": "...", "stores": [...] }
+        // → StoreListResDTO로 파싱 후 stores 배열 사용
+        } else if (cmdId == CmdID::RES_STORE_LIST) {
+            StoreListResDTO dto = j.get<StoreListResDTO>();
+            qDebug() << "[NetworkManager] 가게 목록 수신 status:" << dto.status
+                     << "count:" << dto.stores.size();
+
+            QList<TopStoreInfoQt> stores;
+            for (const auto &s : dto.stores) {
+                TopStoreInfoQt item;
+                item.storeId           = s.storeId;
+                item.storeName         = QString::fromStdString(s.storeName);
+                item.category          = QString::fromStdString(s.category);
+                item.iconPath          = QString::fromStdString(s.iconPath);
+                item.deliveryTimeRange = QString::fromStdString(s.deliveryTimeRange);
+                item.rating            = s.rating;
+                item.reviewCount       = s.reviewCount;
+                item.minOrderAmount    = s.minOrderAmount;
+                item.deliveryFee       = s.deliveryFee;
+                stores.append(item);
+            }
+
+            emit onStoreListReceived(stores);
 
         } else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"

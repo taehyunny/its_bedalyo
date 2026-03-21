@@ -3,6 +3,7 @@
 #include "NetworkManager.h"
 #include "LoginWidget.h"
 #include "HomeWidget.h"
+#include "menucategori.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -13,7 +14,8 @@ QT_END_NAMESPACE
 //
 // - QStackedWidget으로 화면 전환 관리
 // - NetworkManager를 생성해 각 Widget에 주입
-// - 화면 추가 시: Widget 생성 → stackedWidget에 추가 → 시그널 연결
+// - 카테고리 목록을 캐싱해 menucategori 진입 시 재사용
+//   (서버에서 한 번만 받고 재요청 안 함)
 // ============================================================
 class MainWindow : public QMainWindow
 {
@@ -27,15 +29,22 @@ public:
     void showHome();
 
 private slots:
-    // 로그인/회원가입 성공 → 홈 화면으로 전환
     void onLoginSuccess();
-
-    // 로그아웃 → 로그인 화면으로 복귀
     void onLogoutRequested();
+    void onCategorySelected(int categoryId, const QString &categoryName);
+    void onBackToHome();
+
+    // 카테고리 데이터 캐싱 (menucategori 진입 시 재사용)
+    void onMainHomeReceived(QList<CategoryInfoQt> categories,
+                            QList<TopStoreInfoQt> topStores);
 
 private:
     Ui::MainWindow *ui;
-    NetworkManager *m_network;      // 통신 전담 (모든 Widget이 공유)
+    NetworkManager *m_network;
     LoginWidget    *m_loginWidget;
     HomeWidget     *m_homeWidget;
+    menucategori   *m_menuWidget;
+
+    // ── 홈에서 받은 카테고리 목록 캐싱 (menucategori에서 재사용) ──
+    QList<CategoryInfoQt> m_cachedCategories;
 };
