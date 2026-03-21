@@ -1,9 +1,10 @@
-#include "LoginWidget.h"   // 대소문자 정확히 일치
+#include "LoginWidget.h"
 #include "ui_loginwidget.h"
 #include "AccountDTO.h"
+#include "UserSession.h"
 #include <QMessageBox>
-#include <QLabel>
 
+// ── 탭 스타일 상수 ──
 static const QString TAB_ACTIVE =
     "color:#1565c0; border-bottom:2.5px solid #1565c0; background:transparent;"
     "font-size:16px; font-weight:bold; padding:10px 0px;"
@@ -14,6 +15,14 @@ static const QString TAB_INACTIVE =
     "font-size:16px; font-weight:bold; padding:10px 0px;"
     "border-top:none; border-left:none; border-right:none;";
 
+// ── 비밀번호 정규식: 최소 8자, 영문+숫자+특수문자 각 1개 이상 ──
+const QRegularExpression LoginWidget::PW_REGEX(
+    "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$"
+);
+
+// ============================================================
+// 생성자
+// ============================================================
 LoginWidget::LoginWidget(NetworkManager *network, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::LoginWidget)
@@ -21,7 +30,10 @@ LoginWidget::LoginWidget(NetworkManager *network, QWidget *parent)
 {
     ui->setupUi(this);
 
-    // 탭 전환
+    // 초기 탭: 로그인
+    ui->formStack->setCurrentIndex(0);
+
+    // ── 탭 전환 ──
     connect(ui->tabLogin, &QPushButton::clicked, this, [this]() {
         ui->formStack->setCurrentIndex(0);
         ui->tabLogin->setStyleSheet(TAB_ACTIVE);
@@ -33,37 +45,37 @@ LoginWidget::LoginWidget(NetworkManager *network, QWidget *parent)
         ui->tabLogin->setStyleSheet(TAB_INACTIVE);
     });
 
-    // 비밀번호 실시간 확인
+    // ── 비밀번호 실시간 검증 연결 ──
     connect(ui->signupPwEdit,        &QLineEdit::textChanged,
-            this, &LoginWidget::onPwConfirmChanged);
+            this, &LoginWidget::onPwChanged);
     connect(ui->signupPwConfirmEdit, &QLineEdit::textChanged,
             this, &LoginWidget::onPwConfirmChanged);
 
-    // 아이디 변경 시 플래그 초기화
+    // ── 아이디 변경 시 중복확인 플래그 초기화 ──
     connect(ui->signupIdEdit, &QLineEdit::textChanged, this, [this]() {
         m_idChecked = false;
         setMsgNeutral(ui->label_idMsg, "");
         updateSignupButtonState();
     });
 
-    // 전화번호 변경 시 플래그 초기화
+    // ── 전화번호 변경 시 중복확인 플래그 초기화 ──
     connect(ui->phoneEdit, &QLineEdit::textChanged, this, [this]() {
         m_phoneChecked = false;
         setMsgNeutral(ui->label_phoneMsg, "");
         updateSignupButtonState();
     });
 
-    // ── 초기 상태: 로그인 탭으로 설정 ──
-    ui->formStack->setCurrentIndex(0);
+    // ── 나머지 입력 필드 변경 시 버튼 상태 재검사 ──
+    connect(ui->nameEdit,    &QLineEdit::textChanged,
+            this, &LoginWidget::onSignupFieldChanged);
+    connect(ui->addressEdit, &QLineEdit::textChanged,
+            this, &LoginWidget::onSignupFieldChanged);
 
-    // 나머지 입력 필드 변경 시 버튼 상태 재검사
-    connect(ui->signupPwEdit,   &QLineEdit::textChanged, this, [this](){ updateSignupButtonState(); });
-    connect(ui->nameEdit,       &QLineEdit::textChanged, this, [this](){ updateSignupButtonState(); });
-    connect(ui->addressEdit,    &QLineEdit::textChanged, this, [this](){ updateSignupButtonState(); });
-
-    // 서버 응답 연결
-    connect(m_network, &NetworkManager::onAuthResponse,
-            this, &LoginWidget::onAuthResponse);
+    // ── 서버 응답 연결 (로그인/회원가입 분리) ──
+    connect(m_network, &NetworkManager::onLoginResponse,
+            this, &LoginWidget::onLoginResponse);
+    connect(m_network, &NetworkManager::onSignupResponse,
+            this, &LoginWidget::onSignupResponse);
     connect(m_network, &NetworkManager::onIdCheckResponse,
             this, &LoginWidget::onIdCheckResponse);
     connect(m_network, &NetworkManager::onPhoneCheckResponse,
@@ -72,26 +84,32 @@ LoginWidget::LoginWidget(NetworkManager *network, QWidget *parent)
 
 LoginWidget::~LoginWidget() { delete ui; }
 
-// ── 로그인 ──
+// ============================================================
+// 로그인 버튼
+// ============================================================
 void LoginWidget::on_loginButton_clicked()
 {
     if (ui->idEdit->text().isEmpty() || ui->pwEdit->text().isEmpty()) {
         QMessageBox::warning(this, "입력 오류", "아이디와 비밀번호를 입력해주세요.");
         return;
     }
+
     LoginReqDTO dto;
     dto.userId   = ui->idEdit->text().toStdString();
     dto.password = ui->pwEdit->text().toStdString();
     m_network->sendLogin(dto);
 }
 
-// ── 아이디 중복확인 ──
+// ============================================================
+// 아이디 중복확인 버튼 (REQ_AUTH_CHECK = 1040)
+// ============================================================
 void LoginWidget::on_btnCheckId_clicked()
 {
     if (ui->signupIdEdit->text().isEmpty()) {
         setMsgError(ui->label_idMsg, "아이디를 먼저 입력해주세요.");
         return;
     }
+
     AuthCheckReqDTO dto;
     dto.userId = ui->signupIdEdit->text().toStdString();
     m_network->sendIdCheck(dto);
@@ -100,13 +118,17 @@ void LoginWidget::on_btnCheckId_clicked()
     ui->btnCheckId->setEnabled(false);
 }
 
-// ── 전화번호 중복확인 ──
+// ============================================================
+// 전화번호 중복확인 버튼 (REQ_PHONE_CHECK = 1042)
+// role=0 (고객) 함께 전송
+// ============================================================
 void LoginWidget::on_btnCheckPhone_clicked()
 {
     if (ui->phoneEdit->text().isEmpty()) {
         setMsgError(ui->label_phoneMsg, "전화번호를 먼저 입력해주세요.");
         return;
     }
+
     PhoneCheckReqDTO dto;
     dto.phoneNumber = ui->phoneEdit->text().toStdString();
     dto.role        = 0; // 고객
@@ -116,14 +138,43 @@ void LoginWidget::on_btnCheckPhone_clicked()
     ui->btnCheckPhone->setEnabled(false);
 }
 
-// ── 비밀번호 실시간 확인 ──
+// ============================================================
+// 비밀번호 형식 실시간 검증
+// 조건: 최소 8자, 영문 + 숫자 + 특수문자 포함
+// ============================================================
+void LoginWidget::onPwChanged()
+{
+    QString pw = ui->signupPwEdit->text();
+
+    if (pw.isEmpty()) {
+        setMsgNeutral(ui->label_pwMsg, "");
+        m_pwValid = false;
+    } else if (PW_REGEX.match(pw).hasMatch()) {
+        setMsgSuccess(ui->label_pwMsg, "✅ 사용 가능한 비밀번호입니다.");
+        m_pwValid = true;
+    } else {
+        setMsgError(ui->label_pwMsg, "❌ 최소 8자, 영문+숫자+특수문자를 포함해야 합니다.");
+        m_pwValid = false;
+    }
+
+    // 비밀번호가 바뀌면 확인란도 다시 체크
+    onPwConfirmChanged();
+}
+
+// ============================================================
+// 비밀번호 확인 실시간 일치 여부
+// ============================================================
 void LoginWidget::onPwConfirmChanged()
 {
     QString pw        = ui->signupPwEdit->text();
     QString pwConfirm = ui->signupPwConfirmEdit->text();
 
     if (pwConfirm.isEmpty()) {
-        setMsgNeutral(ui->label_pwMsg, "");
+        if (m_pwValid)
+            setMsgSuccess(ui->label_pwMsg, "✅ 사용 가능한 비밀번호입니다.");
+        m_pwMatched = false;
+    } else if (!m_pwValid) {
+        setMsgError(ui->label_pwMsg, "❌ 최소 8자, 영문+숫자+특수문자를 포함해야 합니다.");
         m_pwMatched = false;
     } else if (pw == pwConfirm) {
         setMsgSuccess(ui->label_pwMsg, "✅ 비밀번호가 일치합니다.");
@@ -132,10 +183,21 @@ void LoginWidget::onPwConfirmChanged()
         setMsgError(ui->label_pwMsg, "❌ 비밀번호가 일치하지 않습니다.");
         m_pwMatched = false;
     }
+
     updateSignupButtonState();
 }
 
-// ── 회원가입 버튼 활성화 조건 ──
+// ============================================================
+// 입력 필드 변경 시 회원가입 버튼 상태 재검사
+// ============================================================
+void LoginWidget::onSignupFieldChanged()
+{
+    updateSignupButtonState();
+}
+
+// ============================================================
+// 회원가입 버튼 활성화 조건
+// ============================================================
 void LoginWidget::updateSignupButtonState()
 {
     bool allFilled = !ui->signupIdEdit->text().isEmpty()
@@ -145,13 +207,21 @@ void LoginWidget::updateSignupButtonState()
                   && !ui->phoneEdit->text().isEmpty()
                   && !ui->addressEdit->text().isEmpty();
 
-    ui->signupButton->setEnabled(allFilled && m_idChecked && m_phoneChecked && m_pwMatched);
+    bool canSignup = allFilled
+                  && m_idChecked
+                  && m_phoneChecked
+                  && m_pwValid
+                  && m_pwMatched;
+
+    ui->signupButton->setEnabled(canSignup);
 }
 
-// ── 회원가입 ──
+// ============================================================
+// 회원가입 요청 전송
+// ============================================================
 void LoginWidget::on_signupButton_clicked()
 {
-    if (!m_idChecked || !m_phoneChecked || !m_pwMatched) return;
+    if (!m_idChecked || !m_phoneChecked || !m_pwValid || !m_pwMatched) return;
 
     SignupReqDTO dto;
     dto.userId      = ui->signupIdEdit->text().toStdString();
@@ -159,26 +229,51 @@ void LoginWidget::on_signupButton_clicked()
     dto.userName    = ui->nameEdit->text().toStdString();
     dto.phoneNumber = ui->phoneEdit->text().toStdString();
     dto.address     = ui->addressEdit->text().toStdString();
-    dto.role        = 0;
+    dto.role        = 0; // 고객
+
     m_network->sendSignup(dto);
 }
 
-// ── 서버 응답 슬롯 ──
-void LoginWidget::onAuthResponse(int status, QString message, QString userName)
+// ============================================================
+// 로그인 응답 처리 (RES_LOGIN)
+// 서버가 userName, address 채워서 줌
+// ============================================================
+void LoginWidget::onLoginResponse(int status, QString message, QString userName, QString address)
 {
-    if (status == 200 && !userName.isEmpty()) {
-        // 로그인 성공 → 홈 화면으로 (주소는 로그인 시 서버에서 받아오는 게 이상적이나
-        // 현재는 회원가입 시 입력한 주소 사용)
-        emit loginSuccess(userName, "");
+    if (status == 200) {
+        UserSession::instance().set(userName, address);
+        emit loginSuccess();
     } else {
-        QString title = (status == 200) ? "성공" : "실패";
-        QMessageBox::information(this, title, message);
+        QMessageBox::warning(this, "로그인 실패", message);
     }
 }
 
+// ============================================================
+// 회원가입 응답 처리 (RES_SIGNUP)
+// 서버는 성공/실패만 알려줌 → 클라 입력값으로 UserSession 저장 후 바로 홈 전환
+// ============================================================
+void LoginWidget::onSignupResponse(int status, QString message)
+{
+    if (status == 200) {
+        // 서버 응답 대신 직접 입력했던 값으로 UserSession 저장
+        UserSession::instance().set(
+            ui->nameEdit->text(),
+            ui->addressEdit->text(),
+            ui->signupIdEdit->text()
+        );
+        // 로그인한 것과 동일하게 홈 화면으로 전환
+        emit loginSuccess();
+    } else {
+        QMessageBox::warning(this, "회원가입 실패", message);
+    }
+}
+
+// ── 아이디 중복확인 응답 (RES_AUTH_CHECK) ──
 void LoginWidget::onIdCheckResponse(int status, QString message, bool isAvailable)
 {
+    Q_UNUSED(status)
     ui->btnCheckId->setEnabled(true);
+
     if (isAvailable) {
         setMsgSuccess(ui->label_idMsg, "✅ 사용 가능한 아이디입니다.");
         m_idChecked = true;
@@ -189,9 +284,12 @@ void LoginWidget::onIdCheckResponse(int status, QString message, bool isAvailabl
     updateSignupButtonState();
 }
 
+// ── 전화번호 중복확인 응답 (RES_PHONE_CHECK) ──
 void LoginWidget::onPhoneCheckResponse(int status, QString message, bool isAvailable)
 {
+    Q_UNUSED(status)
     ui->btnCheckPhone->setEnabled(true);
+
     if (isAvailable) {
         setMsgSuccess(ui->label_phoneMsg, "✅ 사용 가능한 전화번호입니다.");
         m_phoneChecked = true;
@@ -202,7 +300,7 @@ void LoginWidget::onPhoneCheckResponse(int status, QString message, bool isAvail
     updateSignupButtonState();
 }
 
-// ── 메시지 헬퍼 ──
+// ── 메시지 라벨 스타일 헬퍼 ──
 void LoginWidget::setMsgSuccess(QLabel *label, const QString &msg) {
     label->setText(msg);
     label->setStyleSheet("font-size:12px; color:#1565c0; padding-left:4px;");

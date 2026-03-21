@@ -114,14 +114,23 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
     try {
         nlohmann::json j = nlohmann::json::parse(body.constData());
 
-        // ── 로그인 / 회원가입 응답 ──
-        if (cmdId == CmdID::RES_LOGIN || cmdId == CmdID::RES_SIGNUP) {
+        // ── 로그인 응답 ──
+        if (cmdId == CmdID::RES_LOGIN) {
             AuthResDTO dto = j.get<AuthResDTO>();
-            qDebug() << "[NetworkManager] 인증응답 status:" << dto.status
-                     << "userName:" << QString::fromStdString(dto.userName);
-            emit onAuthResponse(dto.status,
-                                QString::fromStdString(dto.message),
-                                QString::fromStdString(dto.userName));
+            qDebug() << "[NetworkManager] 로그인 응답 status:" << dto.status
+                     << "userName:" << QString::fromStdString(dto.userName)
+                     << "address:"  << QString::fromStdString(dto.address);
+            emit onLoginResponse(dto.status,
+                                 QString::fromStdString(dto.message),
+                                 QString::fromStdString(dto.userName),
+                                 QString::fromStdString(dto.address));
+
+        // ── 회원가입 응답 ── (서버는 성공/실패만 알려줌, userName/address는 클라 입력값 사용)
+        } else if (cmdId == CmdID::RES_SIGNUP) {
+            AuthResDTO dto = j.get<AuthResDTO>();
+            qDebug() << "[NetworkManager] 회원가입 응답 status:" << dto.status;
+            emit onSignupResponse(dto.status,
+                                  QString::fromStdString(dto.message));
 
         // ── 아이디 중복확인 응답 ──
         } else if (cmdId == CmdID::RES_AUTH_CHECK) {
@@ -156,15 +165,15 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             QList<TopStoreInfoQt> topStores;
             for (const auto &s : dto.topStores) {
                 TopStoreInfoQt item;
-                item.storeId          = s.storeId;
-                item.storeName        = QString::fromStdString(s.storeName);
-                item.category         = QString::fromStdString(s.category);
-                item.iconPath         = QString::fromStdString(s.iconPath);
+                item.storeId           = s.storeId;
+                item.storeName         = QString::fromStdString(s.storeName);
+                item.category          = QString::fromStdString(s.category);
+                item.iconPath          = QString::fromStdString(s.iconPath);
                 item.deliveryTimeRange = QString::fromStdString(s.deliveryTimeRange);
-                item.rating           = s.rating;
-                item.reviewCount      = s.reviewCount;
-                item.minOrderAmount   = s.minOrderAmount;
-                item.deliveryFee      = s.deliveryFee;
+                item.rating            = s.rating;
+                item.reviewCount       = s.reviewCount;
+                item.minOrderAmount    = s.minOrderAmount;
+                item.deliveryFee       = s.deliveryFee;
                 topStores.append(item);
             }
 

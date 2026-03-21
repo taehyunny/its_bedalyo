@@ -7,6 +7,7 @@
 #include "BaseDTO.h"     // ← StoreDTO.h 보다 먼저!
 #include "AccountDTO.h"
 #include "StoreDTO.h"    // ← BaseDTO.h 다음에
+
 // Qt용 변환 구조체 (HomeWidget에서 사용)
 struct CategoryInfoQt {
     int     id;
@@ -20,10 +21,10 @@ struct TopStoreInfoQt {
     QString category;
     QString iconPath;
     QString deliveryTimeRange;
-    double  rating       = 0.0;
-    int     reviewCount  = 0;
+    double  rating         = 0.0;
+    int     reviewCount    = 0;
     int     minOrderAmount = 0;
-    int     deliveryFee  = 0;
+    int     deliveryFee    = 0;
 };
 
 class NetworkManager : public QObject {
@@ -41,14 +42,17 @@ public:
 signals:
     void onConnected();
 
-    // 로그인/회원가입 응답
-    void onAuthResponse(int status, QString message, QString userName);
+    // ── 로그인 응답 (서버가 userName, address 채워서 줌) ──
+    void onLoginResponse(int status, QString message, QString userName, QString address);
+
+    // ── 회원가입 응답 (서버는 성공/실패만 알려줌) ──
+    void onSignupResponse(int status, QString message);
 
     // 아이디/전화번호 중복확인 응답
     void onIdCheckResponse(int status, QString message, bool isAvailable);
     void onPhoneCheckResponse(int status, QString message, bool isAvailable);
 
-    // 메인 화면 데이터 수신 (RES_CATEGORY = 2102)
+    // 메인 화면 데이터 수신 (RES_CATEGORY)
     // 서버 연결 시 자동으로 push됨
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
                             QList<TopStoreInfoQt> topStores);

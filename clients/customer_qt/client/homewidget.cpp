@@ -114,7 +114,7 @@ void HomeWidget::setUserName(const QString &userName) { m_userName = userName; }
 void HomeWidget::setAddress(const QString &address)
 {
     m_address = address;
-    ui->label_address->setText(address.isEmpty() ? "주소 없음" : address);
+    ui->label_address->setText(address.isEmpty() ? "주소뭐게" : address);
 }
 
 // ============================================================
@@ -156,12 +156,12 @@ QWidget* HomeWidget::makeCategoryItem(int id, const QString &name, const QString
     Q_UNUSED(iconPath)
 
     QWidget *item = new QWidget();
-    item->setFixedWidth(64);
+    item->setFixedSize(64, 80); // 너비 64, 높이 80px 고정 (이모지52 + 간격6 + 텍스트14 + 여백8)
     item->setStyleSheet("background: transparent;");
 
     QVBoxLayout *vl = new QVBoxLayout(item);
-    vl->setContentsMargins(0, 0, 0, 0);
-    vl->setSpacing(6);
+    vl->setContentsMargins(0, 4, 0, 4);
+    vl->setSpacing(4);
     vl->setAlignment(Qt::AlignHCenter);
 
     QPushButton *imgBtn = new QPushButton();
