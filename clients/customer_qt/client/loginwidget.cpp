@@ -238,10 +238,10 @@ void LoginWidget::on_signupButton_clicked()
 // 로그인 응답 처리 (RES_LOGIN)
 // 서버가 userName, address 채워서 줌
 // ============================================================
-void LoginWidget::onLoginResponse(int status, QString message, QString userName, QString address)
+void LoginWidget::onLoginResponse(int status, QString message, QString userName, QString address, QString phoneNumber)
 {
     if (status == 200) {
-        UserSession::instance().set(userName, address);
+        UserSession::instance().set(userName, address, ui->idEdit->text(), phoneNumber);
         emit loginSuccess();
     } else {
         QMessageBox::warning(this, "로그인 실패", message);
@@ -259,7 +259,8 @@ void LoginWidget::onSignupResponse(int status, QString message)
         UserSession::instance().set(
             ui->nameEdit->text(),
             ui->addressEdit->text(),
-            ui->signupIdEdit->text()
+            ui->signupIdEdit->text(),
+            ui->phoneEdit->text()
         );
         // 로그인한 것과 동일하게 홈 화면으로 전환
         emit loginSuccess();

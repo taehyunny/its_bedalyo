@@ -9,6 +9,10 @@ MainWindow::MainWindow(QWidget *parent)
     , m_loginWidget(new LoginWidget(m_network, this))
     , m_homeWidget(new HomeWidget(m_network, this))
     , m_menuWidget(new menucategori(m_network, this))
+    , m_searchWidget(new SearchWidget(m_network, this))
+    , m_searchResultWidget(new SearchResultWidget(m_network, this))
+    , m_orderHistoryWidget(new OrderHistoryWidget(m_network, this))
+    , m_myPageWidget(new MyPageWidget(m_network, this))
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -21,21 +25,69 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_loginWidget);
     ui->stackedWidget->addWidget(m_homeWidget);
     ui->stackedWidget->addWidget(m_menuWidget);
+    ui->stackedWidget->addWidget(m_searchWidget);
+    ui->stackedWidget->addWidget(m_searchResultWidget);
+    ui->stackedWidget->addWidget(m_orderHistoryWidget);
+    ui->stackedWidget->addWidget(m_myPageWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
 
-    // ── 시그널 연결 ──
+    // ── 로그인 ──
     connect(m_loginWidget, &LoginWidget::loginSuccess,
             this, &MainWindow::onLoginSuccess);
     connect(m_homeWidget, &HomeWidget::logoutRequested,
             this, &MainWindow::onLogoutRequested);
+
+    // ── 카테고리 화면 ──
     connect(m_homeWidget, &HomeWidget::categorySelected,
             this, &MainWindow::onCategorySelected);
     connect(m_menuWidget, &menucategori::backRequested,
             this, &MainWindow::onBackToHome);
 
+    // ── 검색 화면 ──
+    connect(m_homeWidget, &HomeWidget::searchRequested,
+            this, &MainWindow::onSearchRequested);
+    connect(m_searchWidget, &SearchWidget::backRequested,
+            this, &MainWindow::onBackToHome);
+    connect(m_searchWidget, &SearchWidget::searchRequested,
+            this, &MainWindow::onSearchExecuted);
+    connect(m_searchResultWidget, &SearchResultWidget::backRequested,
+            this, &MainWindow::onSearchRequested);
+
+    // ── 검색 내비바 ──
+    connect(m_searchWidget, &SearchWidget::orderListRequested,
+            this, &MainWindow::onOrderListRequested);
+    connect(m_searchWidget, &SearchWidget::mypageRequested,
+            this, &MainWindow::onMypageRequested);
+    connect(m_searchWidget, &SearchWidget::favoriteRequested,
+            this, []() { /* TODO: 즐겨찾기 */ });
+
+    // ── 주문내역 화면 ──
+    connect(m_homeWidget, &HomeWidget::orderListRequested,
+            this, &MainWindow::onOrderListRequested);
+    connect(m_orderHistoryWidget, &OrderHistoryWidget::homeRequested,
+            this, &MainWindow::onBackToHome);
+    connect(m_orderHistoryWidget, &OrderHistoryWidget::searchRequested,
+            this, &MainWindow::onSearchRequested);
+    connect(m_orderHistoryWidget, &OrderHistoryWidget::favoriteRequested,
+            this, []() { /* TODO: 즐겨찾기 */ });
+    connect(m_orderHistoryWidget, &OrderHistoryWidget::mypageRequested,
+            this, &MainWindow::onMypageRequested);
+
+    // ── 마이페이지 화면 ──
+    connect(m_homeWidget, &HomeWidget::mypageRequested,
+            this, &MainWindow::onMypageRequested);
+    connect(m_myPageWidget, &MyPageWidget::homeRequested,
+            this, &MainWindow::onBackToHome);
+    connect(m_myPageWidget, &MyPageWidget::searchRequested,
+            this, &MainWindow::onSearchRequested);
+    connect(m_myPageWidget, &MyPageWidget::orderListRequested,
+            this, &MainWindow::onOrderListRequested);
+    connect(m_myPageWidget, &MyPageWidget::favoriteRequested,
+            this, []() { /* TODO: 즐겨찾기 */ });
+    connect(m_myPageWidget, &MyPageWidget::logoutRequested,
+            this, &MainWindow::onLogoutRequested);
+
     // ── 카테고리 데이터 캐싱 ──
-    // HomeWidget이 받은 데이터를 MainWindow도 같이 받아서 캐싱
-    // menucategori는 여기서 직접 연결 안 하고 setCategory() 호출 시 전달
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &MainWindow::onMainHomeReceived);
 
@@ -45,9 +97,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() { delete ui; }
 
-// ============================================================
-// 로그인/회원가입 성공 → 홈 화면으로 전환
-// ============================================================
 void MainWindow::onLoginSuccess()
 {
     m_homeWidget->setUserName(UserSession::instance().userName);
@@ -55,38 +104,48 @@ void MainWindow::onLoginSuccess()
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
 }
 
-// ============================================================
-// 로그아웃 → 세션 초기화 후 로그인 화면으로 복귀
-// ============================================================
 void MainWindow::onLogoutRequested()
 {
     UserSession::instance().clear();
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
 }
 
-// ============================================================
-// 카테고리 데이터 캐싱
-// HomeWidget이 RES_CATEGORY 받을 때 MainWindow도 같이 받아서 저장
-// ============================================================
 void MainWindow::onMainHomeReceived(QList<CategoryInfoQt> categories,
                                      QList<TopStoreInfoQt> /*topStores*/)
 {
     m_cachedCategories = categories;
 }
 
-// ============================================================
-// 홈에서 카테고리 클릭 → menucategori 화면으로 전환
-// 캐싱된 카테고리 목록을 넘겨주고 가게 목록은 서버에 새로 요청
-// ============================================================
 void MainWindow::onCategorySelected(int categoryId, const QString &categoryName)
 {
     m_menuWidget->setCategory(categoryId, categoryName, m_cachedCategories);
     ui->stackedWidget->setCurrentWidget(m_menuWidget);
 }
 
-// ============================================================
-// menucategori 뒤로가기 → 홈으로 복귀
-// ============================================================
+void MainWindow::onSearchRequested()
+{
+    m_searchWidget->loadSearchData();
+    ui->stackedWidget->setCurrentWidget(m_searchWidget);
+}
+
+void MainWindow::onSearchExecuted(const QString &keyword)
+{
+    m_searchResultWidget->search(keyword);
+    ui->stackedWidget->setCurrentWidget(m_searchResultWidget);
+}
+
+void MainWindow::onOrderListRequested()
+{
+    m_orderHistoryWidget->loadData();
+    ui->stackedWidget->setCurrentWidget(m_orderHistoryWidget);
+}
+
+void MainWindow::onMypageRequested()
+{
+    m_myPageWidget->loadData();
+    ui->stackedWidget->setCurrentWidget(m_myPageWidget);
+}
+
 void MainWindow::onBackToHome()
 {
     ui->stackedWidget->setCurrentWidget(m_homeWidget);

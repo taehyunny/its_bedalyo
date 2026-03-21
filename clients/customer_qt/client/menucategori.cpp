@@ -103,7 +103,6 @@ menucategori::menucategori(NetworkManager *network, QWidget *parent)
     // ── 버튼 연결 ──
     connect(ui->btnBack,    &QPushButton::clicked, this, &menucategori::backRequested);
     connect(ui->btnSort,    &QPushButton::clicked, this, &menucategori::onSortButtonClicked);
-    connect(ui->navHomeBtn, &QPushButton::clicked, this, &menucategori::backRequested);
 
     // ── 가게 목록 수신 ──
     connect(m_network, &NetworkManager::onStoreListReceived,

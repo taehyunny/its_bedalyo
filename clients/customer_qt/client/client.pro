@@ -10,7 +10,11 @@ SOURCES += \
     mainwindow.cpp \
     NetworkManager.cpp \
     homewidget.cpp \
-    menucategori.cpp
+    menucategori.cpp \
+    SearchWidget.cpp \
+    SearchResultWidget.cpp \
+    OrderHistoryWidget.cpp \
+    MyPageWidget.cpp
 
 HEADERS += \
     loginwidget.h \
@@ -18,13 +22,21 @@ HEADERS += \
     NetworkManager.h \
     homewidget.h \
     menucategori.h \
+    SearchWidget.h \
+    SearchResultWidget.h \
+    OrderHistoryWidget.h \
+    MyPageWidget.h \
     UserSession.h
 
 FORMS += \
     loginwidget.ui \
     mainwindow.ui \
     homewidget.ui \
-    menucategori.ui
+    menucategori.ui \
+    searchwidget.ui \
+    searchresultwidget.ui \
+    orderhistorywidget.ui \
+    mypagewidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

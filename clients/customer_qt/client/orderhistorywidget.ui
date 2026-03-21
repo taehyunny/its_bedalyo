@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>OrderHistoryWidget</class>
+ <widget class="QWidget" name="OrderHistoryWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>390</width>
+    <height>844</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>주문내역</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget#OrderHistoryWidget { background-color: #ffffff; }</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="tabBarLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="tabHistory">
+       <property name="styleSheet">
+        <string notr="true">
+          QPushButton {
+           background:transparent; border:none;
+           border-bottom:2.5px solid transparent;
+           font-size:15px; font-weight:bold; color:#aaaaaa;
+           padding:0; margin:0;
+          }
+         </string>
+       </property>
+       <property name="text">
+        <string>과거 주문 내역</string>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="tabPending">
+       <property name="styleSheet">
+        <string notr="true">
+          QPushButton {
+           background:transparent; border:none;
+           border-bottom:2.5px solid #111111;
+           font-size:15px; font-weight:bold; color:#111111;
+           padding:0; margin:0;
+          }
+         </string>
+       </property>
+       <property name="text">
+        <string>준비중</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QStackedWidget" name="tabStack">
+     <property name="styleSheet">
+      <string notr="true">QStackedWidget { background:#ffffff; }</string>
+     </property>
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <widget class="QWidget" name="pageHistory">
+      <property name="styleSheet">
+       <string notr="true">QWidget#pageHistory { background:#ffffff; }</string>
+      </property>
+      <layout class="QVBoxLayout" name="historyLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QScrollArea" name="historyScrollArea">
+         <property name="styleSheet">
+          <string notr="true">QScrollArea { background:#ffffff; border:none; }</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Shape::NoFrame</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="historyScrollContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>390</width>
+            <height>732</height>
+           </rect>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background:#ffffff;</string>
+          </property>
+          <layout class="QVBoxLayout" name="historyListLayout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <layout class="QVBoxLayout" name="historyEmptyLayout">
+             <property name="spacing">
+              <number>20</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>120</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="historyEmptyIcon">
+               <property name="styleSheet">
+                <string notr="true">font-size:72px; color:#dddddd;</string>
+               </property>
+               <property name="text">
+                <string>📋</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="historyEmptyLabel">
+               <property name="styleSheet">
+                <string notr="true">font-size:15px; color:#aaaaaa;</string>
+               </property>
+               <property name="text">
+                <string>주문 내역이 없습니다.</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="historyEmptySpacer">
+               <property name="orientation">
+                <enum>Qt::Orientation::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pagePending">
+      <property name="styleSheet">
+       <string notr="true">QWidget#pagePending { background:#ffffff; }</string>
+      </property>
+      <layout class="QVBoxLayout" name="pendingLayout">
+       <property name="spacing">
+        <number>24</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>120</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="pendingIcon">
+         <property name="styleSheet">
+          <string notr="true">font-size:72px; color:#dddddd;</string>
+         </property>
+         <property name="text">
+          <string>📋</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="pendingBtnLayout">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>60</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>60</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="btnGoHistory">
+           <property name="styleSheet">
+            <string notr="true">
+             QPushButton {
+              background:#ffffff; border:1.5px solid #cccccc;
+              border-radius:8px; font-size:15px; color:#333333;
+              font-weight:bold;
+             }
+             QPushButton:hover { border-color:#1565c0; color:#1565c0; }
+             QPushButton:pressed { background:#f0f4ff; }
+            </string>
+           </property>
+           <property name="text">
+            <string>과거 주문 내역 보기</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="pendingSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="navLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="navHome">
+       <property name="styleSheet">
+        <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+       </property>
+       <property name="text">
+        <string>🏠
+홈</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="navSearch">
+       <property name="styleSheet">
+        <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+       </property>
+       <property name="text">
+        <string>🔍
+검색</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="navFavorite">
+       <property name="styleSheet">
+        <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+       </property>
+       <property name="text">
+        <string>🤍
+즐겨찾기</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="navOrder">
+       <property name="styleSheet">
+        <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#1565c0;font-weight:bold;padding:6px 0;}</string>
+       </property>
+       <property name="text">
+        <string>📋
+주문내역</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="navMy">
+       <property name="styleSheet">
+        <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+       </property>
+       <property name="text">
+        <string>👤
+마이이츠</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
