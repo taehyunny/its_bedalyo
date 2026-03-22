@@ -10,6 +10,11 @@
 #define IDD_SIGNUP_DLG                  131
 #define IDD_SIGNUP                      132
 #define IDD_TAB_STORE                   134
+#define IDD_TAB_ORDER                   136
+#define IDD_ORDER_DETAIL                138
+#define IDD_TAB_REVIEW                  140
+#define IDD_TAB_SALES                   142
+#define IDD_TAB_SETTLEMENT              144
 #define IDC_EDIT1                       1000
 #define IDC_EDIT2                       1001
 #define IDC_BUTTON1                     1002
@@ -67,14 +72,45 @@
 #define IDC_STATIC_APPROVAL             1155
 #define IDC_BTN_SAVE                    1156
 #define IDC_BTN_CANCEL                  1157
+#define IDC_LIST_ORDER                  1158
+#define IDC_BTN_ORDER_ACCEPT            1159
+#define IDC_BTN_ORDER_REJECT            1160
+#define IDC_COMBO_REJECT_REASON         1162
+#define IDC_EDIT_REJECT_REASON          1163
+#define IDC_LIST_ORDER_ITEMS            1164
+#define IDC_STATIC_ORDER_ID             1165
+#define IDC_STATIC_ORDER_ADDRESS        1166
+#define IDC_STATIC_ORDER_PRICE          1167
+#define IDC_STATIC_ORDER_STATUS         1168
+#define IDC_BTN_DETAIL_CLOSE            1169
+#define IDC_BTN_PRINT_RECEIPT           1170
+#define IDC_STATIC_ORDER_TIME           1171
+#define IDC_LIST_REVIEW                 1172
+#define IDC_EDIT_REPLY                  1173
+#define IDC_BTN_REPLY_SUBMIT            1174
+#define IDC_DATETIMEPICKER_START        1175
+#define IDC_DATETIMEPICKER_END          1176
+#define IDC_BTN_SALES_SEARCH            1177
+#define IDC_STATIC_TOTAL_SALES          1178
+#define IDC_STATIC_TOTAL_ORDER          1179
+#define IDC_STATIC_COMMISSION           1180
+#define IDC_STATIC_NET_SALES            1181
+#define IDC_LIST_TOP_MENU               1182
+#define IDC_DATETIMEPICKER_SET_START    1183
+#define IDC_DATETIMEPICKER_SET_END      1184
+#define IDC_BTN_SETTLEMENT_SEARCH       1185
+#define IDC_STATIC_PENDING_AMOUNT       1186
+#define IDC_STATIC_COMPLETED_AMOUNT     1187
+#define IDC_LIST1                       1188
+#define IDC_LIST_SETTLEMENT             1188
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        136
+#define _APS_NEXT_RESOURCE_VALUE        146
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1158
+#define _APS_NEXT_CONTROL_VALUE         1189
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
