@@ -40,10 +40,11 @@ private slots:
     // ── 실시간 검증 ──
     void onPwChanged();                 // 비밀번호 형식 검증
     void onPwConfirmChanged();          // 비밀번호 일치 확인
+    void onPhoneChanged();              // 전화번호 형식 검증
     void onSignupFieldChanged();        // 회원가입 버튼 활성화 조건 재검사
 
     // ── 서버 응답 슬롯 ──
-    void onLoginResponse(int status, QString message, QString userName, QString address);
+    void onLoginResponse(int status, QString message, QString userName, QString address, QString phoneNumber);
     void onSignupResponse(int status, QString message); // ← 회원가입 전용 (분리)
     void onIdCheckResponse(int status, QString message, bool isAvailable);
     void onPhoneCheckResponse(int status, QString message, bool isAvailable);
@@ -55,11 +56,15 @@ private:
     // ── 회원가입 조건 플래그 ──
     bool m_idChecked    = false;  // 아이디 중복확인 완료
     bool m_phoneChecked = false;  // 전화번호 중복확인 완료
+    bool m_phoneValid   = false;  // 전화번호 형식 충족
     bool m_pwValid      = false;  // 비밀번호 형식 충족
     bool m_pwMatched    = false;  // 비밀번호 일치
 
     // ── 비밀번호 조건 정규식 (최소 8자, 영문+숫자+특수문자) ──
     static const QRegularExpression PW_REGEX;
+
+    // ── 전화번호 조건 정규식 (숫자만 10~11자리) ──
+    static const QRegularExpression PHONE_REGEX;
 
     // ── 회원가입 버튼 활성화 조건 검사 ──
     void updateSignupButtonState();

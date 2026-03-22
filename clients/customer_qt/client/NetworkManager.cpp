@@ -66,6 +66,35 @@ void NetworkManager::sendStoreListRequest(int categoryId)
     sendPacket(CmdID::REQ_STORE_LIST, j);
 }
 
+// ── 매장 검색 요청 (REQ_SEARCH_STORE = 2116) ──
+void NetworkManager::sendSearchStore(const QString &keyword)
+{
+    qDebug() << "[NetworkManager] 매장 검색 요청 keyword:" << keyword;
+    ReqSearchStoreDTO dto;
+    dto.keyword = keyword.toStdString();
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_SEARCH_STORE, j);
+}
+
+// ============================================================
+// TopStoreInfo(C++ DTO) → TopStoreInfoQt(Qt 타입) 변환 헬퍼
+// 동일한 변환 코드가 여러 곳에 반복되는 것을 방지
+// ============================================================
+static TopStoreInfoQt toQt(const TopStoreInfo &s)
+{
+    TopStoreInfoQt item;
+    item.storeId           = s.storeId;
+    item.storeName         = QString::fromStdString(s.storeName);
+    item.category          = QString::fromStdString(s.category);
+    item.iconPath          = QString::fromStdString(s.iconPath);
+    item.deliveryTimeRange = QString::fromStdString(s.deliveryTimeRange);
+    item.rating            = s.rating;
+    item.reviewCount       = s.reviewCount;
+    item.minOrderAmount    = s.minOrderAmount;
+    item.deliveryFee       = s.deliveryFee;
+    return item;
+}
+
 void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
 {
     if (m_socket->state() != QAbstractSocket::ConnectedState) {
@@ -134,7 +163,8 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             emit onLoginResponse(dto.status,
                                  QString::fromStdString(dto.message),
                                  QString::fromStdString(dto.userName),
-                                 QString::fromStdString(dto.address));
+                                 QString::fromStdString(dto.address),
+                                 QString::fromStdString(dto.phoneNumber));
 
         // ── 회원가입 응답 ──
         } else if (cmdId == CmdID::RES_SIGNUP) {
@@ -173,19 +203,8 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             }
 
             QList<TopStoreInfoQt> topStores;
-            for (const auto &s : dto.topStores) {
-                TopStoreInfoQt item;
-                item.storeId           = s.storeId;
-                item.storeName         = QString::fromStdString(s.storeName);
-                item.category          = QString::fromStdString(s.category);
-                item.iconPath          = QString::fromStdString(s.iconPath);
-                item.deliveryTimeRange = QString::fromStdString(s.deliveryTimeRange);
-                item.rating            = s.rating;
-                item.reviewCount       = s.reviewCount;
-                item.minOrderAmount    = s.minOrderAmount;
-                item.deliveryFee       = s.deliveryFee;
-                topStores.append(item);
-            }
+            for (const auto &s : dto.topStores)
+                topStores.append(toQt(s));
 
             emit onMainHomeReceived(categories, topStores);
 
@@ -198,21 +217,21 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                      << "count:" << dto.stores.size();
 
             QList<TopStoreInfoQt> stores;
-            for (const auto &s : dto.stores) {
-                TopStoreInfoQt item;
-                item.storeId           = s.storeId;
-                item.storeName         = QString::fromStdString(s.storeName);
-                item.category          = QString::fromStdString(s.category);
-                item.iconPath          = QString::fromStdString(s.iconPath);
-                item.deliveryTimeRange = QString::fromStdString(s.deliveryTimeRange);
-                item.rating            = s.rating;
-                item.reviewCount       = s.reviewCount;
-                item.minOrderAmount    = s.minOrderAmount;
-                item.deliveryFee       = s.deliveryFee;
-                stores.append(item);
-            }
+            for (const auto &s : dto.stores)
+                stores.append(toQt(s));
 
             emit onStoreListReceived(stores);
+
+        // ── 매장 검색 결과 수신 (RES_SEARCH_STORE = 2117) ──
+        } else if (cmdId == CmdID::RES_SEARCH_STORE) {
+            ResSearchStoreDTO dto = j.get<ResSearchStoreDTO>();
+            qDebug() << "[NetworkManager] 매장 검색 결과 status:" << dto.status
+                     << "count:" << dto.storeList.size();
+
+            QList<TopStoreInfoQt> stores;
+            for (const auto &s : dto.storeList)
+                stores.append(toQt(s));
+            emit onSearchResultReceived(stores);
 
         } else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"

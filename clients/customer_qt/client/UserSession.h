@@ -20,16 +20,19 @@ public:
     }
 
     // ── 유저 정보 ──
-    QString userName;  // 이름 (홈 화면 등에서 표시)
-    QString address;   // 주소 (홈 화면 헤더에 표시)
-    QString userId;    // 아이디 (필요 시 사용)
+    QString userName;    // 이름 (홈 화면 등에서 표시)
+    QString address;     // 주소 (홈 화면 헤더에 표시)
+    QString userId;      // 아이디 (필요 시 사용)
+    QString phoneNumber; // 전화번호 (마이페이지에서 표시)
 
     // 로그인/회원가입 성공 시 한 번에 저장
-    void set(const QString &name, const QString &addr, const QString &id = "")
+    void set(const QString &name, const QString &addr,
+             const QString &id = "", const QString &phone = "")
     {
-        userName = name;
-        address  = addr;
-        userId   = id;
+        userName    = name;
+        address     = addr;
+        userId      = id;
+        phoneNumber = phone;
     }
 
     // 로그아웃 시 전체 초기화
@@ -38,6 +41,7 @@ public:
         userName.clear();
         address.clear();
         userId.clear();
+        phoneNumber.clear();
     }
 
     // 로그인 상태 여부

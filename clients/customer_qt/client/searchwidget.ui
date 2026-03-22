@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SearchWidget</class>
+ <widget class="QWidget" name="SearchWidget">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>390</width><height>844</height></rect>
+  </property>
+  <property name="windowTitle"><string>검색</string></property>
+  <property name="styleSheet">
+   <string notr="true">QWidget#SearchWidget { background-color: #ffffff; }</string>
+  </property>
+
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing"><number>0</number></property>
+   <property name="leftMargin"><number>0</number></property>
+   <property name="topMargin"><number>0</number></property>
+   <property name="rightMargin"><number>0</number></property>
+   <property name="bottomMargin"><number>0</number></property>
+
+   <item>
+    <widget class="QWidget" name="headerWidget">
+     <property name="minimumHeight"><number>56</number></property>
+     <property name="maximumHeight"><number>56</number></property>
+     <property name="styleSheet">
+      <string notr="true">QWidget#headerWidget { background:#ffffff; border-bottom:1px solid #eeeeee; }</string>
+     </property>
+     <layout class="QHBoxLayout" name="headerLayout">
+      <property name="leftMargin"><number>12</number></property>
+      <property name="topMargin"><number>8</number></property>
+      <property name="rightMargin"><number>12</number></property>
+      <property name="bottomMargin"><number>8</number></property>
+      <property name="spacing"><number>8</number></property>
+      <item>
+       <widget class="QPushButton" name="btnBack">
+        <property name="minimumSize"><size><width>36</width><height>36</height></size></property>
+        <property name="maximumSize"><size><width>36</width><height>36</height></size></property>
+        <property name="text"><string>←</string></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:20px;color:#222222;}QPushButton:hover{color:#1565c0;}</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="searchEdit">
+        <property name="placeholderText"><string>검색어를 입력해주세요</string></property>
+        <property name="styleSheet">
+         <string notr="true">QLineEdit{background:#f5f5f5;border:1.5px solid transparent;border-radius:20px;padding:8px 16px;font-size:14px;color:#222222;}QLineEdit:focus{border:1.5px solid #1565c0;background:#ffffff;}</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnSearch">
+        <property name="minimumSize"><size><width>36</width><height>36</height></size></property>
+        <property name="maximumSize"><size><width>36</width><height>36</height></size></property>
+        <property name="text"><string>🔍</string></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:18px;}QPushButton:hover{background:#f5f5f5;border-radius:18px;}</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+     <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+     <property name="verticalScrollBarPolicy"><enum>Qt::ScrollBarAsNeeded</enum></property>
+     <property name="widgetResizable"><bool>true</bool></property>
+     <property name="styleSheet"><string notr="true">QScrollArea{background:#ffffff;border:none;}</string></property>
+     <widget class="QWidget" name="scrollContent">
+      <property name="styleSheet"><string notr="true">QWidget#scrollContent{background:#ffffff;}</string></property>
+      <layout class="QVBoxLayout" name="scrollLayout">
+       <property name="spacing"><number>0</number></property>
+       <property name="leftMargin"><number>0</number></property>
+       <property name="topMargin"><number>0</number></property>
+       <property name="rightMargin"><number>0</number></property>
+       <property name="bottomMargin"><number>0</number></property>
+
+       <item>
+        <widget class="QWidget" name="popularSection">
+         <property name="styleSheet"><string notr="true">QWidget#popularSection{background:#ffffff;}</string></property>
+         <layout class="QVBoxLayout" name="popularLayout">
+          <property name="leftMargin"><number>16</number></property>
+          <property name="topMargin"><number>20</number></property>
+          <property name="rightMargin"><number>16</number></property>
+          <property name="bottomMargin"><number>16</number></property>
+          <property name="spacing"><number>0</number></property>
+          <item>
+           <widget class="QLabel" name="labelPopularTitle">
+            <property name="text"><string>인기 검색어</string></property>
+            <property name="styleSheet"><string notr="true">font-size:16px;font-weight:bold;color:#111111;padding-bottom:14px;</string></property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="popularContainer">
+            <property name="styleSheet"><string notr="true">QWidget#popularContainer{background:transparent;}</string></property>
+            <layout class="QGridLayout" name="popularGridLayout">
+             <property name="leftMargin"><number>0</number></property>
+             <property name="topMargin"><number>0</number></property>
+             <property name="rightMargin"><number>0</number></property>
+             <property name="bottomMargin"><number>0</number></property>
+             <property name="horizontalSpacing"><number>0</number></property>
+             <property name="verticalSpacing"><number>0</number></property>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+
+       <item>
+        <widget class="QFrame" name="divider">
+         <property name="minimumHeight"><number>8</number></property>
+         <property name="maximumHeight"><number>8</number></property>
+         <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+         <property name="styleSheet"><string notr="true">background:#f5f5f5;</string></property>
+        </widget>
+       </item>
+
+       <item>
+        <widget class="QWidget" name="recentSection">
+         <property name="styleSheet"><string notr="true">QWidget#recentSection{background:#ffffff;}</string></property>
+         <layout class="QVBoxLayout" name="recentLayout">
+          <property name="leftMargin"><number>16</number></property>
+          <property name="topMargin"><number>20</number></property>
+          <property name="rightMargin"><number>16</number></property>
+          <property name="bottomMargin"><number>8</number></property>
+          <property name="spacing"><number>0</number></property>
+          <item>
+           <layout class="QHBoxLayout" name="recentHeaderLayout">
+            <property name="leftMargin"><number>0</number></property>
+            <property name="topMargin"><number>0</number></property>
+            <property name="rightMargin"><number>0</number></property>
+            <property name="bottomMargin"><number>0</number></property>
+            <property name="spacing"><number>0</number></property>
+            <item>
+             <widget class="QLabel" name="labelRecentTitle">
+              <property name="text"><string>최근 검색어</string></property>
+              <property name="styleSheet"><string notr="true">font-size:16px;font-weight:bold;color:#111111;</string></property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="recentHeaderSpacer">
+              <property name="orientation"><enum>Qt::Horizontal</enum></property>
+              <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnDeleteAll">
+              <property name="text"><string>전체삭제</string></property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{background:transparent;border:none;font-size:13px;color:#888888;padding:0;}QPushButton:hover{color:#e53935;}</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QWidget" name="recentContainer">
+            <property name="styleSheet"><string notr="true">QWidget#recentContainer{background:transparent;}</string></property>
+            <layout class="QVBoxLayout" name="recentListLayout">
+             <property name="leftMargin"><number>0</number></property>
+             <property name="topMargin"><number>12</number></property>
+             <property name="rightMargin"><number>0</number></property>
+             <property name="bottomMargin"><number>0</number></property>
+             <property name="spacing"><number>0</number></property>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+
+       <item>
+        <spacer name="bottomSpacer">
+         <property name="orientation"><enum>Qt::Vertical</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+        </spacer>
+       </item>
+
+      </layout>
+     </widget>
+    </widget>
+   </item>
+
+   <item>
+    <widget class="QWidget" name="navBar">
+     <property name="minimumHeight"><number>60</number></property>
+     <property name="maximumHeight"><number>60</number></property>
+     <property name="styleSheet">
+      <string notr="true">QWidget#navBar{background:#ffffff;border-top:1px solid #eeeeee;}</string>
+     </property>
+     <layout class="QHBoxLayout" name="navLayout">
+      <property name="leftMargin"><number>0</number></property>
+      <property name="topMargin"><number>0</number></property>
+      <property name="rightMargin"><number>0</number></property>
+      <property name="bottomMargin"><number>0</number></property>
+      <property name="spacing"><number>0</number></property>
+      <item>
+       <widget class="QPushButton" name="navHome">
+        <property name="text"><string>🏠
+홈</string></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navSearch">
+        <property name="text"><string>🔍
+검색</string></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#1565c0;font-weight:bold;padding:6px 0;}</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navFavorite">
+        <property name="text"><string>🤍
+즐겨찾기</string></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navOrder">
+        <property name="text"><string>📋
+주문내역</string></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navMy">
+        <property name="text"><string>👤
+마이이츠</string></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

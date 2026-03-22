@@ -149,3 +149,17 @@ struct BizNumCheckResDTO
     std::string message;
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(BizNumCheckResDTO, status, isAvailable, message)
 };
+
+struct ReqSearchStoreDTO {
+    std::string keyword; // 유저가 입력 중인 검색어 (예: "떡")
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqSearchStoreDTO, keyword)
+};
+
+// [RES_SEARCH_STORE: 2117] 서버 -> 클라이언트 (매장 검색 결과 응답)
+struct ResSearchStoreDTO {
+    int status; // 200: 성공, 404: 검색 결과 없음
+    std::vector<TopStoreInfo> storeList; // 🚀 아까 우리가 완벽하게 파싱했던 그 구조체 재활용!
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ResSearchStoreDTO, status, storeList)
+};

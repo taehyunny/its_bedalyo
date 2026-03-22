@@ -44,11 +44,14 @@ public:
     // ── 카테고리별 가게 목록 요청 (REQ_STORE_LIST = 2000) ──
     void sendStoreListRequest(int categoryId);
 
+    // ── 매장 검색 요청 (REQ_SEARCH_STORE = 2116) ──
+    void sendSearchStore(const QString &keyword);
+
 signals:
     void onConnected();
 
     // ── 로그인 응답 (서버가 userName, address 채워서 줌) ──
-    void onLoginResponse(int status, QString message, QString userName, QString address);
+    void onLoginResponse(int status, QString message, QString userName, QString address, QString phoneNumber);
 
     // ── 회원가입 응답 (서버는 성공/실패만 알려줌) ──
     void onSignupResponse(int status, QString message);
@@ -63,6 +66,9 @@ signals:
 
     // ── 카테고리별 가게 목록 수신 (RES_STORE_LIST = 2001, menucategori에서 사용) ──
     void onStoreListReceived(QList<TopStoreInfoQt> stores);
+
+    // ── 매장 검색 결과 수신 (RES_SEARCH_STORE = 2117) ──
+    void onSearchResultReceived(QList<TopStoreInfoQt> stores);
 
 private slots:
     void handleConnected();
