@@ -1,4 +1,6 @@
 #include "HomeWidget.h"
+#include "storeutils.h"
+#include "cartsession.h"
 #include "ui_homewidget.h"
 #include <QFrame>
 #include <QLocale>
@@ -106,6 +108,13 @@ HomeWidget::HomeWidget(NetworkManager *network, QWidget *parent)
     // 서버 메인 홈 데이터 수신
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &HomeWidget::onMainHomeReceived);
+
+    // ── 카트 바 버튼 연결 ──
+    connect(ui->btnCartView, &QPushButton::clicked,
+            this, &HomeWidget::on_btnCartView_clicked);
+
+    // ── 초기 카트 바 상태 설정 (앱 시작 시 장바구니 비어있으므로 숨김) ──
+    updateCartBar();
 }
 
 HomeWidget::~HomeWidget() { delete ui; }
@@ -172,7 +181,7 @@ QWidget* HomeWidget::makeCategoryItem(int id, const QString &name, const QString
         "QPushButton:pressed { background:#c5d8ff; }"
     );
     // TODO: iconPath로 실제 이미지 로드
-    imgBtn->setText(categoryEmoji(name));
+    imgBtn->setText(StoreUtils::categoryEmoji(name));
 
     QLabel *nameLabel = new QLabel(name.isEmpty() ? "-" : name);
     nameLabel->setAlignment(Qt::AlignCenter);
@@ -209,9 +218,9 @@ QWidget* HomeWidget::makeStoreCard(const TopStoreInfoQt &store)
     imgLabel->setAlignment(Qt::AlignCenter);
     imgLabel->setStyleSheet(
         QString("background-color:%1; font-size:48px;")
-            .arg(placeholderColorForCard(store.category))
+            .arg(StoreUtils::placeholderColor(store.category))
     );
-    imgLabel->setText(categoryEmoji(store.category));
+    imgLabel->setText(StoreUtils::categoryEmoji(store.category));
     vl->addWidget(imgLabel);
 
     QWidget *info = new QWidget();
@@ -233,12 +242,12 @@ QWidget* HomeWidget::makeStoreCard(const TopStoreInfoQt &store)
         QString("⭐ %1 (%2)  ·  %3  ·  %4")
             .arg(store.rating, 0, 'f', 1)
             .arg(store.reviewCount)
-            .arg(formatDeliveryFee(store.deliveryFee))
+            .arg(StoreUtils::formatDeliveryFee(store.deliveryFee))
             .arg(store.deliveryTimeRange)
     );
     metaLabel->setStyleSheet("font-size:13px; color:#555555;");
 
-    QLabel *minOrderLabel = new QLabel("최소주문 " + formatWon(store.minOrderAmount));
+    QLabel *minOrderLabel = new QLabel("최소주문 " + StoreUtils::formatWon(store.minOrderAmount));
     minOrderLabel->setStyleSheet("font-size:12px; color:#888888;");
 
     il->addWidget(catLabel);
@@ -268,24 +277,47 @@ bool HomeWidget::eventFilter(QObject *obj, QEvent *event)
     return QWidget::eventFilter(obj, event);
 }
 
-QString HomeWidget::formatWon(int amount)
-    { return QLocale(QLocale::Korean).toString(amount) + "원"; }
-QString HomeWidget::formatDeliveryFee(int fee)
-    { return (fee == 0) ? "무료배달" : "배달비 " + QLocale(QLocale::Korean).toString(fee) + "원"; }
-QString HomeWidget::placeholderColorForCard(const QString &cat)
+
+
+
+
+
+// ============================================================
+// 카트 바 UI 갱신
+// CartSession 상태를 읽어 카트 바를 show/hide하고 수량·금액 업데이트
+// 메뉴를 담거나 제거할 때마다 외부에서 이 함수를 호출해야 함
+// ============================================================
+void HomeWidget::updateCartBar()
 {
-    if (cat == "중식") return "#fde8d8"; if (cat == "일식") return "#d8eafd";
-    if (cat == "치킨") return "#fdf5d8"; if (cat == "한식") return "#d8fde4";
-    if (cat == "양식") return "#fdd8d8"; if (cat == "카페") return "#ede8fd";
-    if (cat == "베이커리") return "#fdf0d8"; if (cat == "분식") return "#fde8f0";
-    return "#f0f0f0";
+    CartSession &cart = CartSession::instance();
+
+    if (cart.isEmpty()) {
+        // 장바구니가 비어있으면 카트 바 완전히 숨김
+        ui->cartBar->hide();
+        return;
+    }
+
+    // 장바구니에 메뉴가 있으면 카트 바 표시
+    ui->cartBar->show();
+
+    // 수량 뱃지 + "카트 보기" 텍스트 업데이트
+    // 예: "  2   카트 보기"
+    ui->btnCartView->setText(
+        QString("  %1   카트 보기").arg(cart.totalCount())
+    );
+
+    // 우측 금액 업데이트
+    // 예: "24,000원"
+    ui->labelCartPrice->setText(cart.totalPriceStr());
 }
-QString HomeWidget::categoryEmoji(const QString &cat)
+
+// ============================================================
+// 카트 바 클릭 → 장바구니 화면으로 전환
+// TODO: 장바구니 화면(CartWidget) 구현 후 MainWindow에서 연결
+// ============================================================
+void HomeWidget::on_btnCartView_clicked()
 {
-    if (cat == "한식") return "🍚"; if (cat == "중식") return "🥟";
-    if (cat == "일식") return "🍱"; if (cat == "치킨") return "🍗";
-    if (cat == "양식") return "🍕"; if (cat == "분식") return "🍢";
-    if (cat == "돈까스") return "🥩"; return "🍽";
+    emit cartRequested();
 }
 
 void HomeWidget::on_btnSearch_clicked()    { emit searchRequested(); }

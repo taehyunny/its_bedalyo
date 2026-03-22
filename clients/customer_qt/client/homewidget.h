@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include <QEvent>
 #include "NetworkManager.h"
+#include "cartsession.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class HomeWidget; }
@@ -46,6 +47,7 @@ signals:
     void orderListRequested();
     void mypageRequested();
     void logoutRequested();
+    void cartRequested();          // 카트 바 클릭 → 장바구니 화면으로
 
 private slots:
     void on_btnSearch_clicked();
@@ -59,6 +61,9 @@ private slots:
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
                             QList<TopStoreInfoQt> topStores);
 
+    // 카트 바 클릭 슬롯
+    void on_btnCartView_clicked();
+
 private:
     Ui::HomeWidget *ui;
     NetworkManager *m_network;
@@ -71,8 +76,8 @@ private:
     // 가게 카드 위젯 생성
     QWidget* makeStoreCard(const TopStoreInfoQt &store);
 
-    static QString formatWon(int amount);
-    static QString formatDeliveryFee(int fee);
-    static QString placeholderColorForCard(const QString &category);
-    static QString categoryEmoji(const QString &category);
+    // ── 카트 바 UI 갱신 ──
+    // CartSession 상태를 읽어 카트 바를 show/hide하고 수량·금액 업데이트
+    void updateCartBar();
+
 };

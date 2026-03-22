@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
-    setFixedSize(390, 844);
+    setFixedSize(AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT);
 
     centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
     centralWidget()->layout()->setSpacing(0);
@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_searchWidget, &SearchWidget::mypageRequested,
             this, &MainWindow::onMypageRequested);
     connect(m_searchWidget, &SearchWidget::favoriteRequested,
-            this, []() { /* TODO: 즐겨찾기 */ });
+            this, &MainWindow::onFavoriteRequested);
 
     // ── 주문내역 화면 ──
     connect(m_homeWidget, &HomeWidget::orderListRequested,
@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_orderHistoryWidget, &OrderHistoryWidget::searchRequested,
             this, &MainWindow::onSearchRequested);
     connect(m_orderHistoryWidget, &OrderHistoryWidget::favoriteRequested,
-            this, []() { /* TODO: 즐겨찾기 */ });
+            this, &MainWindow::onFavoriteRequested);
     connect(m_orderHistoryWidget, &OrderHistoryWidget::mypageRequested,
             this, &MainWindow::onMypageRequested);
 
@@ -83,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_myPageWidget, &MyPageWidget::orderListRequested,
             this, &MainWindow::onOrderListRequested);
     connect(m_myPageWidget, &MyPageWidget::favoriteRequested,
-            this, []() { /* TODO: 즐겨찾기 */ });
+            this, &MainWindow::onFavoriteRequested);
     connect(m_myPageWidget, &MyPageWidget::logoutRequested,
             this, &MainWindow::onLogoutRequested);
 
@@ -92,7 +92,7 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::onMainHomeReceived);
 
     // ── 서버 연결 ──
-    m_network->connectToServer("10.10.10.123", 8010);
+    m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -149,6 +149,16 @@ void MainWindow::onMypageRequested()
 void MainWindow::onBackToHome()
 {
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
+}
+
+// ============================================================
+// 즐겨찾기 화면 전환
+// TODO: 즐겨찾기 Widget 구현 후 화면 전환 추가
+// ============================================================
+void MainWindow::onFavoriteRequested()
+{
+    // TODO: m_favoriteWidget->loadData();
+    // ui->stackedWidget->setCurrentWidget(m_favoriteWidget);
 }
 
 void MainWindow::showLogin() { ui->stackedWidget->setCurrentWidget(m_loginWidget); }

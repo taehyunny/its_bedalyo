@@ -1,4 +1,4 @@
-#include "OrderHistoryWidget.h"
+#include "orderhistorywidget.h"
 #include "ui_orderhistorywidget.h"
 #include "UserSession.h"
 #include <QDebug>

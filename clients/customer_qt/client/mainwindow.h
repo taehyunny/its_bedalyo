@@ -1,6 +1,7 @@
 #pragma once
 #include <QMainWindow>
 #include "NetworkManager.h"
+#include "config.h"
 #include "LoginWidget.h"
 #include "HomeWidget.h"
 #include "menucategori.h"
@@ -41,6 +42,7 @@ private slots:
     void onSearchExecuted(const QString &keyword);
     void onOrderListRequested();
     void onMypageRequested();
+    void onFavoriteRequested();
 
     // 카테고리 데이터 캐싱 (menucategori 진입 시 재사용)
     void onMainHomeReceived(QList<CategoryInfoQt> categories,

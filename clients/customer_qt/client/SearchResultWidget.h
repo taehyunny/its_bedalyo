@@ -47,8 +47,4 @@ private:
     // 카드 위젯 — 클릭은 내부 람다로 처리 (eventFilter 불필요)
     QWidget* makeStoreCard(const TopStoreInfoQt &store);
 
-    static QString formatWon(int amount);
-    static QString formatDeliveryFee(int fee);
-    static QString placeholderColor(const QString &category);
-    static QString categoryEmoji(const QString &category);
 };

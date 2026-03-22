@@ -20,6 +20,9 @@ const QRegularExpression LoginWidget::PW_REGEX(
     "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$"
 );
 
+// ── 전화번호 정규식: 숫자만 10~11자리 ──
+const QRegularExpression LoginWidget::PHONE_REGEX("^[0-9]{10,11}$");
+
 // ============================================================
 // 생성자
 // ============================================================
@@ -58,12 +61,9 @@ LoginWidget::LoginWidget(NetworkManager *network, QWidget *parent)
         updateSignupButtonState();
     });
 
-    // ── 전화번호 변경 시 중복확인 플래그 초기화 ──
-    connect(ui->phoneEdit, &QLineEdit::textChanged, this, [this]() {
-        m_phoneChecked = false;
-        setMsgNeutral(ui->label_phoneMsg, "");
-        updateSignupButtonState();
-    });
+    // ── 전화번호 실시간 형식 검증 + 중복확인 플래그 초기화 ──
+    connect(ui->phoneEdit, &QLineEdit::textChanged,
+            this, &LoginWidget::onPhoneChanged);
 
     // ── 나머지 입력 필드 변경 시 버튼 상태 재검사 ──
     connect(ui->nameEdit,    &QLineEdit::textChanged,
@@ -128,6 +128,10 @@ void LoginWidget::on_btnCheckPhone_clicked()
         setMsgError(ui->label_phoneMsg, "전화번호를 먼저 입력해주세요.");
         return;
     }
+    if (!m_phoneValid) {
+        setMsgError(ui->label_phoneMsg, "❌ 숫자만 입력해주세요. (예: 01012345678)");
+        return;
+    }
 
     PhoneCheckReqDTO dto;
     dto.phoneNumber = ui->phoneEdit->text().toStdString();
@@ -136,6 +140,33 @@ void LoginWidget::on_btnCheckPhone_clicked()
 
     setMsgNeutral(ui->label_phoneMsg, "확인 중...");
     ui->btnCheckPhone->setEnabled(false);
+}
+
+// ============================================================
+// 전화번호 형식 실시간 검증
+// 조건: 숫자만 10~11자리 (하이픈 없이 입력)
+// ============================================================
+void LoginWidget::onPhoneChanged()
+{
+    QString phone = ui->phoneEdit->text();
+
+    // 전화번호 변경 시 중복확인 플래그 초기화
+    m_phoneChecked = false;
+
+    if (phone.isEmpty()) {
+        setMsgNeutral(ui->label_phoneMsg, "");
+        m_phoneValid = false;
+    } else if (PHONE_REGEX.match(phone).hasMatch()) {
+        setMsgSuccess(ui->label_phoneMsg, "✅ 올바른 전화번호 형식입니다.");
+        m_phoneValid = true;
+    } else {
+        setMsgError(ui->label_phoneMsg, "❌ 숫자만 입력해주세요. (예: 01012345678)");
+        m_phoneValid = false;
+    }
+
+    // 중복확인 버튼 — 형식이 맞을 때만 활성화
+    ui->btnCheckPhone->setEnabled(m_phoneValid);
+    updateSignupButtonState();
 }
 
 // ============================================================
@@ -210,6 +241,7 @@ void LoginWidget::updateSignupButtonState()
     bool canSignup = allFilled
                   && m_idChecked
                   && m_phoneChecked
+                  && m_phoneValid
                   && m_pwValid
                   && m_pwMatched;
 

@@ -45,8 +45,4 @@ private:
     void clearLayout(QLayout *layout);
     QWidget* makeStoreCard(const TopStoreInfoQt &store);
 
-    static QString formatWon(int amount);
-    static QString formatDeliveryFee(int fee);
-    static QString placeholderColorForCard(const QString &category);
-    static QString categoryEmoji(const QString &category);
 };

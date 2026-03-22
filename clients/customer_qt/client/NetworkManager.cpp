@@ -76,6 +76,25 @@ void NetworkManager::sendSearchStore(const QString &keyword)
     sendPacket(CmdID::REQ_SEARCH_STORE, j);
 }
 
+// ============================================================
+// TopStoreInfo(C++ DTO) → TopStoreInfoQt(Qt 타입) 변환 헬퍼
+// 동일한 변환 코드가 여러 곳에 반복되는 것을 방지
+// ============================================================
+static TopStoreInfoQt toQt(const TopStoreInfo &s)
+{
+    TopStoreInfoQt item;
+    item.storeId           = s.storeId;
+    item.storeName         = QString::fromStdString(s.storeName);
+    item.category          = QString::fromStdString(s.category);
+    item.iconPath          = QString::fromStdString(s.iconPath);
+    item.deliveryTimeRange = QString::fromStdString(s.deliveryTimeRange);
+    item.rating            = s.rating;
+    item.reviewCount       = s.reviewCount;
+    item.minOrderAmount    = s.minOrderAmount;
+    item.deliveryFee       = s.deliveryFee;
+    return item;
+}
+
 void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
 {
     if (m_socket->state() != QAbstractSocket::ConnectedState) {
@@ -184,19 +203,8 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             }
 
             QList<TopStoreInfoQt> topStores;
-            for (const auto &s : dto.topStores) {
-                TopStoreInfoQt item;
-                item.storeId           = s.storeId;
-                item.storeName         = QString::fromStdString(s.storeName);
-                item.category          = QString::fromStdString(s.category);
-                item.iconPath          = QString::fromStdString(s.iconPath);
-                item.deliveryTimeRange = QString::fromStdString(s.deliveryTimeRange);
-                item.rating            = s.rating;
-                item.reviewCount       = s.reviewCount;
-                item.minOrderAmount    = s.minOrderAmount;
-                item.deliveryFee       = s.deliveryFee;
-                topStores.append(item);
-            }
+            for (const auto &s : dto.topStores)
+                topStores.append(toQt(s));
 
             emit onMainHomeReceived(categories, topStores);
 
@@ -209,19 +217,8 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                      << "count:" << dto.stores.size();
 
             QList<TopStoreInfoQt> stores;
-            for (const auto &s : dto.stores) {
-                TopStoreInfoQt item;
-                item.storeId           = s.storeId;
-                item.storeName         = QString::fromStdString(s.storeName);
-                item.category          = QString::fromStdString(s.category);
-                item.iconPath          = QString::fromStdString(s.iconPath);
-                item.deliveryTimeRange = QString::fromStdString(s.deliveryTimeRange);
-                item.rating            = s.rating;
-                item.reviewCount       = s.reviewCount;
-                item.minOrderAmount    = s.minOrderAmount;
-                item.deliveryFee       = s.deliveryFee;
-                stores.append(item);
-            }
+            for (const auto &s : dto.stores)
+                stores.append(toQt(s));
 
             emit onStoreListReceived(stores);
 
@@ -232,19 +229,8 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                      << "count:" << dto.storeList.size();
 
             QList<TopStoreInfoQt> stores;
-            for (const auto &s : dto.storeList) {
-                TopStoreInfoQt item;
-                item.storeId           = s.storeId;
-                item.storeName         = QString::fromStdString(s.storeName);
-                item.category          = QString::fromStdString(s.category);
-                item.iconPath          = QString::fromStdString(s.iconPath);
-                item.deliveryTimeRange = QString::fromStdString(s.deliveryTimeRange);
-                item.rating            = s.rating;
-                item.reviewCount       = s.reviewCount;
-                item.minOrderAmount    = s.minOrderAmount;
-                item.deliveryFee       = s.deliveryFee;
-                stores.append(item);
-            }
+            for (const auto &s : dto.storeList)
+                stores.append(toQt(s));
             emit onSearchResultReceived(stores);
 
         } else {

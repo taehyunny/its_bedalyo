@@ -1,4 +1,5 @@
 #include "menucategori.h"
+#include "storeutils.h"
 #include "ui_menucategori.h"
 #include <QFrame>
 #include <QLocale>
@@ -343,9 +344,9 @@ QWidget* menucategori::makeStoreCard(const TopStoreInfoQt &store)
     imgLabel->setAlignment(Qt::AlignCenter);
     imgLabel->setStyleSheet(
         QString("background-color:%1; font-size:48px;")
-            .arg(placeholderColorForCard(store.category))
+            .arg(StoreUtils::placeholderColor(store.category))
     );
-    imgLabel->setText(categoryEmoji(store.category));
+    imgLabel->setText(StoreUtils::categoryEmoji(store.category));
     vl->addWidget(imgLabel);
 
     QWidget *info = new QWidget();
@@ -361,12 +362,12 @@ QWidget* menucategori::makeStoreCard(const TopStoreInfoQt &store)
         QString("⭐ %1 (%2)  ·  %3  ·  %4")
             .arg(store.rating, 0, 'f', 1)
             .arg(store.reviewCount)
-            .arg(formatDeliveryFee(store.deliveryFee))
+            .arg(StoreUtils::formatDeliveryFee(store.deliveryFee))
             .arg(store.deliveryTimeRange)
     );
     metaLabel->setStyleSheet("font-size:13px; color:#555555;");
 
-    QLabel *minOrderLabel = new QLabel("최소주문 " + formatWon(store.minOrderAmount));
+    QLabel *minOrderLabel = new QLabel("최소주문 " + StoreUtils::formatWon(store.minOrderAmount));
     minOrderLabel->setStyleSheet("font-size:12px; color:#888888;");
 
     il->addWidget(nameLabel);
@@ -386,6 +387,7 @@ QWidget* menucategori::makeStoreCard(const TopStoreInfoQt &store)
 // ============================================================
 // 헬퍼
 // ============================================================
+
 void menucategori::clearLayout(QLayout *layout)
 {
     if (!layout) return;
@@ -394,27 +396,4 @@ void menucategori::clearLayout(QLayout *layout)
         if (item->widget()) delete item->widget();
         delete item;
     }
-}
-
-QString menucategori::formatWon(int amount)
-    { return QLocale(QLocale::Korean).toString(amount) + "원"; }
-QString menucategori::formatDeliveryFee(int fee)
-    { return (fee == 0) ? "무료배달" : "배달비 " + QLocale(QLocale::Korean).toString(fee) + "원"; }
-QString menucategori::placeholderColorForCard(const QString &cat)
-{
-    if (cat == "한식") return "#d8fde4"; if (cat == "중식") return "#fde8d8";
-    if (cat == "돈까스") return "#fff3d8"; if (cat == "양식") return "#fdd8d8";
-    if (cat == "치킨") return "#fdf5d8"; if (cat == "피자") return "#fde8d8";
-    if (cat == "햄버거") return "#fdf0e0"; if (cat == "족발/보쌈") return "#e8fde8";
-    if (cat == "도시락") return "#fdf0d8"; if (cat == "초밥/회") return "#d8eafd";
-    return "#f0f0f0";
-}
-QString menucategori::categoryEmoji(const QString &cat)
-{
-    if (cat == "한식") return "🍚"; if (cat == "중식") return "🥟";
-    if (cat == "돈까스") return "🥩"; if (cat == "양식") return "🍝";
-    if (cat == "치킨") return "🍗"; if (cat == "피자") return "🍕";
-    if (cat == "햄버거") return "🍔"; if (cat == "족발/보쌈") return "🍖";
-    if (cat == "도시락") return "🍱"; if (cat == "초밥/회") return "🍣";
-    return "🍽";
 }

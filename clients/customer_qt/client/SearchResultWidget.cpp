@@ -1,4 +1,5 @@
-#include "SearchResultWidget.h"
+#include "searchresultwidget.h"
+#include "storeutils.h"
 #include "ui_searchresultwidget.h"
 #include "UserSession.h"
 #include <QFrame>
@@ -115,9 +116,9 @@ QWidget* SearchResultWidget::makeStoreCard(const TopStoreInfoQt &store)
     imgLabel->setAlignment(Qt::AlignCenter);
     imgLabel->setStyleSheet(
         QString("background-color:%1; font-size:48px; border-radius:8px 8px 0 0;")
-            .arg(placeholderColor(store.category))
+            .arg(StoreUtils::placeholderColor(store.category))
     );
-    imgLabel->setText(categoryEmoji(store.category));
+    imgLabel->setText(StoreUtils::categoryEmoji(store.category));
     vl->addWidget(imgLabel);
 
     // 정보 영역
@@ -144,13 +145,13 @@ QWidget* SearchResultWidget::makeStoreCard(const TopStoreInfoQt &store)
         QString("⭐ %1 (%2)  ·  %3  ·  %4")
             .arg(store.rating, 0, 'f', 1)
             .arg(store.reviewCount)
-            .arg(formatDeliveryFee(store.deliveryFee))
+            .arg(StoreUtils::formatDeliveryFee(store.deliveryFee))
             .arg(store.deliveryTimeRange)
     );
     metaLabel->setStyleSheet("font-size:13px; color:#555555;");
 
     // 최소주문
-    QLabel *minLabel = new QLabel("최소주문 " + formatWon(store.minOrderAmount));
+    QLabel *minLabel = new QLabel("최소주문 " + StoreUtils::formatWon(store.minOrderAmount));
     minLabel->setStyleSheet("font-size:12px; color:#888888;");
 
     il->addWidget(catLabel);
@@ -162,7 +163,6 @@ QWidget* SearchResultWidget::makeStoreCard(const TopStoreInfoQt &store)
     // ── 카드 전체를 덮는 클릭 버튼 (투명 오버레이) ──
     // eventFilter 없이 람다로 클릭 처리
     QPushButton *clickOverlay = new QPushButton(card);
-    clickOverlay->setGeometry(0, 0, 390, 260); // 카드 크기에 맞게
     clickOverlay->setStyleSheet(
         "QPushButton { background:transparent; border:none; }"
         "QPushButton:hover { background:rgba(0,0,0,0.03); }"
@@ -200,38 +200,10 @@ void SearchResultWidget::on_btnBack_clicked() { emit backRequested(); }
 // ============================================================
 // 헬퍼
 // ============================================================
-QString SearchResultWidget::formatWon(int amount)
-    { return QLocale(QLocale::Korean).toString(amount) + "원"; }
 
-QString SearchResultWidget::formatDeliveryFee(int fee)
-    { return (fee == 0) ? "무료배달" : "배달비 " + QLocale(QLocale::Korean).toString(fee) + "원"; }
 
-QString SearchResultWidget::placeholderColor(const QString &cat)
-{
-    if (cat == "한식")     return "#d8fde4";
-    if (cat == "중식")     return "#fde8d8";
-    if (cat == "일식")     return "#d8eafd";
-    if (cat == "치킨")     return "#fdf5d8";
-    if (cat == "양식")     return "#fdd8d8";
-    if (cat == "분식")     return "#fde8f0";
-    if (cat == "카페")     return "#ede8fd";
-    if (cat == "베이커리") return "#fdf0d8";
-    if (cat == "돈까스")   return "#fff3d8";
-    if (cat == "햄버거")   return "#fdf0e0";
-    return "#f0f0f0";
-}
 
-QString SearchResultWidget::categoryEmoji(const QString &cat)
-{
-    if (cat == "한식")     return "🍚";
-    if (cat == "중식")     return "🥟";
-    if (cat == "일식")     return "🍱";
-    if (cat == "치킨")     return "🍗";
-    if (cat == "양식")     return "🍕";
-    if (cat == "분식")     return "🍢";
-    if (cat == "카페")     return "☕";
-    if (cat == "베이커리") return "🥐";
-    if (cat == "돈까스")   return "🥩";
-    if (cat == "햄버거")   return "🍔";
-    return "🍽";
-}
+
+
+
+

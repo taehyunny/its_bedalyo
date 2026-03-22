@@ -11,10 +11,10 @@ SOURCES += \
     NetworkManager.cpp \
     homewidget.cpp \
     menucategori.cpp \
-    SearchWidget.cpp \
-    SearchResultWidget.cpp \
-    OrderHistoryWidget.cpp \
-    MyPageWidget.cpp
+    searchwidget.cpp \
+    searchresultwidget.cpp \
+    orderhistorywidget.cpp \
+    mypagewidget.cpp
 
 HEADERS += \
     loginwidget.h \
@@ -22,11 +22,14 @@ HEADERS += \
     NetworkManager.h \
     homewidget.h \
     menucategori.h \
-    SearchWidget.h \
-    SearchResultWidget.h \
-    OrderHistoryWidget.h \
-    MyPageWidget.h \
-    UserSession.h
+    searchwidget.h \
+    searchresultwidget.h \
+    orderhistorywidget.h \
+    mypagewidget.h \
+    UserSession.h \
+    storeutils.h \
+    config.h \
+    cartsession.h
 
 FORMS += \
     loginwidget.ui \

@@ -1,4 +1,4 @@
-#include "MyPageWidget.h"
+#include "mypagewidget.h"
 #include "ui_mypagewidget.h"
 #include "UserSession.h"
 #include <QMessageBox>

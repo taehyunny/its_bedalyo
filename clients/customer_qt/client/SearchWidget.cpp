@@ -1,4 +1,4 @@
-#include "SearchWidget.h"
+#include "searchwidget.h"
 #include "ui_searchwidget.h"
 #include "UserSession.h"
 #include <QMessageBox>
