@@ -18,15 +18,12 @@ SearchWidget::SearchWidget(NetworkManager *network, QWidget *parent)
 {
     ui->setupUi(this);
 
-    // ── Enter 키로도 검색 실행 ──
     connect(ui->searchEdit, &QLineEdit::returnPressed,
             this, &SearchWidget::onSearchEditReturnPressed);
 
-    // ── 서버 응답 연결 ──
     connect(m_network, &NetworkManager::onSearchWidgetReceived,
             this, &SearchWidget::onSearchWidgetReceived);
 
-    // ── 초기 상태: 최근 검색어 섹션 숨김 ──
     ui->recentSection->hide();
     ui->divider->hide();
 }
@@ -35,8 +32,7 @@ SearchWidget::~SearchWidget() { delete ui; }
 
 // ============================================================
 // 화면 진입 시 서버에 검색 위젯 데이터 요청
-// REQ_RESEACH_WIDGET(2108) + userId 전송
-// 인기 검색어 옆 시간은 서버에서 받지 않고 진입 시점의 로컬 시간 표시
+// 인기 검색어 옆 시간은 진입 시점의 로컬 시간 표시
 // ============================================================
 void SearchWidget::loadSearchData()
 {
@@ -44,7 +40,6 @@ void SearchWidget::loadSearchData()
              << UserSession::instance().userId;
 
     // ── 인기 검색어 옆 업데이트 시간 표시 (오전/오후 HH:MM 형식) ──
-    // 예: "오후 11:07 업데이트"
     QDateTime now = QDateTime::currentDateTime();
     QString ampm = (now.time().hour() < 12) ? "오전" : "오후";
     int hour12 = now.time().hour() % 12;
@@ -72,8 +67,9 @@ void SearchWidget::onSearchWidgetReceived(QList<PopularKeywordQt> popular,
     QList<RecentSearchItem> recentItems;
     for (const RecentSearchQt &r : recent) {
         RecentSearchItem item;
-        item.historyId = r.historyId;
-        item.keyword   = r.keyword;
+        item.historyId  = r.historyId;
+        item.keyword    = r.keyword;
+        item.searchDate = r.searchDate; // ← 날짜 추가
         recentItems.append(item);
     }
     buildRecentList(recentItems);
@@ -96,7 +92,6 @@ void SearchWidget::buildPopularList(const QList<PopularKeywordQt> &keywords)
         hl->setContentsMargins(0, 0, 0, 0);
         hl->setSpacing(8);
 
-        // 순위 번호 (1~3위: 파란색, 4~5위: 검정)
         QLabel *rankLabel = new QLabel(QString::number(keywords[i].rank));
         rankLabel->setFixedWidth(20);
         rankLabel->setAlignment(Qt::AlignCenter);
@@ -106,7 +101,6 @@ void SearchWidget::buildPopularList(const QList<PopularKeywordQt> &keywords)
                 .arg(rankColor)
         );
 
-        // 검색어 버튼
         QPushButton *kwBtn = new QPushButton(keywords[i].keyword);
         kwBtn->setStyleSheet(
             "QPushButton {"
@@ -118,7 +112,6 @@ void SearchWidget::buildPopularList(const QList<PopularKeywordQt> &keywords)
             "QPushButton:pressed { color:#0d47a1; }"
         );
         kwBtn->setCursor(Qt::PointingHandCursor);
-
         connect(kwBtn, &QPushButton::clicked, this, [this, keyword = keywords[i].keyword]() {
             executeSearch(keyword);
         });
@@ -155,9 +148,7 @@ void SearchWidget::buildRecentList(const QList<RecentSearchItem> &items)
 
 // ============================================================
 // 최근 검색어 단건 위젯 생성
-// [ 🕐 검색어   X ]
-// TODO: 서버에서 searchDate 내려주면 날짜 표시 추가 예정
-//       RecentSearchItem에 QString searchDate 필드 추가 후 dateLabel 활성화
+// [ 🕐 검색어   03.21   X ]
 // ============================================================
 QWidget* SearchWidget::makeRecentItemWidget(const RecentSearchItem &item)
 {
@@ -192,10 +183,10 @@ QWidget* SearchWidget::makeRecentItemWidget(const RecentSearchItem &item)
         executeSearch(keyword);
     });
 
-    // TODO: 서버에서 searchDate 내려주면 아래 dateLabel 활성화
-    // QLabel *dateLabel = new QLabel(item.searchDate);
-    // dateLabel->setStyleSheet("font-size:12px; color:#aaaaaa; background:transparent;");
-    // dateLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    // 날짜 라벨 (서버에서 받은 searchDate 표시)
+    QLabel *dateLabel = new QLabel(item.searchDate);
+    dateLabel->setStyleSheet("font-size:12px; color:#aaaaaa; background:transparent;");
+    dateLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
     // X 삭제 버튼
     QPushButton *delBtn = new QPushButton("✕");
@@ -215,7 +206,7 @@ QWidget* SearchWidget::makeRecentItemWidget(const RecentSearchItem &item)
 
     hl->addWidget(iconLabel);
     hl->addWidget(kwBtn, 1);
-    // TODO: hl->addWidget(dateLabel); // searchDate 확정 후 활성화
+    hl->addWidget(dateLabel);
     hl->addWidget(delBtn);
 
     // 하단 구분선
@@ -251,7 +242,6 @@ void SearchWidget::executeSearch(const QString &keyword)
 
     qDebug() << "[SearchWidget] 검색 실행:" << keyword;
 
-    // REQ_RESEARCH_ADD(2112) 전송 — 서버 최근 검색어 저장
     m_network->sendSearchAdd(UserSession::instance().userId, keyword);
 
     emit searchRequested(keyword);
@@ -259,7 +249,6 @@ void SearchWidget::executeSearch(const QString &keyword)
 
 // ============================================================
 // 최근 검색어 단건 삭제
-// UI 즉시 제거 (낙관적 업데이트) → REQ_RESEARCH_DELETE(2110) 전송
 // ============================================================
 void SearchWidget::deleteRecentItem(int historyId, const QString &keyword)
 {
@@ -288,7 +277,6 @@ void SearchWidget::deleteRecentItem(int historyId, const QString &keyword)
 
 // ============================================================
 // 전체 삭제
-// UI 즉시 제거 (낙관적 업데이트) → REQ_RESEARCH_DEL_ALL(2114) 전송
 // ============================================================
 void SearchWidget::on_btnDeleteAll_clicked()
 {

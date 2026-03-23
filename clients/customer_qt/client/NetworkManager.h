@@ -37,6 +37,7 @@ struct PopularKeywordQt {
 struct RecentSearchQt {
     int     historyId;
     QString keyword;
+    QString searchDate;
 };
 
 class NetworkManager : public QObject {
