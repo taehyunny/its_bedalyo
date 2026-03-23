@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "UserSession.h"
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -14,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_orderHistoryWidget(new OrderHistoryWidget(m_network, this))
     , m_myPageWidget(new MyPageWidget(m_network, this))
     , m_storeDetailWidget(new StoreDetailWidget(m_network, this))
+    , m_policyWidget(new PolicyWidget(this))
+    , m_settingsWidget(new SettingsWidget(m_network, this))
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -30,14 +33,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_searchResultWidget);
     ui->stackedWidget->addWidget(m_orderHistoryWidget);
     ui->stackedWidget->addWidget(m_myPageWidget);
-    ui->stackedWidget->setCurrentWidget(m_loginWidget);
     ui->stackedWidget->addWidget(m_storeDetailWidget);
+    ui->stackedWidget->addWidget(m_policyWidget);
+    ui->stackedWidget->addWidget(m_settingsWidget);
+    ui->stackedWidget->setCurrentWidget(m_loginWidget);
 
     // ── 로그인 ──
     connect(m_loginWidget, &LoginWidget::loginSuccess,
             this, &MainWindow::onLoginSuccess);
-    connect(m_homeWidget, &HomeWidget::logoutRequested,
-            this, &MainWindow::onLogoutRequested);
 
     // ── 카테고리 화면 ──
     connect(m_homeWidget, &HomeWidget::categorySelected,
@@ -86,16 +89,30 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::onOrderListRequested);
     connect(m_myPageWidget, &MyPageWidget::favoriteRequested,
             this, &MainWindow::onFavoriteRequested);
-    connect(m_myPageWidget, &MyPageWidget::logoutRequested,
+    connect(m_myPageWidget, &MyPageWidget::policyRequested,
+            this, &MainWindow::onPolicyRequested);
+    connect(m_myPageWidget, &MyPageWidget::settingsRequested,
+            this, &MainWindow::onSettingsRequested);
+
+    // ── 약관 및 정책 화면 ──
+    connect(m_policyWidget, &PolicyWidget::backRequested,
+            this, &MainWindow::onMypageRequested);
+
+    // ── 설정 화면 ──
+    connect(m_settingsWidget, &SettingsWidget::backRequested,
+            this, &MainWindow::onMypageRequested);
+    connect(m_settingsWidget, &SettingsWidget::logoutRequested,
             this, &MainWindow::onLogoutRequested);
+
+    // ── 가게 상세 화면 ──
+    connect(m_homeWidget, &HomeWidget::storeSelected,
+            this, &MainWindow::onStoreSelected);
+    // connect(m_menuWidget, &menucategori::storeSelected,
+    //         this, &MainWindow::onStoreSelected);
 
     // ── 카테고리 데이터 캐싱 ──
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &MainWindow::onMainHomeReceived);
-
-//     connect(m_menuWidget, &menucategori::storeSelected, 
-//             this, &MainWindow::onStoreSelected);
-    connect(m_homeWidget, &HomeWidget::storeSelected, this, &MainWindow::onStoreSelected);
 
     // ── 서버 연결 ──
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
@@ -152,34 +169,33 @@ void MainWindow::onMypageRequested()
     ui->stackedWidget->setCurrentWidget(m_myPageWidget);
 }
 
+void MainWindow::onPolicyRequested()
+{
+    ui->stackedWidget->setCurrentWidget(m_policyWidget);
+}
+
+void MainWindow::onSettingsRequested()
+{
+    ui->stackedWidget->setCurrentWidget(m_settingsWidget);
+}
+
 void MainWindow::onBackToHome()
 {
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
 }
 
-// ============================================================
-// 즐겨찾기 화면 전환
-// TODO: 즐겨찾기 Widget 구현 후 화면 전환 추가
-// ============================================================
 void MainWindow::onFavoriteRequested()
 {
     // TODO: m_favoriteWidget->loadData();
     // ui->stackedWidget->setCurrentWidget(m_favoriteWidget);
 }
 
-void MainWindow::showLogin() { ui->stackedWidget->setCurrentWidget(m_loginWidget); }
-void MainWindow::showHome()  { ui->stackedWidget->setCurrentWidget(m_homeWidget); }
-
-// ============================================================
-// 2페이지(가게 목록)에서 가게를 클릭했을 때 실행되는 함수
-// ============================================================
 void MainWindow::onStoreSelected(int storeId)
 {
-    qDebug() << "[MainWindow] 3페이지로 이동! 선택된 가게 ID:" << storeId;
-    
-    // 가게 ID를 3페이지로 던져줍니다.
+    qDebug() << "[MainWindow] 가게 상세로 이동! storeId:" << storeId;
     m_storeDetailWidget->loadStoreData(storeId);
-    
-    // 화면을 3페이지로 전환!
     ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
 }
+
+void MainWindow::showLogin() { ui->stackedWidget->setCurrentWidget(m_loginWidget); }
+void MainWindow::showHome()  { ui->stackedWidget->setCurrentWidget(m_homeWidget); }

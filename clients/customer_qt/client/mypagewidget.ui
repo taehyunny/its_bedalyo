@@ -17,7 +17,6 @@
    <property name="rightMargin"><number>0</number></property>
    <property name="bottomMargin"><number>0</number></property>
 
-   <!-- ===== 전체 스크롤 ===== -->
    <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable"><bool>true</bool></property>
@@ -37,7 +36,7 @@
        <property name="bottomMargin"><number>0</number></property>
        <property name="spacing"><number>0</number></property>
 
-       <!-- ===== 프로필 카드 ===== -->
+       <!-- 프로필 카드 -->
        <item>
         <widget class="QWidget" name="profileCard">
          <property name="styleSheet">
@@ -50,7 +49,6 @@
           <property name="bottomMargin"><number>24</number></property>
           <property name="spacing"><number>0</number></property>
 
-          <!-- 이름 -->
           <item>
            <widget class="QLabel" name="labelName">
             <property name="text"><string>이름</string></property>
@@ -61,7 +59,6 @@
            </widget>
           </item>
 
-          <!-- 전화번호 -->
           <item>
            <widget class="QLabel" name="labelPhone">
             <property name="text"><string>010-****-0000</string></property>
@@ -72,7 +69,6 @@
            </widget>
           </item>
 
-          <!-- 통계 3개 -->
           <item>
            <layout class="QHBoxLayout" name="statsLayout">
             <property name="leftMargin"><number>0</number></property>
@@ -81,15 +77,10 @@
             <property name="bottomMargin"><number>0</number></property>
             <property name="spacing"><number>0</number></property>
 
-            <!-- 내가 남긴 리뷰 -->
             <item>
              <widget class="QWidget" name="statReview">
               <property name="styleSheet"><string notr="true">background:transparent;</string></property>
               <layout class="QVBoxLayout" name="statReviewLayout">
-               <property name="leftMargin"><number>0</number></property>
-               <property name="topMargin"><number>0</number></property>
-               <property name="rightMargin"><number>0</number></property>
-               <property name="bottomMargin"><number>0</number></property>
                <property name="spacing"><number>4</number></property>
                <item>
                 <widget class="QLabel" name="labelReviewCount">
@@ -109,15 +100,10 @@
              </widget>
             </item>
 
-            <!-- 도움이 됐어요 -->
             <item>
              <widget class="QWidget" name="statHelp">
               <property name="styleSheet"><string notr="true">background:transparent;</string></property>
               <layout class="QVBoxLayout" name="statHelpLayout">
-               <property name="leftMargin"><number>0</number></property>
-               <property name="topMargin"><number>0</number></property>
-               <property name="rightMargin"><number>0</number></property>
-               <property name="bottomMargin"><number>0</number></property>
                <property name="spacing"><number>4</number></property>
                <item>
                 <widget class="QLabel" name="labelHelpCount">
@@ -137,15 +123,10 @@
              </widget>
             </item>
 
-            <!-- 즐겨찾기 -->
             <item>
              <widget class="QWidget" name="statFavorite">
               <property name="styleSheet"><string notr="true">background:transparent;</string></property>
               <layout class="QVBoxLayout" name="statFavoriteLayout">
-               <property name="leftMargin"><number>0</number></property>
-               <property name="topMargin"><number>0</number></property>
-               <property name="rightMargin"><number>0</number></property>
-               <property name="bottomMargin"><number>0</number></property>
                <property name="spacing"><number>4</number></property>
                <item>
                 <widget class="QLabel" name="labelFavoriteCount">
@@ -168,7 +149,6 @@
            </layout>
           </item>
 
-          <!-- 자세히 보기 버튼 -->
           <item>
            <widget class="QPushButton" name="btnDetail">
             <property name="text"><string>자세히 보기</string></property>
@@ -192,7 +172,6 @@
         </widget>
        </item>
 
-       <!-- 카드 구분 여백 -->
        <item>
         <widget class="QFrame" name="gap1">
          <property name="minimumHeight"><number>8</number></property>
@@ -202,7 +181,7 @@
         </widget>
        </item>
 
-       <!-- ===== 메뉴 리스트 카드 ===== -->
+       <!-- 메뉴 리스트 카드 (로그아웃 제거됨 → 설정으로 이동) -->
        <item>
         <widget class="QWidget" name="menuCard">
          <property name="styleSheet">
@@ -215,107 +194,62 @@
           <property name="bottomMargin"><number>0</number></property>
           <property name="spacing"><number>0</number></property>
 
-          <!-- 주소 관리 -->
           <item>
            <widget class="QPushButton" name="btnAddress">
             <property name="text"><string>📋  주소 관리</string></property>
             <property name="minimumHeight"><number>56</number></property>
             <property name="styleSheet">
-             <string notr="true">
-              QPushButton { background:#ffffff; border:none; border-bottom:1px solid #f0f0f0; font-size:15px; color:#222222; text-align:left; padding-left:20px; }
-              QPushButton:hover { background:#f9f9f9; }
-              QPushButton:pressed { background:#f0f0f0; }
-             </string>
+             <string notr="true">QPushButton{background:#ffffff;border:none;border-bottom:1px solid #f0f0f0;font-size:15px;color:#222222;text-align:left;padding-left:20px;}QPushButton:hover{background:#f9f9f9;}QPushButton:pressed{background:#f0f0f0;}</string>
             </property>
            </widget>
           </item>
 
-          <!-- 즐겨찾기 -->
           <item>
            <widget class="QPushButton" name="btnFavorite">
             <property name="text"><string>🤍  즐겨찾기</string></property>
             <property name="minimumHeight"><number>56</number></property>
             <property name="styleSheet">
-             <string notr="true">
-              QPushButton { background:#ffffff; border:none; border-bottom:1px solid #f0f0f0; font-size:15px; color:#222222; text-align:left; padding-left:20px; }
-              QPushButton:hover { background:#f9f9f9; }
-              QPushButton:pressed { background:#f0f0f0; }
-             </string>
+             <string notr="true">QPushButton{background:#ffffff;border:none;border-bottom:1px solid #f0f0f0;font-size:15px;color:#222222;text-align:left;padding-left:20px;}QPushButton:hover{background:#f9f9f9;}QPushButton:pressed{background:#f0f0f0;}</string>
             </property>
            </widget>
           </item>
 
-          <!-- 쿠폰·이용권 -->
           <item>
            <widget class="QPushButton" name="btnCoupon">
             <property name="text"><string>🏷️  쿠폰·이용권</string></property>
             <property name="minimumHeight"><number>56</number></property>
             <property name="styleSheet">
-             <string notr="true">
-              QPushButton { background:#ffffff; border:none; border-bottom:1px solid #f0f0f0; font-size:15px; color:#222222; text-align:left; padding-left:20px; }
-              QPushButton:hover { background:#f9f9f9; }
-              QPushButton:pressed { background:#f0f0f0; }
-             </string>
+             <string notr="true">QPushButton{background:#ffffff;border:none;border-bottom:1px solid #f0f0f0;font-size:15px;color:#222222;text-align:left;padding-left:20px;}QPushButton:hover{background:#f9f9f9;}QPushButton:pressed{background:#f0f0f0;}</string>
             </property>
            </widget>
           </item>
 
-          <!-- 자주 묻는 질문 -->
           <item>
            <widget class="QPushButton" name="btnFaq">
             <property name="text"><string>💬  자주 묻는 질문</string></property>
             <property name="minimumHeight"><number>56</number></property>
             <property name="styleSheet">
-             <string notr="true">
-              QPushButton { background:#ffffff; border:none; border-bottom:1px solid #f0f0f0; font-size:15px; color:#222222; text-align:left; padding-left:20px; }
-              QPushButton:hover { background:#f9f9f9; }
-              QPushButton:pressed { background:#f0f0f0; }
-             </string>
+             <string notr="true">QPushButton{background:#ffffff;border:none;border-bottom:1px solid #f0f0f0;font-size:15px;color:#222222;text-align:left;padding-left:20px;}QPushButton:hover{background:#f9f9f9;}QPushButton:pressed{background:#f0f0f0;}</string>
             </property>
            </widget>
           </item>
 
-          <!-- 약관 및 정책 -->
           <item>
            <widget class="QPushButton" name="btnPolicy">
             <property name="text"><string>📄  약관 및 정책</string></property>
             <property name="minimumHeight"><number>56</number></property>
             <property name="styleSheet">
-             <string notr="true">
-              QPushButton { background:#ffffff; border:none; border-bottom:1px solid #f0f0f0; font-size:15px; color:#222222; text-align:left; padding-left:20px; }
-              QPushButton:hover { background:#f9f9f9; }
-              QPushButton:pressed { background:#f0f0f0; }
-             </string>
+             <string notr="true">QPushButton{background:#ffffff;border:none;border-bottom:1px solid #f0f0f0;font-size:15px;color:#222222;text-align:left;padding-left:20px;}QPushButton:hover{background:#f9f9f9;}QPushButton:pressed{background:#f0f0f0;}</string>
             </property>
            </widget>
           </item>
 
-          <!-- 설정 -->
           <item>
            <widget class="QPushButton" name="btnSettings">
             <property name="text"><string>⚙️  설정</string></property>
             <property name="minimumHeight"><number>56</number></property>
             <property name="styleSheet">
-             <string notr="true">
-              QPushButton { background:#ffffff; border:none; border-bottom:1px solid #f0f0f0; font-size:15px; color:#222222; text-align:left; padding-left:20px; }
-              QPushButton:hover { background:#f9f9f9; }
-              QPushButton:pressed { background:#f0f0f0; }
-             </string>
-            </property>
-           </widget>
-          </item>
-
-          <!-- 로그아웃 -->
-          <item>
-           <widget class="QPushButton" name="btnLogout">
-            <property name="text"><string>🚪  로그아웃</string></property>
-            <property name="minimumHeight"><number>56</number></property>
-            <property name="styleSheet">
-             <string notr="true">
-              QPushButton { background:#ffffff; border:none; font-size:15px; color:#e53935; text-align:left; padding-left:20px; }
-              QPushButton:hover { background:#fff5f5; }
-              QPushButton:pressed { background:#ffebee; }
-             </string>
+             <string notr="true">QPushButton{background:#ffffff;border:none;font-size:15px;color:#222222;text-align:left;padding-left:20px;}QPushButton:hover{background:#f9f9f9;}QPushButton:pressed{background:#f0f0f0;}</string>
             </property>
            </widget>
           </item>
@@ -324,7 +258,6 @@
         </widget>
        </item>
 
-       <!-- 하단 여백 -->
        <item>
         <spacer name="bottomSpacer">
          <property name="orientation"><enum>Qt::Vertical</enum></property>
@@ -337,7 +270,7 @@
     </widget>
    </item>
 
-   <!-- ===== 하단 내비바 ===== -->
+   <!-- 하단 내비바 -->
    <item>
     <widget class="QWidget" name="navBar">
      <property name="minimumHeight"><number>60</number></property>
