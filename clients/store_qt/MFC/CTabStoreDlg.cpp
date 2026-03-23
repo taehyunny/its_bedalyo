@@ -108,7 +108,7 @@ BOOL CTabStoreDlg::OnInitDialog()
     m_editOwnerName.SetReadOnly(TRUE);
     m_editOwnerPhone.SetReadOnly(TRUE);
     m_editAccount.SetReadOnly(TRUE);
-
+    m_comboCategory.EnableWindow(FALSE);
     // ✅ 더미 데이터 제거 - SetStoreInfo()에서 채워짐
 
     // 스크롤 범위 설정
@@ -155,6 +155,8 @@ void CTabStoreDlg::SetStoreInfo(
 
     // 카테고리 콤보박스 선택
     int nCount = m_comboCategory.GetCount();
+    bool bFound = false;
+
     for (int i = 0; i < nCount; i++)
     {
         CString str;
@@ -162,8 +164,15 @@ void CTabStoreDlg::SetStoreInfo(
         if (str == category)
         {
             m_comboCategory.SetCurSel(i);
+            bFound = true;
             break;
         }
+    }
+    if (!bFound)
+    {
+        CStringA dbg(category);
+        OutputDebugStringA(("[DEBUG] 카테고리 매칭 실패: " + std::string(dbg) + "\n").c_str());
+        m_comboCategory.SetCurSel(0); // 실패하면 첫 번째 선택
     }
 
     // 초기값을 백업해둠 (취소 시 원래대로 복원)
@@ -286,14 +295,29 @@ void CTabStoreDlg::OnBnClickedBtnEditAccount()
 // =========================================================================
 void CTabStoreDlg::OnBnClickedBtnStoreOpen()
 {
-    // TODO: REQ_STORE_STATUS_SET 전송 (status: 1)
-    MessageBox(L"영업을 시작합니다.", L"영업 상태", MB_OK);
+    if (!m_pNet) return;
+
+    json body;
+    body["storeId"] = m_storeId;
+    body["status"] = 1;
+    m_pNet->Send(CmdID::REQ_STORE_STATUS_SET, body);
+
+    // ✅ 즉시 피드백 - 저장 버튼 불필요함을 알림
+    MessageBox(L"영업 상태 변경 요청을 전송했습니다.\n(저장 버튼과 무관하게 즉시 적용됩니다.)",
+        L"영업 상태", MB_OK);
 }
 
 void CTabStoreDlg::OnBnClickedBtnStoreClose()
 {
-    // TODO: REQ_STORE_STATUS_SET 전송 (status: 0)
-    MessageBox(L"영업을 종료합니다.", L"영업 상태", MB_OK);
+    if (!m_pNet) return;
+
+    json body;
+    body["storeId"] = m_storeId;
+    body["status"] = 0;
+    m_pNet->Send(CmdID::REQ_STORE_STATUS_SET, body);
+
+    MessageBox(L"영업 종료 요청을 전송했습니다.\n(저장 버튼과 무관하게 즉시 적용됩니다.)",
+        L"영업 상태", MB_OK);
 }
 
 // =========================================================================

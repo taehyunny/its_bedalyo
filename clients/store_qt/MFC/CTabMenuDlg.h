@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "afxdialogex.h"
+#include "json.hpp"
+#include "NetworkHelper.h"
 
 class CTabMenuDlg : public CDialogEx
 {
@@ -8,6 +10,9 @@ class CTabMenuDlg : public CDialogEx
 public:
     CTabMenuDlg(CWnd* pParent = nullptr);
     virtual ~CTabMenuDlg();
+    void LoadMenuList(); // 서버에 메뉴 목록 요청
+    void SetMenuList(const nlohmann::json& menuArray); // 서버 응답으로 리스트 채우기
+    void SetMenuInfo(int storeId, CNetworkHelper* pNet);
 
 #ifdef AFX_DESIGN_TIME
     enum { IDD = IDD_TAB_MENU };
@@ -35,7 +40,8 @@ private:
     CButton     m_btnMenuEdit;         // IDC_BTN_MENU_EDIT
     CButton     m_btnMenuDelete;       // IDC_BTN_MENU_DELETE
     CButton     m_btnMenuSoldout;      // IDC_BTN_MENU_SOLDOUT
-
+    int              m_storeId = 0;
+    CNetworkHelper* m_pNet = nullptr;
     // ── 내부 함수 ────────────────────────────────────────────
     void InitListCtrl();               // List Control 컬럼 초기화
     void UpdateButtonState();          // 선택 항목 유무에 따라 버튼 활성화/비활성화

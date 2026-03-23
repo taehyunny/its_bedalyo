@@ -125,7 +125,7 @@ void CMFCDlg::OnBtnLogin()
     json body;
     body["userId"] = CT2A(m_strId, CP_UTF8);
     body["password"] = CT2A(m_strPw, CP_UTF8);
-
+    body["role"] = 1;
     m_net.Send(CmdID::REQ_LOGIN, body);
 
     m_waitingResponse = true;
@@ -163,9 +163,15 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 
     m_waitingResponse = false;
     GetDlgItem(IDC_BUTTON1)->EnableWindow(TRUE);
-
     if (pkt->cmdId == CmdID::RES_LOGIN)
     {
+        MessageBox(CA2W(pkt->body.c_str(), CP_UTF8), L"body 전체", MB_OK);
+
+        MessageBox(
+            CA2W(pkt->body.c_str(), CP_UTF8),
+            L"body 전체",
+            MB_OK
+        );
         try
         {
             json resJson = json::parse(pkt->body);

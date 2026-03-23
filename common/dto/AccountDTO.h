@@ -66,9 +66,9 @@ struct LoginReqDTO
 {
     std::string userId;   // 아이디 (핸들러의 req.userId에 대응)
     std::string password; // 비밀번호 (핸들러의 req.password에 대응)
-
+    int role = 1;
     // JSON <-> Struct 자동 변환 매크로
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginReqDTO, userId, password)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginReqDTO, userId, password,role)
 };
 
 struct LoginResDTO
@@ -100,7 +100,8 @@ struct AuthResDTO
     std::string errorType;
 
     // ── 사장님 전용 (role == "1" 일 때만 채워짐) ──────────────
-    int storeId = 0; // 사업자번호 겸 매장 ID
+    int storeId = 0;              // UPDATE 쿼리용 (WHERE store_id=?)
+    std::string businessNumber;   // ✅ 새로 추가 - 화면 표시용 사업자번호
     std::string storeName;
     std::string category;
     std::string storeAddress;
@@ -109,11 +110,12 @@ struct AuthResDTO
     std::string openTime;
     std::string closeTime;
     std::string accountNumber;
-    int approvalStatus = 0; // 0: 대기, 1: 승인
+    int approvalStatus = 0;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(AuthResDTO,
         status, message, userId, address, userName, phoneNumber, role, errorType,
-        storeId, storeName, category, storeAddress,
+        storeId, businessNumber,  // ✅ businessNumber 추가
+        storeName, category, storeAddress,
         cookTime, minOrderAmount, openTime, closeTime,
         accountNumber, approvalStatus)
 };
