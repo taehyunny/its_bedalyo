@@ -14,23 +14,6 @@ MyPageWidget::MyPageWidget(NetworkManager *network, QWidget *parent)
 {
     ui->setupUi(this);
 
-    // ── 메뉴 버튼 연결 ──
-    connect(ui->btnDetail,   &QPushButton::clicked, this, &MyPageWidget::on_btnDetail_clicked);
-    connect(ui->btnAddress,  &QPushButton::clicked, this, &MyPageWidget::on_btnAddress_clicked);
-    connect(ui->btnFavorite, &QPushButton::clicked, this, &MyPageWidget::on_btnFavorite_clicked);
-    connect(ui->btnCoupon,   &QPushButton::clicked, this, &MyPageWidget::on_btnCoupon_clicked);
-    connect(ui->btnFaq,      &QPushButton::clicked, this, &MyPageWidget::on_btnFaq_clicked);
-    connect(ui->btnPolicy,   &QPushButton::clicked, this, &MyPageWidget::on_btnPolicy_clicked);
-    connect(ui->btnSettings, &QPushButton::clicked, this, &MyPageWidget::on_btnSettings_clicked);
-    connect(ui->btnLogout,   &QPushButton::clicked, this, &MyPageWidget::on_btnLogout_clicked);
-
-    // ── 내비바 연결 ──
-    connect(ui->navHome,     &QPushButton::clicked, this, &MyPageWidget::on_navHome_clicked);
-    connect(ui->navSearch,   &QPushButton::clicked, this, &MyPageWidget::on_navSearch_clicked);
-    connect(ui->navFavorite, &QPushButton::clicked, this, &MyPageWidget::on_navFavorite_clicked);
-    connect(ui->navOrder,    &QPushButton::clicked, this, &MyPageWidget::on_navOrder_clicked);
-    connect(ui->navMy,       &QPushButton::clicked, this, &MyPageWidget::on_navMy_clicked);
-
     // ── TODO: 서버 응답 연결 ──
     // connect(m_network, &NetworkManager::onMyInfoReceived,
     //         this, &MyPageWidget::onMyInfoReceived);

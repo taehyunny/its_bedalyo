@@ -35,17 +35,27 @@ private:
 
     CNetworkHelper  m_net;        
 
-
     CString         m_strId;
     CString         m_strPw;
+    // 매장 정보
+    int     m_storeId = 0;
+    CString m_storeName;
+    CString m_category;
+    CString m_storeAddress;
+    CString m_bizNum;
+    CString m_cookTime;
+    CString m_minOrder;
+    CString m_openTime;
+    CString m_closeTime;
 
-
-    int             m_storeId   = 0;
-    CString         m_storeName;
-
+    // 사장님 정보
+    CString m_ownerName;
+    CString m_ownerPhone;
+    CString m_accountNumber;
+    CString m_approvalStatus;
 
     std::string     m_serverIp  = "10.10.10.123";
-    int             m_serverPort = 8000;
+    int             m_serverPort = 8001;
 
 
     bool            m_waitingResponse = false;

@@ -50,10 +50,10 @@ BEGIN
     "\r\n"
     "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)\r\n"
     "LANGUAGE 18, 1\r\n"
-    "#include ""res\\MFC.rc2""  // Microsoft Visual C++ ???⑤챶???????렺???ш낄猷???????嶺뚮ㅎ?당빊???域밸Ŧ遊양댆???源낆뿷????덊렡.\r\n"
-    "#include ""l.KOR\\afxres.rc""      // ??? ????늄????釉먯뒠??\n"
+    "#include ""res\\MFC.rc2""  // Microsoft Visual C++ ?????쇨덧????????遊붋?????袁ㅻ쇀????????꿔꺂????諛명돯?????숆강???녿펶????濚밸Ŧ援욆굢??????낆젵.\r\n"
+    "#include ""l.KOR\\afxres.rc""      // ??? ???????????거???\n"
     "#if !defined(_AFXDLL)\r\n"
-    "#include ""l.KOR\\afxribbon.rc""   // MFC ?域밸Ŧ留㎪쾮??????爾??용굞肉?癲ル슢??쭕? ?域밸Ŧ遊양댆??\n"
+    "#include ""l.KOR\\afxribbon.rc""   // MFC ???숆강?붺춯?뀀젙????????????룻꼥???轅붽틓???壤? ???숆강???녿펶???\n"
     "#endif\r\n"
     "#endif\r\n"
     "\0"
@@ -181,12 +181,12 @@ IDD_TAB_ORDER DIALOGEX 0, 0, 392, 225
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_BORDER | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_LIST_ORDER,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,41,378,122
-    PUSHBUTTON      "주문 수락",IDC_BTN_ORDER_ACCEPT,21,17,50,14
-    PUSHBUTTON      "주문 거절",IDC_BTN_ORDER_REJECT,89,17,50,14
-    COMBOBOX        IDC_COMBO_REJECT_REASON,66,172,310,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "거절 사유 :",IDC_STATIC,25,174,37,8
-    EDITTEXT        IDC_EDIT_REJECT_REASON,66,190,310,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_LIST_ORDER,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,26,378,122
+    PUSHBUTTON      "주문 수락",IDC_BTN_ORDER_ACCEPT,21,9,50,14
+    PUSHBUTTON      "주문 거절",IDC_BTN_ORDER_REJECT,89,10,50,14
+    COMBOBOX        IDC_COMBO_REJECT_REASON,66,156,310,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "거절 사유 :",IDC_STATIC,25,158,37,8
+    EDITTEXT        IDC_EDIT_REJECT_REASON,66,172,310,14,ES_AUTOHSCROLL
 END
 
 IDD_ORDER_DETAIL DIALOGEX 0, 0, 309, 176
@@ -225,8 +225,8 @@ STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Dialog"
 FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "확인",IDOK,198,155,50,14
-    PUSHBUTTON      "취소",IDCANCEL,252,155,50,14
+    DEFPUSHBUTTON   "확인",IDOK,198,150,50,14
+    PUSHBUTTON      "취소",IDCANCEL,252,150,50,14
     LTEXT           "조회 기간 :",IDC_STATIC,16,14,28,8
     CONTROL         "",IDC_DATETIMEPICKER_START,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,46,11,70,15
     LTEXT           "~",IDC_STATIC,121,16,8,8
@@ -240,8 +240,8 @@ BEGIN
     LTEXT           "Static",IDC_STATIC_NET_SALES,180,69,18,8
     LTEXT           "수수료 :",IDC_STATIC,16,68,21,8
     LTEXT           "Static",IDC_STATIC_COMMISSION,40,68,80,11
-    CONTROL         "",IDC_LIST_TOP_MENU,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,100,295,50
-    LTEXT           "인기 메뉴 TOP 3",IDC_STATIC,17,92,45,8
+    CONTROL         "",IDC_LIST_TOP_MENU,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,95,295,50
+    LTEXT           "인기 메뉴 TOP 3",IDC_STATIC,17,86,45,8
 END
 
 IDD_TAB_SETTLEMENT DIALOGEX 0, 0, 309, 176
@@ -257,8 +257,19 @@ BEGIN
     LTEXT           "정산 완료 금액",IDC_STATIC,147,42,37,8
     LTEXT           "Static",IDC_STATIC_PENDING_AMOUNT,18,57,18,8
     LTEXT           "Static",IDC_STATIC_COMPLETED_AMOUNT,147,57,18,8
-    CONTROL         "",IDC_LIST_SETTLEMENT,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,18,103,273,59
-    LTEXT           "정산 내역",IDC_STATIC,18,91,25,8
+    CONTROL         "",IDC_LIST_SETTLEMENT,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,18,86,273,59
+    LTEXT           "정산 내역",IDC_STATIC,18,76,25,8
+END
+
+IDD_TAB_MENU DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "메뉴 추가",IDC_BTN_MENU_ADD,25,7,35,14
+    PUSHBUTTON      "메뉴 수정",IDC_BTN_MENU_EDIT,67,7,35,14
+    PUSHBUTTON      "메뉴 삭제",IDC_BTN_MENU_DELETE,111,7,35,14
+    PUSHBUTTON      "품절 처리",IDC_BTN_MENU_SOLDOUT,155,7,35,14
+    CONTROL         "",IDC_LIST_MENU,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,14,25,282,129
 END
 
 
@@ -380,6 +391,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 169
     END
+
+    IDD_TAB_MENU, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -434,6 +453,11 @@ BEGIN
     0
 END
 
+IDD_TAB_MENU AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -462,10 +486,10 @@ END
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
 LANGUAGE 18, 1
-#include "res\MFC.rc2"  // Microsoft Visual C++ ???⑤챶???????렺???ш낄猷???????嶺뚮ㅎ?당빊???域밸Ŧ遊양댆???源낆뿷????덊렡.
-#include "l.KOR\afxres.rc"      // ??? ????늄????釉먯뒠??
+#include "res\MFC.rc2"  // Microsoft Visual C++ ?????쇨덧????????遊붋?????袁ㅻ쇀????????꿔꺂????諛명돯?????숆강???녿펶????濚밸Ŧ援욆굢??????낆젵.
+#include "l.KOR\afxres.rc"      // ??? ???????????거???
 #if !defined(_AFXDLL)
-#include "l.KOR\afxribbon.rc"   // MFC ?域밸Ŧ留㎪쾮??????爾??용굞肉?癲ル슢??쭕? ?域밸Ŧ遊양댆??
+#include "l.KOR\afxribbon.rc"   // MFC ???숆강?붺춯?뀀젙????????????룻꼥???轅붽틓???壤? ???숆강???녿펶???
 #endif
 #endif
 

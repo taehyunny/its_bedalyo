@@ -23,13 +23,6 @@ OrderHistoryWidget::OrderHistoryWidget(NetworkManager *network, QWidget *parent)
     connect(ui->btnGoHistory, &QPushButton::clicked,
             this, &OrderHistoryWidget::on_btnGoHistory_clicked);
 
-    // ── 내비바 ──
-    connect(ui->navHome,     &QPushButton::clicked, this, &OrderHistoryWidget::on_navHome_clicked);
-    connect(ui->navSearch,   &QPushButton::clicked, this, &OrderHistoryWidget::on_navSearch_clicked);
-    connect(ui->navFavorite, &QPushButton::clicked, this, &OrderHistoryWidget::on_navFavorite_clicked);
-    connect(ui->navOrder,    &QPushButton::clicked, this, &OrderHistoryWidget::on_navOrder_clicked);
-    connect(ui->navMy,       &QPushButton::clicked, this, &OrderHistoryWidget::on_navMy_clicked);
-
     // ── TODO: 서버 응답 연결 ──
     // connect(m_network, &NetworkManager::onOrderHistoryReceived,
     //         this, &OrderHistoryWidget::onOrderHistoryReceived);
