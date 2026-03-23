@@ -265,6 +265,9 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
         // ── 검색 위젯 데이터 수신 (RES_RESEACH_WIDGET = 2109) ──
         } else if (cmdId == CmdID::RES_RESEACH_WIDGET) {
+            // ── 디버그: 서버 응답 원문 출력 ──
+            qDebug() << "[DEBUG] RES_RESEACH_WIDGET raw:" << QString::fromUtf8(body);
+
             ResResearchWidgetDTO dto = j.get<ResResearchWidgetDTO>();
 
             QList<PopularKeywordQt> popular;
@@ -280,6 +283,7 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 RecentSearchQt item;
                 item.historyId = r.historyId;
                 item.keyword   = QString::fromStdString(r.keyword);
+                item.searchDate = QString::fromStdString(r.searchDate);
                 recent.append(item);
             }
 

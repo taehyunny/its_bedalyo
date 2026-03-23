@@ -19,6 +19,7 @@ QT_END_NAMESPACE
 struct RecentSearchItem {
     int     historyId;  // 서버 PK (개별 삭제 시 전송)
     QString keyword;    // 검색어
+    QString searchDate; // 날짜
 };
 
 // ============================================================
