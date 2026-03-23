@@ -45,7 +45,7 @@ private:
 
 
     std::string     m_serverIp  = "10.10.10.123";
-    int             m_serverPort = 8010;
+    int             m_serverPort = 8000;
 
 
     bool            m_waitingResponse = false;

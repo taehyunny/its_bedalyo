@@ -11,6 +11,7 @@ SOURCES += \
     NetworkManager.cpp \
     homewidget.cpp \
     menucategori.cpp \
+    menuoption.cpp \
     searchwidget.cpp \
     searchresultwidget.cpp \
     orderhistorywidget.cpp \
@@ -22,6 +23,7 @@ HEADERS += \
     NetworkManager.h \
     homewidget.h \
     menucategori.h \
+    menuoption.h \
     searchwidget.h \
     searchresultwidget.h \
     orderhistorywidget.h \
@@ -36,6 +38,7 @@ FORMS += \
     mainwindow.ui \
     homewidget.ui \
     menucategori.ui \
+    menuoption.ui \
     searchwidget.ui \
     searchresultwidget.ui \
     orderhistorywidget.ui \
