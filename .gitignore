@@ -161,6 +161,7 @@ $RECYCLE.BIN/
 config.ini
 secrets.*
 credentials.*
+clients/customer_qt/client/config.h
 
 
 # ------------------------------------------
