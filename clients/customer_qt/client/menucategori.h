@@ -26,6 +26,7 @@ public:
 
 signals:
     void backRequested();
+    void storeSelected(int storeId);
 
 private slots:
     void onCategoryTabClicked(int categoryId, const QString &categoryName);

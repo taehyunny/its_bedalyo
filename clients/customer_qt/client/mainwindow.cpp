@@ -93,6 +93,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &MainWindow::onMainHomeReceived);
 
+    connect(m_menuWidget, &menucategori::storeSelected, 
+            this, &MainWindow::onStoreSelected);
+
     // ── 서버 연결 ──
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
 }
@@ -173,7 +176,7 @@ void MainWindow::onStoreSelected(int storeId)
 {
     qDebug() << "[MainWindow] 3페이지로 이동! 선택된 가게 ID:" << storeId;
     
-    // 🚀 이제 에러 안 납니다! 가게 ID를 3페이지로 던져줍니다.
+    // 가게 ID를 3페이지로 던져줍니다.
     m_storeDetailWidget->loadStoreData(storeId);
     
     // 화면을 3페이지로 전환!
