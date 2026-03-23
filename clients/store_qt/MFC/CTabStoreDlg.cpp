@@ -130,6 +130,8 @@ BOOL CTabStoreDlg::OnInitDialog()
 // ✅ 서버에서 받은 데이터로 컨트롤 채우기
 // =========================================================================
 void CTabStoreDlg::SetStoreInfo(
+    int storeId,
+    CNetworkHelper* pNet,
     const CString& storeName, const CString& category,
     const CString& storeAddress, const CString& bizNum,
     const CString& cookTime, const CString& minOrder,
@@ -137,6 +139,8 @@ void CTabStoreDlg::SetStoreInfo(
     const CString& ownerName, const CString& ownerPhone,
     const CString& accountNumber, const CString& approvalStatus)
 {
+    m_storeId = storeId;
+    m_pNet = pNet;  
     m_editStoreName.SetWindowText(storeName);
     m_editStoreAddress.SetWindowText(storeAddress);
     m_editStoreBiznum.SetWindowText(bizNum);
@@ -244,41 +248,35 @@ void CTabStoreDlg::RestoreValues()
 // =========================================================================
 void CTabStoreDlg::OnBnClickedBtnEditName()
 {
-    BackupValues();
     m_editStoreName.SetReadOnly(FALSE);
     m_editStoreName.SetFocus();
 }
 
 void CTabStoreDlg::OnBnClickedBtnEditCategory()
 {
-    BackupValues();
     m_comboCategory.EnableWindow(TRUE);
 }
 
 void CTabStoreDlg::OnBnClickedBtnEditAddress()
 {
-    BackupValues();
     m_editStoreAddress.SetReadOnly(FALSE);
     m_editStoreAddress.SetFocus();
 }
 
 void CTabStoreDlg::OnBnClickedBtnEditOwnerName()
 {
-    BackupValues();
     m_editOwnerName.SetReadOnly(FALSE);
     m_editOwnerName.SetFocus();
 }
 
 void CTabStoreDlg::OnBnClickedBtnEditOwnerPhone()
 {
-    BackupValues();
     m_editOwnerPhone.SetReadOnly(FALSE);
     m_editOwnerPhone.SetFocus();
 }
 
 void CTabStoreDlg::OnBnClickedBtnEditAccount()
 {
-    BackupValues();
     m_editAccount.SetReadOnly(FALSE);
     m_editAccount.SetFocus();
 }
@@ -303,91 +301,77 @@ void CTabStoreDlg::OnBnClickedBtnStoreClose()
 // =========================================================================
 void CTabStoreDlg::OnBnClickedBtnSave()
 {
-        // 1. 변경된 값을 담을 JSON 객체 생성
-        nlohmann::json updateBody;
+    // 1. 변경된 값을 담을 JSON 객체 생성
+    nlohmann::json updateBody;
 
-        // 2. 각 필드별로 백업값(원본)과 현재 입력값을 비교 (Dirty Check)
-        CString currentVal;
+    // 2. 각 필드별로 백업값(원본)과 현재 입력값을 비교 (Dirty Check)
+    CString currentVal;
 
-        // 매장명
-        m_editStoreName.GetWindowText(currentVal);
-        if (currentVal != m_bakStoreName) {
-            updateBody["storeName"] = CT2A(currentVal).m_psz;
-        }
+    m_editStoreName.GetWindowText(currentVal);
+    if (currentVal != m_bakStoreName)
+        updateBody["storeName"] = CT2A(currentVal, CP_UTF8).m_psz;
 
-        // 카테고리 (인덱스가 아닌 텍스트로 보낼 경우)
-        int curSel = m_comboCategory.GetCurSel();
-        if (curSel != m_bakCategory) {
-            CString strCat;
-            m_comboCategory.GetLBText(curSel, strCat);
-            updateBody["category"] = CT2A(strCat).m_psz;
-        }
+    int curSel = m_comboCategory.GetCurSel();
+    if (curSel != m_bakCategory) {
+        CString strCat;
+        m_comboCategory.GetLBText(curSel, strCat);
+        updateBody["category"] = CT2A(strCat, CP_UTF8).m_psz;
+    }
 
-        // 매장 주소
-        m_editStoreAddress.GetWindowText(currentVal);
-        if (currentVal != m_bakStoreAddress) {
-            updateBody["storeAddress"] = CT2A(currentVal).m_psz;
-        }
+    m_editStoreAddress.GetWindowText(currentVal);
+    if (currentVal != m_bakStoreAddress)
+        updateBody["storeAddress"] = CT2A(currentVal, CP_UTF8).m_psz;
 
-        // 조리 시간
-        m_editCookTime.GetWindowText(currentVal);
-        if (currentVal != m_bakCookTime) {
-            updateBody["cookTime"] = CT2A(currentVal).m_psz;
-        }
+    m_editCookTime.GetWindowText(currentVal);
+    if (currentVal != m_bakCookTime)
+        updateBody["cookTime"] = CT2A(currentVal, CP_UTF8).m_psz;
 
-        // 최소 주문 금액
-        m_editMinOrder.GetWindowText(currentVal);
-        if (currentVal != m_bakMinOrder) {
-            updateBody["minOrderPrice"] = _ttoi(currentVal); // 숫자로 변환하여 전송
-        }
+    m_editMinOrder.GetWindowText(currentVal);
+    if (currentVal != m_bakMinOrder)
+        updateBody["minOrderAmount"] = _ttoi(currentVal); // ✅ minOrderPrice → minOrderAmount
 
-        // 영업 시간 (Open / Close)
-        m_editOpenTime.GetWindowText(currentVal);
-        if (currentVal != m_bakOpenTime) updateBody["openTime"] = CT2A(currentVal).m_psz;
+    m_editOpenTime.GetWindowText(currentVal);
+    if (currentVal != m_bakOpenTime)
+        updateBody["openTime"] = CT2A(currentVal, CP_UTF8).m_psz;
 
-        m_editCloseTime.GetWindowText(currentVal);
-        if (currentVal != m_bakCloseTime) updateBody["closeTime"] = CT2A(currentVal).m_psz;
+    m_editCloseTime.GetWindowText(currentVal);
+    if (currentVal != m_bakCloseTime)
+        updateBody["closeTime"] = CT2A(currentVal, CP_UTF8).m_psz;
 
-        // 점주명
-        m_editOwnerName.GetWindowText(currentVal);
-        if (currentVal != m_bakOwnerName) updateBody["ownerName"] = CT2A(currentVal).m_psz;
+    m_editOwnerName.GetWindowText(currentVal);
+    if (currentVal != m_bakOwnerName)
+        updateBody["ownerName"] = CT2A(currentVal, CP_UTF8).m_psz;
 
-        // 전화번호
-        m_editOwnerPhone.GetWindowText(currentVal);
-        if (currentVal != m_bakOwnerPhone) updateBody["ownerPhone"] = CT2A(currentVal).m_psz;
+    m_editOwnerPhone.GetWindowText(currentVal);
+    if (currentVal != m_bakOwnerPhone)
+        updateBody["ownerPhone"] = CT2A(currentVal, CP_UTF8).m_psz;
 
-        // 정산 계좌
-        m_editAccount.GetWindowText(currentVal);
-        if (currentVal != m_bakAccount) updateBody["accountNumber"] = CT2A(currentVal).m_psz;
+    m_editAccount.GetWindowText(currentVal);
+    if (currentVal != m_bakAccount)
+        updateBody["accountNumber"] = CT2A(currentVal, CP_UTF8).m_psz;
 
+    // 3. 서버 전송
+    if (!updateBody.empty())
+    {
+        updateBody["storeId"] = m_storeId; // ✅ 주석 해제 - 어떤 매장인지 서버에 알려야 함
 
-        // 3. 서버 전송 로직
-        if (!updateBody.empty())
-        {
-            // 💡 중요: 어떤 매장의 정보를 바꾸는지 알 수 있도록 ID 등을 추가로 넣어야 할 수 있습니다.
-            // updateBody["storeId"] = m_storeId; 
+        m_pNet->Send(CmdID::REQ_STORE_INFO_UPDATE, updateBody); // ✅ 실제 전송
 
-            // NetworkHelper를 통해 서버에 전송 (메인 윈도우나 전역 객체의 m_net 접근)
-            // 예: theApp.m_net.Send(CmdID::REQ_STORE_INFO_UPDATE, updateBody);
-
-            // 현재 클래스에 m_net이 있다고 가정할 때:
-            // m_net.Send(CmdID::REQ_STORE_INFO_UPDATE, updateBody);
-
-            MessageBox(L"변경사항을 서버에 요청했습니다.", L"저장", MB_OK);
-
-            // 저장이 성공했다고 가정하고 백업값 갱신 (또는 서버 응답 후에 처리)
-            BackupValues();
-        }
-        else
-        {
-            MessageBox(L"변경사항이 없습니다.", L"알림", MB_OK | MB_ICONINFORMATION);
-        }
-
-        // UI 상태 복구 (모두 읽기 전용으로)
+        // ✅ BackupValues() 제거 → 서버 성공 응답(OnStoreUpdateSuccess)에서 처리
+        // ✅ MessageBox 제거 → 서버 응답 후 띄워야 함
+    }
+    else
+    {
+        MessageBox(L"변경사항이 없습니다.", L"알림", MB_OK | MB_ICONINFORMATION);
         SetUIMode(FALSE);
-        MessageBox(L"수정사항이 저장되었습니다.", L"알림", MB_OK);
+    }
 }
 
+void CTabStoreDlg::OnStoreUpdateSuccess() {
+    BackupValues();  // ✅ 여기서 갱신
+    SetUIMode(FALSE);
+    MessageBox(L"저장되었습니다.", L"알림", MB_OK);
+}
 void CTabStoreDlg::OnBnClickedBtnCancel()
 {
     RestoreValues();

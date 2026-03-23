@@ -2,10 +2,11 @@
 #include "MFC.h"
 #include "afxdialogex.h"
 #include "CMainMenuDlg.h"
+#include "NetworkHelper.h"
 
 IMPLEMENT_DYNAMIC(CMainMenuDlg, CDialogEx)
 
-CMainMenuDlg::CMainMenuDlg(int storeId, const CString& storeName,
+CMainMenuDlg::CMainMenuDlg(int storeId, CNetworkHelper* pNet,const CString& storeName,
     const CString& category, const CString& storeAddress,
     const CString& bizNum, const CString& cookTime,
     const CString& minOrder, const CString& openTime,
@@ -13,7 +14,7 @@ CMainMenuDlg::CMainMenuDlg(int storeId, const CString& storeName,
     const CString& ownerPhone, const CString& accountNumber,
     const CString& approvalStatus, CWnd* pParent)
     : CDialogEx(IDD_MAIN_MENU, pParent)
-    , m_storeId(storeId), m_storeName(storeName)
+    , m_storeId(storeId), m_pNet(pNet), m_storeName(storeName)
     , m_category(category), m_storeAddress(storeAddress)
     , m_bizNum(bizNum), m_cookTime(cookTime)
     , m_minOrder(minOrder), m_openTime(openTime)
@@ -38,7 +39,7 @@ void CMainMenuDlg::DoDataExchange(CDataExchange* pDX)
 BOOL CMainMenuDlg::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
-
+    m_pNet->SetNotifyHwnd(GetSafeHwnd());
     // 상단 매장명 / 영업상태 표시
     if (m_storeId == 0 || m_storeName.IsEmpty())
     {
@@ -79,6 +80,7 @@ BOOL CMainMenuDlg::OnInitDialog()
 
     // ✅ 서버에서 받은 매장/사장님 정보 전달
     m_tabStoreDlg.SetStoreInfo(
+        m_storeId, m_pNet,
         m_storeName, m_category, m_storeAddress, m_bizNum,
         m_cookTime, m_minOrder, m_openTime, m_closeTime,
         m_ownerName, m_ownerPhone, m_accountNumber, m_approvalStatus
@@ -98,6 +100,7 @@ BOOL CMainMenuDlg::OnInitDialog()
 
     return TRUE;
 }
+
 
 void CMainMenuDlg::OnTcnSelchangeTabStatusSet(NMHDR* pNMHDR, LRESULT* pResult)
 {
@@ -125,6 +128,25 @@ void CMainMenuDlg::OnTcnSelchangeTabStatusSet(NMHDR* pNMHDR, LRESULT* pResult)
     *pResult = 0;
 }
 
+
+LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
+{
+    auto* pkt = reinterpret_cast<ReceivedPacket*>(lParam);
+    if (!pkt) return 0;
+
+    if (pkt->cmdId == CmdID::RES_STORE_INFO_UPDATE)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) == 200)
+            m_tabStoreDlg.OnStoreUpdateSuccess();  // ✅ 성공 시 탭에 전달
+        else
+            MessageBox(L"저장에 실패했습니다.", L"오류", MB_ICONERROR);
+    }
+
+    delete pkt;
+    return 0;
+}
 BEGIN_MESSAGE_MAP(CMainMenuDlg, CDialogEx)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_STATUS_SET, &CMainMenuDlg::OnTcnSelchangeTabStatusSet)
+    ON_MESSAGE(WM_PACKET_RECEIVED, &CMainMenuDlg::OnPacketReceived)  // ✅ 추가
 END_MESSAGE_MAP()

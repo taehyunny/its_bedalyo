@@ -4,6 +4,7 @@
 #include "afxdialogex.h"
 #include "CTabStoreDlg.h"
 #include "json.hpp"
+#include "NetworkHelper.h"
 
 class CTabStoreDlg : public CDialogEx
 {
@@ -20,13 +21,15 @@ public:
 
     // ✅ 서버에서 받은 매장/사장님 정보를 채우는 함수
    void SetStoreInfo(
+        int storeId,            
+        CNetworkHelper* pNet,     
         const CString& storeName, const CString& category,
         const CString& storeAddress, const CString& bizNum,
         const CString& cookTime, const CString& minOrder,
         const CString& openTime, const CString& closeTime,
         const CString& ownerName, const CString& ownerPhone,
         const CString& accountNumber, const CString& approvalStatus);
-
+   void CTabStoreDlg::OnStoreUpdateSuccess();
 protected:
     afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
     afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
@@ -53,7 +56,8 @@ protected:
 
 private:
     int m_nScrollPos = 0;
-
+    int m_storeId = 0;
+    CNetworkHelper* m_pNet = nullptr;
 
     // ── 매장 정보 컨트롤 ─────────────────────────────────────
     CEdit       m_editStoreName;       // IDC_EDIT_STORE_NAME

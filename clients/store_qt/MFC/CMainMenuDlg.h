@@ -6,13 +6,15 @@
 #include "CTabReviewDlg.h"
 #include "CTabSalesDlg.h"
 #include "CTabSettlementDlg.h"
+#include "NetworkHelper.h"
 
 class CMainMenuDlg : public CDialogEx
 {
     DECLARE_DYNAMIC(CMainMenuDlg)
 
 public:
-    CMainMenuDlg(int storeId, const CString& storeName,
+    CMainMenuDlg(int storeId, CNetworkHelper* pNet, 
+        const CString& storeName,
         const CString& category, const CString& storeAddress,
         const CString& bizNum, const CString& cookTime,
         const CString& minOrder, const CString& openTime,
@@ -31,6 +33,8 @@ public:
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
+    afx_msg LRESULT OnPacketReceived(WPARAM wParam, LPARAM lParam);
+    afx_msg void OnTcnSelchangeTabStatusSet(NMHDR* pNMHDR, LRESULT* pResult);
     DECLARE_MESSAGE_MAP()
 
 private:
@@ -61,7 +65,7 @@ private:
     CStatic     m_staticNameBar;   // IDC_STATIC_NAMEBAR
     CStatic     m_staticStatus;    // IDC_STATIC_STATUS
     CTabCtrl    m_tabCtrl;         // IDC_TAB_STATUS_SET
-
+    CNetworkHelper* m_pNet = nullptr;
 public:
-    afx_msg void OnTcnSelchangeTabStatusSet(NMHDR* pNMHDR, LRESULT* pResult);
+
 };
