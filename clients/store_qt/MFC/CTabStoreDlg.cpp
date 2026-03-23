@@ -23,7 +23,6 @@ void CTabStoreDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
 
-    // ── 매장 정보 ─────────────────────────────────────────────────────────
     DDX_Control(pDX, IDC_EDIT_STORE_NAME, m_editStoreName);
     DDX_Control(pDX, IDC_COMBO_CATEGORY, m_comboCategory);
     DDX_Control(pDX, IDC_EDIT_STORE_ADDRESS, m_editStoreAddress);
@@ -33,13 +32,11 @@ void CTabStoreDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_OPEN_TIME, m_editOpenTime);
     DDX_Control(pDX, IDC_EDIT_CLOSE_TIME, m_editCloseTime);
 
-    // ── 사장님 정보 ───────────────────────────────────────────────────────
     DDX_Control(pDX, IDC_EDIT_OWNER_NAME, m_editOwnerName);
     DDX_Control(pDX, IDC_EDIT_OWNER_PHONE, m_editOwnerPhone);
     DDX_Control(pDX, IDC_EDIT_ACCOUNT, m_editAccount);
     DDX_Control(pDX, IDC_STATIC_APPROVAL, m_staticApproval);
 
-    // ── 버튼 ──────────────────────────────────────────────────────────────
     DDX_Control(pDX, IDC_BTN_EDIT_NAME, m_btnEditName);
     DDX_Control(pDX, IDC_BTN_EDIT_CATEGORY, m_btnEditCategory);
     DDX_Control(pDX, IDC_BTN_EDIT_ADDRESS, m_btnEditAddress);
@@ -77,11 +74,9 @@ BOOL CTabStoreDlg::OnInitDialog()
     m_editOwnerPhone.SetReadOnly(TRUE);
     m_editAccount.SetReadOnly(TRUE);
 
-    // TODO: 서버에서 받은 데이터로 채우기
-    // 현재는 임시 빈값 표시
-    m_staticApproval.SetWindowText(L"대기");
+    // ✅ 더미 데이터 제거 - SetStoreInfo()에서 채워짐
 
-    //  스크롤 범위 설정
+    // 스크롤 범위 설정
     CRect rcClient;
     GetClientRect(&rcClient);
 
@@ -89,12 +84,56 @@ BOOL CTabStoreDlg::OnInitDialog()
     si.cbSize = sizeof(SCROLLINFO);
     si.fMask = SIF_RANGE | SIF_PAGE;
     si.nMin = 0;
-    si.nMax = 600;          // 전체 컨텐츠 높이 (컨트롤 수에 맞게 조정)
+    si.nMax = 600;
     si.nPage = rcClient.Height();
     SetScrollInfo(SB_VERT, &si);
 
     return TRUE;
 }
+
+// =========================================================================
+// ✅ 서버에서 받은 데이터로 컨트롤 채우기
+// =========================================================================
+void CTabStoreDlg::SetStoreInfo(
+    const CString& storeName, const CString& category,
+    const CString& storeAddress, const CString& bizNum,
+    const CString& cookTime, const CString& minOrder,
+    const CString& openTime, const CString& closeTime,
+    const CString& ownerName, const CString& ownerPhone,
+    const CString& accountNumber, const CString& approvalStatus)
+{
+    m_editStoreName.SetWindowText(storeName);
+    m_editStoreAddress.SetWindowText(storeAddress);
+    m_editStoreBiznum.SetWindowText(bizNum);
+    m_editCookTime.SetWindowText(cookTime);
+    m_editMinOrder.SetWindowText(minOrder);
+    m_editOpenTime.SetWindowText(openTime);
+    m_editCloseTime.SetWindowText(closeTime);
+    m_editOwnerName.SetWindowText(ownerName);
+    m_editOwnerPhone.SetWindowText(ownerPhone);
+    m_editAccount.SetWindowText(accountNumber);
+    m_staticApproval.SetWindowText(approvalStatus);
+
+    // 카테고리 콤보박스 선택
+    int nCount = m_comboCategory.GetCount();
+    for (int i = 0; i < nCount; i++)
+    {
+        CString str;
+        m_comboCategory.GetLBText(i, str);
+        if (str == category)
+        {
+            m_comboCategory.SetCurSel(i);
+            break;
+        }
+    }
+
+    // 초기값을 백업해둠 (취소 시 원래대로 복원)
+    BackupValues();
+}
+
+// =========================================================================
+// 스크롤
+// =========================================================================
 void CTabStoreDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
     int nDelta = 0;
@@ -102,10 +141,10 @@ void CTabStoreDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
     switch (nSBCode)
     {
-    case SB_LINEUP:   nDelta = -10;  break;
-    case SB_LINEDOWN: nDelta = 10;  break;
-    case SB_PAGEUP:   nDelta = -50;  break;
-    case SB_PAGEDOWN: nDelta = 50;  break;
+    case SB_LINEUP:     nDelta = -10; break;
+    case SB_LINEDOWN:   nDelta = 10; break;
+    case SB_PAGEUP:     nDelta = -50; break;
+    case SB_PAGEDOWN:   nDelta = 50; break;
     case SB_THUMBTRACK: nDelta = (int)nPos - m_nScrollPos; break;
     default: return;
     }
@@ -122,12 +161,14 @@ void CTabStoreDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 BOOL CTabStoreDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
+    (void)nFlags;
+    (void)pt;
     OnVScroll(zDelta < 0 ? SB_LINEDOWN : SB_LINEUP, 0, nullptr);
     return TRUE;
 }
 
 // =========================================================================
-// 원본값 백업 (저장 버튼 누르기 전 / 취소 시 복원용)
+// 원본값 백업 / 복원
 // =========================================================================
 void CTabStoreDlg::BackupValues()
 {
@@ -156,7 +197,6 @@ void CTabStoreDlg::RestoreValues()
     m_editAccount.SetWindowText(m_bakAccount);
     m_comboCategory.SetCurSel(m_bakCategory);
 
-    // 복원 후 다시 읽기 전용으로
     m_editStoreName.SetReadOnly(TRUE);
     m_editStoreAddress.SetReadOnly(TRUE);
     m_editOwnerName.SetReadOnly(TRUE);
@@ -165,7 +205,7 @@ void CTabStoreDlg::RestoreValues()
 }
 
 // =========================================================================
-// 수정 버튼 핸들러 - 클릭 시 해당 Edit 활성화
+// 수정 버튼 핸들러
 // =========================================================================
 void CTabStoreDlg::OnBnClickedBtnEditName()
 {
@@ -213,25 +253,24 @@ void CTabStoreDlg::OnBnClickedBtnEditAccount()
 // =========================================================================
 void CTabStoreDlg::OnBnClickedBtnStoreOpen()
 {
-    // TODO: REQ_STORE_STATUS_SET 전송 (status: 1 영업중)
+    // TODO: REQ_STORE_STATUS_SET 전송 (status: 1)
     MessageBox(L"영업을 시작합니다.", L"영업 상태", MB_OK);
 }
 
 void CTabStoreDlg::OnBnClickedBtnStoreClose()
 {
-    // TODO: REQ_STORE_STATUS_SET 전송 (status: 0 영업종료)
+    // TODO: REQ_STORE_STATUS_SET 전송 (status: 0)
     MessageBox(L"영업을 종료합니다.", L"영업 상태", MB_OK);
 }
 
 // =========================================================================
-// 저장 버튼 - 변경사항 서버에 전송
+// 저장 / 취소 버튼
 // =========================================================================
 void CTabStoreDlg::OnBnClickedBtnSave()
 {
-    // TODO: 변경된 값 서버에 REQ_PROFILE_UPDATE 전송
+    // TODO: 변경된 값 서버에 전송
     MessageBox(L"저장되었습니다.", L"저장", MB_OK);
 
-    // 저장 후 다시 읽기 전용으로
     m_editStoreName.SetReadOnly(TRUE);
     m_editStoreAddress.SetReadOnly(TRUE);
     m_editOwnerName.SetReadOnly(TRUE);
@@ -239,9 +278,6 @@ void CTabStoreDlg::OnBnClickedBtnSave()
     m_editAccount.SetReadOnly(TRUE);
 }
 
-// =========================================================================
-// 취소 버튼 - 원본값으로 복원
-// =========================================================================
 void CTabStoreDlg::OnBnClickedBtnCancel()
 {
     RestoreValues();

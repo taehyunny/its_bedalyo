@@ -15,6 +15,7 @@
 #define IDD_TAB_REVIEW                  140
 #define IDD_TAB_SALES                   142
 #define IDD_TAB_SETTLEMENT              144
+#define IDD_TAB_MENU                    146
 #define IDC_EDIT1                       1000
 #define IDC_EDIT2                       1001
 #define IDC_BUTTON1                     1002
@@ -103,14 +104,19 @@
 #define IDC_STATIC_COMPLETED_AMOUNT     1187
 #define IDC_LIST1                       1188
 #define IDC_LIST_SETTLEMENT             1188
+#define IDC_LIST_MENU                   1188
+#define IDC_BTN_MENU_ADD                1189
+#define IDC_BTN_MENU_EDIT               1190
+#define IDC_BTN_MENU_DELETE             1191
+#define IDC_BTN_MENU_SOLDOUT            1192
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        146
+#define _APS_NEXT_RESOURCE_VALUE        148
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1189
+#define _APS_NEXT_CONTROL_VALUE         1193
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

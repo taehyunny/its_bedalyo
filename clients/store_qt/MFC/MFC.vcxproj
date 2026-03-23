@@ -189,6 +189,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CMainMenuDlg.h" />
+    <ClInclude Include="COrderDetailDlg.h" />
+    <ClInclude Include="CTabMenuDlg.h" />
+    <ClInclude Include="CTabOrderDlg.h" />
+    <ClInclude Include="CTabReviewDlg.h" />
+    <ClInclude Include="CTabSalesDlg.h" />
+    <ClInclude Include="CTabSettlementDlg.h" />
     <ClInclude Include="CTabStoreDlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Global_protocol.h" />
@@ -203,6 +209,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CMainMenuDlg.cpp" />
+    <ClCompile Include="COrderDetailDlg.cpp" />
+    <ClCompile Include="CTabMenuDlg.cpp" />
+    <ClCompile Include="CTabOrderDlg.cpp" />
+    <ClCompile Include="CTabReviewDlg.cpp" />
+    <ClCompile Include="CTabSalesDlg.cpp" />
+    <ClCompile Include="CTabSettlementDlg.cpp" />
     <ClCompile Include="CTabStoreDlg.cpp" />
     <ClCompile Include="MFC.cpp" />
     <ClCompile Include="MFCDlg.cpp" />

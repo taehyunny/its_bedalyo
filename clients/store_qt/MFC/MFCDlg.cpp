@@ -52,7 +52,6 @@ BOOL CMFCDlg::OnInitDialog()
 
     SetIcon(m_hIcon, TRUE);
     SetIcon(m_hIcon, FALSE);
-
     SetWindowText(L"ITS_Bedalyo - Owner Login");
 
     return TRUE;
@@ -122,7 +121,6 @@ void CMFCDlg::OnBtnLogin()
     }
 
     json body;
-    // ✅ camelCase 키 + CP_UTF8 변환 / role 제거 (LoginReqDTO에 없는 필드)
     body["userId"] = CT2A(m_strId, CP_UTF8);
     body["password"] = CT2A(m_strPw, CP_UTF8);
 
@@ -144,8 +142,15 @@ void CMFCDlg::OnBtnSign()
     }
 
     CSignupDlg signupDlg(&m_net, this);
+
+    // SignupDlg 열기 전 HWND 교체 → 패킷이 SignupDlg로 전달됨
+    m_net.SetNotifyHwnd(signupDlg.GetSafeHwnd());
+
     if (signupDlg.DoModal() == IDOK)
         MessageBox(L"가입이 완료됐습니다. 로그인해주세요.", L"안내", MB_OK);
+
+    // 모달 닫힌 후 MFCDlg로 복구
+    m_net.SetNotifyHwnd(GetSafeHwnd());
 }
 
 LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
@@ -159,25 +164,50 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 
     if (pkt->cmdId == CmdID::RES_LOGIN)
     {
-        OutputDebugStringA("[OnPacketReceived] RES_LOGIN 수신!\n");
-        OutputDebugStringA(("[OnPacketReceived] body: " + pkt->body + "\n").c_str());
-
         try
         {
             json resJson = json::parse(pkt->body);
+            OutputDebugStringA("[OnPacketReceived] RES_LOGIN 수신!\n");
+            OutputDebugStringA(("[OnPacketReceived] body: " + pkt->body + "\n").c_str());
 
-            // ✅ AuthResDTO 기준: "success" 없음 → status == 200 으로 판단
             bool success = (resJson.value("status", 0) == 200);
 
             if (success)
             {
-                m_storeId = resJson.value("storeId", 0);
-                std::string name = resJson.value("storeName", "");
-                m_storeName = CA2W(name.c_str());
+                // UTF-8 → CString 변환 헬퍼
+                auto toW = [](const std::string& s) -> CString {
+                    return CA2W(s.c_str(), CP_UTF8);
+                    };
+
+                // ── 매장 정보 수신 ──────────────────────────────────
+                int     storeId = resJson.value("storeId", 0);
+                CString storeName = toW(resJson.value("storeName", ""));
+                CString category = toW(resJson.value("category", ""));
+                CString storeAddress = toW(resJson.value("storeAddress", ""));
+                CString cookTime = toW(resJson.value("cookTime", ""));
+                CString minOrder = toW(resJson.value("minOrderAmount", ""));
+                CString openTime = toW(resJson.value("openTime", ""));
+                CString closeTime = toW(resJson.value("closeTime", ""));
+
+                // ✅ 1 사업자번호 = 1 매장 → storeId를 문자열로 변환해서 bizNum으로 사용
+                CString bizNum;
+                bizNum.Format(L"%d", storeId);
+
+                // ── 사장님 정보 수신 ────────────────────────────────
+                CString ownerName = toW(resJson.value("userName", ""));
+                CString ownerPhone = toW(resJson.value("phoneNumber", ""));
+                CString accountNumber = toW(resJson.value("accountNumber", ""));
+                CString approvalStatus = resJson.value("approvalStatus", 0) == 1
+                    ? L"승인" : L"대기";
 
                 ShowWindow(SW_HIDE);
 
-                CMainMenuDlg mainDlg(m_storeId, m_storeName, this);
+                CMainMenuDlg mainDlg(
+                    storeId, storeName, category, storeAddress,
+                    bizNum, cookTime, minOrder, openTime,
+                    closeTime, ownerName, ownerPhone, accountNumber,
+                    approvalStatus, this
+                );
                 mainDlg.DoModal();
 
                 ShowWindow(SW_SHOW);
@@ -185,8 +215,6 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
             else
             {
                 std::string msg = resJson.value("message", "로그인에 실패했습니다.");
-
-                // CP_UTF8 추가
                 MessageBox(CA2W(msg.c_str(), CP_UTF8), L"로그인 실패", MB_ICONWARNING);
             }
         }
@@ -201,7 +229,6 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-// ── 취소(나가기) 버튼 ────────────────────────────────────────────────────
 void CMFCDlg::OnBtnCancel()
 {
     m_net.Disconnect();
