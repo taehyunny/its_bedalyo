@@ -40,7 +40,7 @@ struct SignupReqDTO
             {"storeAddress", dto.storeAddress}};
     }
 
-    //  매크로 대신 커스텀 파서 사용! (선택적 필드 처리)
+    // ⚠️ 매크로 대신 커스텀 파서 사용! (선택적 필드 처리)
     friend void from_json(const nlohmann::json &j, SignupReqDTO &dto)
     {
         // [필수 값] 이건 없으면 에러 던짐 (at 사용)

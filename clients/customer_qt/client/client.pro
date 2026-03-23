@@ -15,7 +15,8 @@ SOURCES += \
     searchwidget.cpp \
     searchresultwidget.cpp \
     orderhistorywidget.cpp \
-    mypagewidget.cpp
+    mypagewidget.cpp \
+    storedetailwidget.cpp
 
 HEADERS += \
     loginwidget.h \
@@ -29,6 +30,7 @@ HEADERS += \
     orderhistorywidget.h \
     mypagewidget.h \
     UserSession.h \
+    storedetailwidget.h \
     storeutils.h \
     config.h \
     cartsession.h
@@ -42,7 +44,8 @@ FORMS += \
     searchwidget.ui \
     searchresultwidget.ui \
     orderhistorywidget.ui \
-    mypagewidget.ui
+    mypagewidget.ui \
+    storedetailwidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

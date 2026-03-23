@@ -9,6 +9,7 @@
 #include "SearchResultWidget.h"
 #include "OrderHistoryWidget.h"
 #include "MyPageWidget.h"
+#include "storedetailwidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -43,6 +44,7 @@ private slots:
     void onOrderListRequested();
     void onMypageRequested();
     void onFavoriteRequested();
+    void onStoreSelected(int storeId);
 
     // 카테고리 데이터 캐싱 (menucategori 진입 시 재사용)
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
@@ -58,6 +60,7 @@ private:
     SearchResultWidget   *m_searchResultWidget;
     OrderHistoryWidget   *m_orderHistoryWidget;
     MyPageWidget         *m_myPageWidget;
+    StoreDetailWidget    *m_storeDetailWidget;
 
     // ── 홈에서 받은 카테고리 목록 캐싱 (menucategori에서 재사용) ──
     QList<CategoryInfoQt> m_cachedCategories;

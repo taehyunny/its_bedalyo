@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_searchResultWidget(new SearchResultWidget(m_network, this))
     , m_orderHistoryWidget(new OrderHistoryWidget(m_network, this))
     , m_myPageWidget(new MyPageWidget(m_network, this))
+    , m_storeDetailWidget(new StoreDetailWidget(m_network, this))
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -30,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_orderHistoryWidget);
     ui->stackedWidget->addWidget(m_myPageWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
+    ui->stackedWidget->addWidget(m_storeDetailWidget);
 
     // ── 로그인 ──
     connect(m_loginWidget, &LoginWidget::loginSuccess,
@@ -163,3 +165,17 @@ void MainWindow::onFavoriteRequested()
 
 void MainWindow::showLogin() { ui->stackedWidget->setCurrentWidget(m_loginWidget); }
 void MainWindow::showHome()  { ui->stackedWidget->setCurrentWidget(m_homeWidget); }
+
+// ============================================================
+// 2페이지(가게 목록)에서 가게를 클릭했을 때 실행되는 함수
+// ============================================================
+void MainWindow::onStoreSelected(int storeId)
+{
+    qDebug() << "[MainWindow] 3페이지로 이동! 선택된 가게 ID:" << storeId;
+    
+    // 🚀 이제 에러 안 납니다! 가게 ID를 3페이지로 던져줍니다.
+    m_storeDetailWidget->loadStoreData(storeId);
+    
+    // 화면을 3페이지로 전환!
+    ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
+}
