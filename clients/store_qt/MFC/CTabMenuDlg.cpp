@@ -42,6 +42,7 @@ BOOL CTabMenuDlg::OnInitDialog()
     return TRUE;
 }
 
+
 // =========================================================================
 // List Control 컬럼 초기화
 // =========================================================================
@@ -59,27 +60,55 @@ void CTabMenuDlg::InitListCtrl()
     m_listMenu.InsertColumn(3, L"상태", LVCFMT_CENTER, 80);
     m_listMenu.InsertColumn(4, L"인기메뉴", LVCFMT_CENTER, 80);
 
-    // TODO: 서버에서 받은 메뉴 데이터로 채우기
-    // 현재는 임시 더미 데이터
-    int nIdx = m_listMenu.InsertItem(0, L"떡볶이 2인세트");
-    m_listMenu.SetItemText(nIdx, 1, L"18,000");
-    m_listMenu.SetItemText(nIdx, 2, L"메인");
-    m_listMenu.SetItemText(nIdx, 3, L"판매중");
-    m_listMenu.SetItemText(nIdx, 4, L"O");
-
-    nIdx = m_listMenu.InsertItem(1, L"순대 1개");
-    m_listMenu.SetItemText(nIdx, 1, L"4,000");
-    m_listMenu.SetItemText(nIdx, 2, L"사이드");
-    m_listMenu.SetItemText(nIdx, 3, L"판매중");
-    m_listMenu.SetItemText(nIdx, 4, L"X");
-
-    nIdx = m_listMenu.InsertItem(2, L"라면 1개");
-    m_listMenu.SetItemText(nIdx, 1, L"5,000");
-    m_listMenu.SetItemText(nIdx, 2, L"메인");
-    m_listMenu.SetItemText(nIdx, 3, L"품절");
-    m_listMenu.SetItemText(nIdx, 4, L"X");
 }
 
+void CTabMenuDlg::LoadMenuList()
+{
+    if (!m_pNet) return;
+
+    json body;
+    body["storeId"] = m_storeId;  // ✅ 멤버변수 사용
+    m_pNet->Send(CmdID::REQ_MENU_LIST, body);
+}
+
+void CTabMenuDlg::SetMenuInfo(int storeId, CNetworkHelper* pNet)
+{
+    m_storeId = storeId;
+    m_pNet = pNet;
+    LoadMenuList(); // 저장 즉시 서버에 요청
+}
+
+void CTabMenuDlg::SetMenuList(const nlohmann::json& menuArray)
+{
+    m_listMenu.DeleteAllItems();
+
+    auto toW = [](const std::string& s) -> CString {
+        return CA2W(s.c_str(), CP_UTF8);
+        };
+
+    for (int i = 0; i < (int)menuArray.size(); i++)
+    {
+        const auto& menu = menuArray[i];
+
+        CString menuName = toW(menu.value("menuName", ""));
+        int     price = menu.value("basePrice", 0);
+        CString category = toW(menu.value("menuCategory", ""));
+        bool    soldOut = menu.value("isSoldOut", false);
+        bool    popular = menu.value("isPopular", false);
+
+        CString strPrice;
+        strPrice.Format(L"%d", price);
+
+        int nIdx = m_listMenu.InsertItem(i, menuName);
+        m_listMenu.SetItemText(nIdx, 1, strPrice);
+        m_listMenu.SetItemText(nIdx, 2, category);
+        m_listMenu.SetItemText(nIdx, 3, soldOut ? L"품절" : L"판매중");
+        m_listMenu.SetItemText(nIdx, 4, popular ? L"O" : L"X");
+
+        // menuId를 나중에 수정/삭제 시 사용하기 위해 저장
+        m_listMenu.SetItemData(nIdx, menu.value("menuId", 0));
+    }
+}
 // =========================================================================
 // 선택 항목 유무에 따라 버튼 활성화/비활성화
 // =========================================================================

@@ -96,4 +96,6 @@ private:
     CString     m_bakOwnerPhone;
     CString     m_bakAccount;
     int         m_bakCategory = 0;
+public:
+    afx_msg void OnCbnSelchangeComboCategory();
 };

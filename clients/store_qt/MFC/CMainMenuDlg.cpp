@@ -85,6 +85,7 @@ BOOL CMainMenuDlg::OnInitDialog()
         m_cookTime, m_minOrder, m_openTime, m_closeTime,
         m_ownerName, m_ownerPhone, m_accountNumber, m_approvalStatus
     );
+    m_tabMenuDlg.SetMenuInfo(m_storeId, m_pNet);
 
     m_tabReviewDlg.Create(IDD_TAB_REVIEW, &m_tabCtrl);
     m_tabReviewDlg.MoveWindow(&rcTab);
@@ -138,14 +139,22 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     {
         json resJson = json::parse(pkt->body);
         if (resJson.value("status", 0) == 200)
-            m_tabStoreDlg.OnStoreUpdateSuccess();  // ✅ 성공 시 탭에 전달
+            m_tabStoreDlg.OnStoreUpdateSuccess();
         else
             MessageBox(L"저장에 실패했습니다.", L"오류", MB_ICONERROR);
+    }
+
+    else if (pkt->cmdId == CmdID::RES_MENU_LIST)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) == 200)
+            m_tabMenuDlg.SetMenuList(resJson["menus"]);
     }
 
     delete pkt;
     return 0;
 }
+
 BEGIN_MESSAGE_MAP(CMainMenuDlg, CDialogEx)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_STATUS_SET, &CMainMenuDlg::OnTcnSelchangeTabStatusSet)
     ON_MESSAGE(WM_PACKET_RECEIVED, &CMainMenuDlg::OnPacketReceived)  // ✅ 추가
