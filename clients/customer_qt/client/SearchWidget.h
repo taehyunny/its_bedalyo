@@ -11,13 +11,14 @@ namespace Ui { class SearchWidget; }
 QT_END_NAMESPACE
 
 // ============================================================
-// 최근 검색어 항목 (서버 응답 DTO 확정 전 임시 구조체)
-// 서버팀과 테이블 확정 후 SearchDTO.h 로 분리 예정
+// 최근 검색어 항목 — ResearchDTO.h의 RecentSearch Qt 래핑
+// historyId : 서버 PK (개별 삭제 시 전송)
+// keyword   : 검색어
+// (date 필드 제거 — 서버 DTO에 없음)
 // ============================================================
 struct RecentSearchItem {
-    int     searchId;   // 검색어 PK (개별 삭제 시 서버에 전송)
+    int     historyId;  // 서버 PK (개별 삭제 시 전송)
     QString keyword;    // 검색어
-    QString date;       // 날짜 문자열 (예: "03.21")
 };
 
 // ============================================================
@@ -54,8 +55,8 @@ public:
     void loadSearchData();
 
 signals:
-    void backRequested();                        // ← 버튼 → 홈으로
-    void searchRequested(const QString &keyword); // 검색 실행 → 결과 화면으로
+    void backRequested();
+    void searchRequested(const QString &keyword);
     void favoriteRequested();
     void orderListRequested();
     void mypageRequested();
@@ -67,12 +68,9 @@ private slots:
     void on_btnDeleteAll_clicked();
     void onSearchEditReturnPressed();
 
-    // ── 서버 응답 슬롯 (NetworkManager 시그널 연결) ──
-    // TODO: NetworkManager에 아래 시그널 추가 필요
-    // void onSearchWidgetReceived(QList<QString> popular, QList<RecentSearchItem> recent);
-    // void onRecentDeleteReceived(int status);
-    // void onRecentAddReceived(int status);
-    // void onRecentDeleteAllReceived(int status);
+    // ── 서버 응답 슬롯 ──
+    void onSearchWidgetReceived(QList<PopularKeywordQt> popular,
+                                QList<RecentSearchQt> recent);
 
     // ── 내비바 ──
     void on_navHome_clicked();
@@ -85,10 +83,10 @@ private:
     Ui::SearchWidget *ui;
     NetworkManager   *m_network;
 
-    QList<RecentSearchItem> m_recentItems; // 현재 표시 중인 최근 검색어 목록
+    QList<RecentSearchItem> m_recentItems;
 
     // ── UI 빌더 ──
-    void buildPopularList(const QList<QString> &keywords);
+    void buildPopularList(const QList<PopularKeywordQt> &keywords);
     void buildRecentList(const QList<RecentSearchItem> &items);
     void clearLayout(QLayout *layout);
 
@@ -96,7 +94,7 @@ private:
     void executeSearch(const QString &keyword);
 
     // ── 최근 검색어 단건 삭제 (UI + 서버) ──
-    void deleteRecentItem(int searchId, const QString &keyword);
+    void deleteRecentItem(int historyId, const QString &keyword);
 
     // ── 위젯 생성 헬퍼 ──
     QWidget* makeRecentItemWidget(const RecentSearchItem &item);

@@ -12,8 +12,8 @@
 #include <functional>
 
 // ============================================================
-// CatScrollFilter - homewidget.cpp의 CatScrollFilter와 완전히 동일
-// categoryTabScroll viewport에 설치해서 가로 드래그 스크롤 구현
+// CatScrollFilter - 가로 + 세로 드래그 스크롤 모두 지원
+// categoryTabScroll(가로), storeScrollArea(세로) 둘 다 사용
 // ============================================================
 class CatScrollFilter : public QObject {
 public:
@@ -34,9 +34,17 @@ protected:
             }
         } else if (event->type() == QEvent::MouseMove && m_dragging) {
             QMouseEvent *e = static_cast<QMouseEvent*>(event);
-            int delta = e->pos().x() - m_lastPos.x();
+
+            // ── 가로 드래그 ──
+            int deltaX = e->pos().x() - m_lastPos.x();
             m_target->horizontalScrollBar()->setValue(
-                m_target->horizontalScrollBar()->value() - delta);
+                m_target->horizontalScrollBar()->value() - deltaX);
+
+            // ── 세로 드래그 ──
+            int deltaY = e->pos().y() - m_lastPos.y();
+            m_target->verticalScrollBar()->setValue(
+                m_target->verticalScrollBar()->value() - deltaY);
+
             m_lastPos = e->pos();
             return true;
         } else if (event->type() == QEvent::MouseButtonRelease) {
@@ -55,8 +63,11 @@ private:
 
 
 // ============================================================
-// ClickableLabel - mousePressEvent로 클릭을 감지하는 QLabel
-// Q_OBJECT 없이 함수포인터 콜백으로 클릭 처리
+// ClickableLabel - 드래그 vs 클릭 구분 버전
+//
+// Press 시점에 콜백을 바로 호출하지 않고,
+// Release 시점에 이동 거리가 5px 미만일 때만 클릭으로 인정
+// → 카테고리 탭을 드래그로 스크롤할 때 탭이 선택되는 문제 해결
 // ============================================================
 class ClickableLabel : public QLabel {
 public:
@@ -68,21 +79,30 @@ public:
     int     categoryId()   const { return m_categoryId; }
     QString categoryName() const { return m_categoryName; }
 
-    // 클릭 콜백 설정 (lambda로 사용)
     void setClickCallback(std::function<void(int, const QString&)> cb) {
         m_callback = cb;
     }
 
 protected:
     void mousePressEvent(QMouseEvent *e) override {
-        if (e->button() == Qt::LeftButton && m_callback)
-            m_callback(m_categoryId, m_categoryName);
+        if (e->button() == Qt::LeftButton)
+            m_pressPos = e->pos(); // 시작 위치만 저장, 콜백은 아직 호출 안 함
         QLabel::mousePressEvent(e);
+    }
+
+    void mouseReleaseEvent(QMouseEvent *e) override {
+        if (e->button() == Qt::LeftButton && m_callback) {
+            // 5px 이내로 움직였을 때만 클릭으로 인정
+            if ((e->pos() - m_pressPos).manhattanLength() < 5)
+                m_callback(m_categoryId, m_categoryName);
+        }
+        QLabel::mouseReleaseEvent(e);
     }
 
 private:
     int     m_categoryId   = -1;
     QString m_categoryName;
+    QPoint  m_pressPos;   // 클릭 시작 위치 (드래그 판별용)
     std::function<void(int, const QString&)> m_callback;
 };
 
@@ -96,14 +116,19 @@ menucategori::menucategori(NetworkManager *network, QWidget *parent)
 {
     ui->setupUi(this);
 
-    // ── 카테고리 탭: 가로 드래그 스크롤 (homewidget CatScrollFilter 완전 동일) ──
+    // ── 카테고리 탭: 가로 드래그 스크롤 ──
     auto *hFilter = new CatScrollFilter(ui->categoryTabScroll, this);
     ui->categoryTabScroll->viewport()->installEventFilter(hFilter);
     ui->categoryTabScroll->viewport()->setMouseTracking(true);
 
+    // ── 가게 목록: 세로 드래그 스크롤 ──
+    auto *storeFilter = new CatScrollFilter(ui->storeScrollArea, this);
+    ui->storeScrollArea->viewport()->installEventFilter(storeFilter);
+    ui->storeScrollArea->viewport()->setMouseTracking(true);
+
     // ── 버튼 연결 ──
-    connect(ui->btnBack,    &QPushButton::clicked, this, &menucategori::backRequested);
-    connect(ui->btnSort,    &QPushButton::clicked, this, &menucategori::onSortButtonClicked);
+    connect(ui->btnBack, &QPushButton::clicked, this, &menucategori::backRequested);
+    connect(ui->btnSort, &QPushButton::clicked, this, &menucategori::onSortButtonClicked);
 
     // ── 가게 목록 수신 ──
     connect(m_network, &NetworkManager::onStoreListReceived,
@@ -135,7 +160,7 @@ void menucategori::setCategory(int categoryId, const QString &categoryName,
 }
 
 // ============================================================
-// 카테고리 탭 가로 드래그 스크롤 생성
+// 카테고리 탭 빌드
 // ============================================================
 void menucategori::buildCategoryTabs(const QList<CategoryInfoQt> &categories)
 {
@@ -170,7 +195,6 @@ void menucategori::buildCategoryTabs(const QList<CategoryInfoQt> &categories)
 
     static_cast<QHBoxLayout*>(layout)->addStretch();
 
-    // 선택된 탭 위치로 스크롤
     for (int i = 0; i < layout->count(); ++i) {
         ClickableLabel *b = dynamic_cast<ClickableLabel*>(layout->itemAt(i)->widget());
         if (b && b->categoryId() == m_currentCategoryId) {
@@ -181,9 +205,7 @@ void menucategori::buildCategoryTabs(const QList<CategoryInfoQt> &categories)
 }
 
 // ============================================================
-// eventFilter - 카테고리 탭(QLabel) 클릭 감지
-// CatScrollFilter가 viewport 이벤트를 소비하므로
-// QLabel에 직접 installEventFilter해서 클릭 처리
+// 카테고리 탭 클릭
 // ============================================================
 void menucategori::onCategoryTabClicked(int categoryId, const QString &categoryName)
 {
@@ -191,7 +213,6 @@ void menucategori::onCategoryTabClicked(int categoryId, const QString &categoryN
     m_currentCategoryName = categoryName;
     ui->labelTitle->setText(categoryName);
 
-    // 모든 탭 스타일 업데이트
     QLayout *layout = ui->categoryTabContentsLayout;
     for (int i = 0; i < layout->count(); ++i) {
         ClickableLabel *b = dynamic_cast<ClickableLabel*>(layout->itemAt(i)->widget());
@@ -209,24 +230,21 @@ void menucategori::onCategoryTabClicked(int categoryId, const QString &categoryN
 }
 
 // ============================================================
-// 추천순 ▼ → 바텀시트 (추천순 / 주문많은순 / 별점높은순)
+// 추천순 ▼ → 바텀시트
 // ============================================================
 void menucategori::onSortButtonClicked()
 {
-    // ── 스택 객체로 생성 → exec() 후 자동 소멸, 크래시 없음 ──
     QDialog sheet(this);
     sheet.setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
     sheet.setAttribute(Qt::WA_TranslucentBackground);
     sheet.setFixedSize(this->width(), this->height());
     sheet.move(mapToGlobal(QPoint(0, 0)));
 
-    // 반투명 오버레이 (sheet 자식)
     QWidget overlay(&sheet);
     overlay.setGeometry(0, 0, sheet.width(), sheet.height());
     overlay.setStyleSheet("background: rgba(0,0,0,0.4);");
     overlay.lower();
 
-    // 바텀시트 패널 (sheet 자식)
     QWidget panel(&sheet);
     panel.setStyleSheet("background: #FFFFFF; border-radius: 16px 16px 0 0;");
     const int panelH = 260;
@@ -237,7 +255,6 @@ void menucategori::onSortButtonClicked()
     vl.setContentsMargins(0, 0, 0, 0);
     vl.setSpacing(0);
 
-    // 타이틀 바
     QWidget titleBar(&panel);
     titleBar.setFixedHeight(52);
     QHBoxLayout tl(&titleBar);
@@ -265,7 +282,6 @@ void menucategori::onSortButtonClicked()
     divLine.setFixedHeight(1);
     vl.addWidget(&divLine);
 
-    // 정렬 옵션 3개
     const QStringList sortOptions = {"추천순", "주문많은순", "별점높은순"};
     for (const QString &opt : sortOptions) {
         QPushButton *optBtn = new QPushButton(&panel);
@@ -292,7 +308,6 @@ void menucategori::onSortButtonClicked()
         vl.addWidget(optBtn);
     }
 
-    // 오버레이 클릭 시 닫기 (EventFilter, sheet 소유)
     struct OverlayFilter : public QObject {
         QDialog *m_sheet;
         OverlayFilter(QDialog *s, QObject *p) : QObject(p), m_sheet(s) {}
@@ -306,7 +321,7 @@ void menucategori::onSortButtonClicked()
     };
     overlay.installEventFilter(new OverlayFilter(&sheet, &sheet));
 
-    sheet.exec(); // 스택 객체 → 자동 소멸
+    sheet.exec();
 }
 
 // ============================================================
@@ -387,7 +402,6 @@ QWidget* menucategori::makeStoreCard(const TopStoreInfoQt &store)
 // ============================================================
 // 헬퍼
 // ============================================================
-
 void menucategori::clearLayout(QLayout *layout)
 {
     if (!layout) return;
