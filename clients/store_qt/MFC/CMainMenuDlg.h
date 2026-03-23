@@ -21,6 +21,9 @@ public:
         const CString& approvalStatus,
         CWnd* pParent = nullptr);
 
+    // ✅ 소멸자 선언 추가
+    virtual ~CMainMenuDlg();
+
 #ifdef AFX_DESIGN_TIME
     enum { IDD = IDD_MAIN_MENU };
 #endif
@@ -34,6 +37,17 @@ private:
     // ── 매장 정보 ──────────────────────────────────────────
     int             m_storeId = 0;
     CString         m_storeName;
+    CString         m_category;
+    CString         m_storeAddress;
+    CString         m_bizNum;
+    CString         m_cookTime;
+    CString         m_minOrder;
+    CString         m_openTime;
+    CString         m_closeTime;
+    CString         m_ownerName;
+    CString         m_ownerPhone;
+    CString         m_accountNumber;
+    CString         m_approvalStatus;
 
     // ── 탭 다이얼로그 ───────────────────────────────────────
     CTabOrderDlg      m_tabOrderDlg;      // 0: 주문 관리
@@ -42,17 +56,6 @@ private:
     CTabReviewDlg     m_tabReviewDlg;     // 3: 리뷰 관리
     CTabSalesDlg      m_tabSalesDlg;      // 4: 매출 통계
     CTabSettlementDlg m_tabSettlementDlg; // 5: 정산 관리
-    CString m_category;
-    CString m_storeAddress;
-    CString m_bizNum;
-    CString m_cookTime;
-    CString m_minOrder;
-    CString m_openTime;
-    CString m_closeTime;
-    CString m_ownerName;
-    CString m_ownerPhone;
-    CString m_accountNumber;
-    CString m_approvalStatus;
 
     // ── 컨트롤 바인딩 ───────────────────────────────────────
     CStatic     m_staticNameBar;   // IDC_STATIC_NAMEBAR

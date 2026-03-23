@@ -102,13 +102,12 @@
 #define IDC_BTN_SETTLEMENT_SEARCH       1185
 #define IDC_STATIC_PENDING_AMOUNT       1186
 #define IDC_STATIC_COMPLETED_AMOUNT     1187
-#define IDC_LIST1                       1188
 #define IDC_LIST_SETTLEMENT             1188
-#define IDC_LIST_MENU                   1188
 #define IDC_BTN_MENU_ADD                1189
 #define IDC_BTN_MENU_EDIT               1190
 #define IDC_BTN_MENU_DELETE             1191
 #define IDC_BTN_MENU_SOLDOUT            1192
+#define IDC_LIST_MENU                   1193
 
 // Next default values for new objects
 // 
@@ -116,7 +115,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        148
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1193
+#define _APS_NEXT_CONTROL_VALUE         1194
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

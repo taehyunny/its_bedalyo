@@ -5,6 +5,8 @@
 #include "afxdialogex.h"
 #include "CMainMenuDlg.h"
 #include "SignupDlg.h"
+#include "NetworkHelper.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -189,7 +191,7 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
                 CString openTime = toW(resJson.value("openTime", ""));
                 CString closeTime = toW(resJson.value("closeTime", ""));
 
-                // ✅ 1 사업자번호 = 1 매장 → storeId를 문자열로 변환해서 bizNum으로 사용
+                // 1 사업자번호 = 1 매장 → storeId를 문자열로 변환해서 bizNum으로 사용
                 CString bizNum;
                 bizNum.Format(L"%d", storeId);
 
@@ -197,8 +199,10 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
                 CString ownerName = toW(resJson.value("userName", ""));
                 CString ownerPhone = toW(resJson.value("phoneNumber", ""));
                 CString accountNumber = toW(resJson.value("accountNumber", ""));
-                CString approvalStatus = resJson.value("approvalStatus", 0) == 1
-                    ? L"승인" : L"대기";
+
+                // ✅ 삼항 연산자 대신 if문으로 변경 (C4927 변환 오류 해결)
+                int nApproval = resJson.value("approvalStatus", 0);
+                CString approvalStatus = (nApproval == 1) ? L"승인" : L"대기";
 
                 ShowWindow(SW_HIDE);
 

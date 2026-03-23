@@ -85,7 +85,7 @@ void COrderDetailDlg::PrintReceipt()
     m_staticOrderTime.GetWindowText(strTime);
     m_staticOrderPrice.GetWindowText(strPrice);
 
-    // std::string으로 변환 후 연결
+    // ✅ std::string으로 변환 후 연결
     std::string sOrderId = CT2A(strOrderId, CP_UTF8);
     std::string sAddress = CT2A(strAddress, CP_UTF8);
     std::string sStatus = CT2A(strStatus, CP_UTF8);

@@ -24,6 +24,9 @@ struct ReceivedPacket
 class CNetworkHelper
 {
 public:
+
+    void SetNotifyHwnd(HWND hWnd) { m_hNotify = hWnd; }
+
     CNetworkHelper()
     {
         WSADATA wsa;
@@ -37,9 +40,7 @@ public:
     }
 
     bool IsValid() const { return m_wsaOk; }
-
-    // ✅ [추가] SignupDlg ↔ MFCDlg 전환 시 패킷 수신 대상 HWND 교체용
-    void SetNotifyHwnd(HWND hWnd) { m_hNotify = hWnd; }
+    // [추가] SignupDlg ↔ MFCDlg 전환 시 패킷 수신 대상 HWND 교체용
 
     bool Connect(const std::string& ip, int port, HWND hNotify)
     {
