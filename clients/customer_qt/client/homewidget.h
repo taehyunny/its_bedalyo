@@ -47,21 +47,21 @@ signals:
     void orderListRequested();
     void mypageRequested();
     void logoutRequested();
-    void cartRequested();          // 카트 바 클릭 → 장바구니 화면으로
+    void cartRequested();
+    void addressRequested();   // 주소 버튼 클릭 → 주소 관리 화면으로
 
 private slots:
     void on_btnSearch_clicked();
+    void on_btnAddress_clicked();  // 주소 버튼 클릭 슬롯
     void on_navHome_clicked();
     void on_navSearch_clicked();
     void on_navFavorite_clicked();
     void on_navOrder_clicked();
     void on_navMy_clicked();
 
-    // 서버에서 메인 홈 데이터 수신 시 호출
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
                             QList<TopStoreInfoQt> topStores);
 
-    // 카트 바 클릭 슬롯
     void on_btnCartView_clicked();
 
 private:
@@ -70,14 +70,7 @@ private:
     QString         m_userName;
     QString         m_address;
 
-    // 카테고리 아이템 위젯 생성
     QWidget* makeCategoryItem(int id, const QString &name, const QString &iconPath);
-
-    // 가게 카드 위젯 생성
     QWidget* makeStoreCard(const TopStoreInfoQt &store);
-
-    // ── 카트 바 UI 갱신 ──
-    // CartSession 상태를 읽어 카트 바를 show/hide하고 수량·금액 업데이트
     void updateCartBar();
-
 };

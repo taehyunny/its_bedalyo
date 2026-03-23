@@ -97,6 +97,7 @@ void LoginWidget::on_loginButton_clicked()
     LoginReqDTO dto;
     dto.userId   = ui->idEdit->text().toStdString();
     dto.password = ui->pwEdit->text().toStdString();
+    dto.role     = 0;
     m_network->sendLogin(dto);
 }
 

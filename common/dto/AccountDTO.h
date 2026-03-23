@@ -66,11 +66,10 @@ struct LoginReqDTO
 {
     std::string userId;   // 아이디 (핸들러의 req.userId에 대응)
     std::string password; // 비밀번호 (핸들러의 req.password에 대응)
-
+    int role;
     // JSON <-> Struct 자동 변환 매크로
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginReqDTO, userId, password)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginReqDTO, userId, password, role)
 };
-
 struct LoginResDTO
 {
     int status;
