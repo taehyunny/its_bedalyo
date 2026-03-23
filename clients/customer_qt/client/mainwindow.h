@@ -2,26 +2,20 @@
 #include <QMainWindow>
 #include "NetworkManager.h"
 #include "config.h"
-#include "LoginWidget.h"
-#include "HomeWidget.h"
+#include "loginwidget.h"
+#include "homewidget.h"
 #include "menucategori.h"
-#include "SearchWidget.h"
-#include "SearchResultWidget.h"
-#include "OrderHistoryWidget.h"
-#include "MyPageWidget.h"
+#include "searchwidget.h"
+#include "searchresultwidget.h"
+#include "orderhistorywidget.h"
+#include "mypagewidget.h"
+#include "policywidget.h"
+#include "settingswidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-// ============================================================
-// MainWindow - 앱 최상위 컨테이너
-//
-// - QStackedWidget으로 화면 전환 관리
-// - NetworkManager를 생성해 각 Widget에 주입
-// - 카테고리 목록을 캐싱해 menucategori 진입 시 재사용
-//   (서버에서 한 번만 받고 재요청 안 함)
-// ============================================================
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -43,22 +37,24 @@ private slots:
     void onOrderListRequested();
     void onMypageRequested();
     void onFavoriteRequested();
+    void onPolicyRequested();
+    void onSettingsRequested();
 
-    // 카테고리 데이터 캐싱 (menucategori 진입 시 재사용)
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
                             QList<TopStoreInfoQt> topStores);
 
 private:
-    Ui::MainWindow *ui;
-    NetworkManager *m_network;
-    LoginWidget    *m_loginWidget;
-    HomeWidget     *m_homeWidget;
-    menucategori   *m_menuWidget;
-    SearchWidget         *m_searchWidget;
-    SearchResultWidget   *m_searchResultWidget;
-    OrderHistoryWidget   *m_orderHistoryWidget;
-    MyPageWidget         *m_myPageWidget;
+    Ui::MainWindow     *ui;
+    NetworkManager     *m_network;
+    LoginWidget        *m_loginWidget;
+    HomeWidget         *m_homeWidget;
+    menucategori       *m_menuWidget;
+    SearchWidget       *m_searchWidget;
+    SearchResultWidget *m_searchResultWidget;
+    OrderHistoryWidget *m_orderHistoryWidget;
+    MyPageWidget       *m_myPageWidget;
+    PolicyWidget       *m_policyWidget;
+    SettingsWidget     *m_settingsWidget;
 
-    // ── 홈에서 받은 카테고리 목록 캐싱 (menucategori에서 재사용) ──
     QList<CategoryInfoQt> m_cachedCategories;
 };

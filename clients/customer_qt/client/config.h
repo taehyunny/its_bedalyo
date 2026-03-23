@@ -11,7 +11,7 @@ namespace AppConfig
 {
     // ── 서버 연결 ──
     static const QString SERVER_IP   = "10.10.10.123";
-    static const quint16 SERVER_PORT = 8009;
+    static const quint16 SERVER_PORT = 8008;
 
     // ── 앱 기본 설정 ──
     static const int WINDOW_WIDTH  = 390;

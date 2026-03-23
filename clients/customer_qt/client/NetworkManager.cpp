@@ -198,6 +198,7 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         // ── 로그인 응답 ──
         if (cmdId == CmdID::RES_LOGIN) {
             AuthResDTO dto = j.get<AuthResDTO>();
+            qDebug() << "[Login] phoneNumber:" << QString::fromStdString(dto.phoneNumber);
             emit onLoginResponse(dto.status,
                                  QString::fromStdString(dto.message),
                                  QString::fromStdString(dto.userName),

@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_searchResultWidget(new SearchResultWidget(m_network, this))
     , m_orderHistoryWidget(new OrderHistoryWidget(m_network, this))
     , m_myPageWidget(new MyPageWidget(m_network, this))
+    , m_policyWidget(new PolicyWidget(this))
+    , m_settingsWidget(new SettingsWidget(m_network, this))
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -29,13 +31,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_searchResultWidget);
     ui->stackedWidget->addWidget(m_orderHistoryWidget);
     ui->stackedWidget->addWidget(m_myPageWidget);
+    ui->stackedWidget->addWidget(m_policyWidget);
+    ui->stackedWidget->addWidget(m_settingsWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
 
     // ── 로그인 ──
     connect(m_loginWidget, &LoginWidget::loginSuccess,
             this, &MainWindow::onLoginSuccess);
-    connect(m_homeWidget, &HomeWidget::logoutRequested,
-            this, &MainWindow::onLogoutRequested);
 
     // ── 카테고리 화면 ──
     connect(m_homeWidget, &HomeWidget::categorySelected,
@@ -84,7 +86,19 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::onOrderListRequested);
     connect(m_myPageWidget, &MyPageWidget::favoriteRequested,
             this, &MainWindow::onFavoriteRequested);
-    connect(m_myPageWidget, &MyPageWidget::logoutRequested,
+    connect(m_myPageWidget, &MyPageWidget::policyRequested,
+            this, &MainWindow::onPolicyRequested);
+    connect(m_myPageWidget, &MyPageWidget::settingsRequested,
+            this, &MainWindow::onSettingsRequested);
+
+    // ── 약관 및 정책 화면 ──
+    connect(m_policyWidget, &PolicyWidget::backRequested,
+            this, &MainWindow::onMypageRequested);
+
+    // ── 설정 화면 ──
+    connect(m_settingsWidget, &SettingsWidget::backRequested,
+            this, &MainWindow::onMypageRequested);
+    connect(m_settingsWidget, &SettingsWidget::logoutRequested,
             this, &MainWindow::onLogoutRequested);
 
     // ── 카테고리 데이터 캐싱 ──
@@ -146,15 +160,21 @@ void MainWindow::onMypageRequested()
     ui->stackedWidget->setCurrentWidget(m_myPageWidget);
 }
 
+void MainWindow::onPolicyRequested()
+{
+    ui->stackedWidget->setCurrentWidget(m_policyWidget);
+}
+
+void MainWindow::onSettingsRequested()
+{
+    ui->stackedWidget->setCurrentWidget(m_settingsWidget);
+}
+
 void MainWindow::onBackToHome()
 {
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
 }
 
-// ============================================================
-// 즐겨찾기 화면 전환
-// TODO: 즐겨찾기 Widget 구현 후 화면 전환 추가
-// ============================================================
 void MainWindow::onFavoriteRequested()
 {
     // TODO: m_favoriteWidget->loadData();
