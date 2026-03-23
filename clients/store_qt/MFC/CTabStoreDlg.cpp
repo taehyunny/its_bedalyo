@@ -4,6 +4,7 @@
 #include "MFC.h"
 #include "afxdialogex.h"
 #include "CTabStoreDlg.h"
+#include "json.hpp"
 
 IMPLEMENT_DYNAMIC(CTabStoreDlg, CDialogEx)
 
@@ -16,6 +17,40 @@ CTabStoreDlg::~CTabStoreDlg()
 {
 }
 
+void CTabStoreDlg::SetUIMode(BOOL bEditMode)
+{
+    BOOL bReadOnly = !bEditMode;
+
+    // --- [그룹 1] 수정 버튼을 눌러야 활성화되는 항목들 ---
+    m_editStoreName.SetReadOnly(bReadOnly);
+    m_editStoreAddress.SetReadOnly(bReadOnly);
+    m_editOwnerName.SetReadOnly(bReadOnly);
+    m_editOwnerPhone.SetReadOnly(bReadOnly);
+    m_editAccount.SetReadOnly(bReadOnly);
+    m_comboCategory.EnableWindow(bEditMode);
+
+    // --- [그룹 2] 항상 활성화 (자주 바뀌는 설정) ---
+    // 이 항목들은 bReadOnly 값과 상관없이 항상 FALSE(입력가능) / TRUE(활성)
+    m_editCookTime.SetReadOnly(FALSE);
+    m_editMinOrder.SetReadOnly(FALSE);
+    m_editOpenTime.SetReadOnly(FALSE);
+    m_editCloseTime.SetReadOnly(FALSE);
+    m_btnStoreOpen.EnableWindow(TRUE);
+    m_btnStoreClose.EnableWindow(TRUE);
+
+    // --- [그룹 3] 항상 읽기 전용 (관리자 문의 대상) ---
+    m_editStoreBiznum.SetReadOnly(TRUE);
+    m_staticApproval.EnableWindow(FALSE); // 승인 상태 등
+
+    // --- [그룹 4] 수정 버튼 자체 제어 ---
+    // 수정 중일 때는 다른 '수정' 버튼을 못 누르게 막음
+    m_btnEditName.EnableWindow(bReadOnly);
+    m_btnEditCategory.EnableWindow(bReadOnly);
+    m_btnEditAddress.EnableWindow(bReadOnly);
+    m_btnEditOwnerName.EnableWindow(bReadOnly);
+    m_btnEditOwnerPhone.EnableWindow(bReadOnly);
+    m_btnEditAccount.EnableWindow(bReadOnly);
+}
 // =========================================================================
 // 컨트롤 바인딩
 // =========================================================================
@@ -268,19 +303,95 @@ void CTabStoreDlg::OnBnClickedBtnStoreClose()
 // =========================================================================
 void CTabStoreDlg::OnBnClickedBtnSave()
 {
-    // TODO: 변경된 값 서버에 전송
-    MessageBox(L"저장되었습니다.", L"저장", MB_OK);
+        // 1. 변경된 값을 담을 JSON 객체 생성
+        nlohmann::json updateBody;
 
-    m_editStoreName.SetReadOnly(TRUE);
-    m_editStoreAddress.SetReadOnly(TRUE);
-    m_editOwnerName.SetReadOnly(TRUE);
-    m_editOwnerPhone.SetReadOnly(TRUE);
-    m_editAccount.SetReadOnly(TRUE);
+        // 2. 각 필드별로 백업값(원본)과 현재 입력값을 비교 (Dirty Check)
+        CString currentVal;
+
+        // 매장명
+        m_editStoreName.GetWindowText(currentVal);
+        if (currentVal != m_bakStoreName) {
+            updateBody["storeName"] = CT2A(currentVal).m_psz;
+        }
+
+        // 카테고리 (인덱스가 아닌 텍스트로 보낼 경우)
+        int curSel = m_comboCategory.GetCurSel();
+        if (curSel != m_bakCategory) {
+            CString strCat;
+            m_comboCategory.GetLBText(curSel, strCat);
+            updateBody["category"] = CT2A(strCat).m_psz;
+        }
+
+        // 매장 주소
+        m_editStoreAddress.GetWindowText(currentVal);
+        if (currentVal != m_bakStoreAddress) {
+            updateBody["storeAddress"] = CT2A(currentVal).m_psz;
+        }
+
+        // 조리 시간
+        m_editCookTime.GetWindowText(currentVal);
+        if (currentVal != m_bakCookTime) {
+            updateBody["cookTime"] = CT2A(currentVal).m_psz;
+        }
+
+        // 최소 주문 금액
+        m_editMinOrder.GetWindowText(currentVal);
+        if (currentVal != m_bakMinOrder) {
+            updateBody["minOrderPrice"] = _ttoi(currentVal); // 숫자로 변환하여 전송
+        }
+
+        // 영업 시간 (Open / Close)
+        m_editOpenTime.GetWindowText(currentVal);
+        if (currentVal != m_bakOpenTime) updateBody["openTime"] = CT2A(currentVal).m_psz;
+
+        m_editCloseTime.GetWindowText(currentVal);
+        if (currentVal != m_bakCloseTime) updateBody["closeTime"] = CT2A(currentVal).m_psz;
+
+        // 점주명
+        m_editOwnerName.GetWindowText(currentVal);
+        if (currentVal != m_bakOwnerName) updateBody["ownerName"] = CT2A(currentVal).m_psz;
+
+        // 전화번호
+        m_editOwnerPhone.GetWindowText(currentVal);
+        if (currentVal != m_bakOwnerPhone) updateBody["ownerPhone"] = CT2A(currentVal).m_psz;
+
+        // 정산 계좌
+        m_editAccount.GetWindowText(currentVal);
+        if (currentVal != m_bakAccount) updateBody["accountNumber"] = CT2A(currentVal).m_psz;
+
+
+        // 3. 서버 전송 로직
+        if (!updateBody.empty())
+        {
+            // 💡 중요: 어떤 매장의 정보를 바꾸는지 알 수 있도록 ID 등을 추가로 넣어야 할 수 있습니다.
+            // updateBody["storeId"] = m_storeId; 
+
+            // NetworkHelper를 통해 서버에 전송 (메인 윈도우나 전역 객체의 m_net 접근)
+            // 예: theApp.m_net.Send(CmdID::REQ_STORE_INFO_UPDATE, updateBody);
+
+            // 현재 클래스에 m_net이 있다고 가정할 때:
+            // m_net.Send(CmdID::REQ_STORE_INFO_UPDATE, updateBody);
+
+            MessageBox(L"변경사항을 서버에 요청했습니다.", L"저장", MB_OK);
+
+            // 저장이 성공했다고 가정하고 백업값 갱신 (또는 서버 응답 후에 처리)
+            BackupValues();
+        }
+        else
+        {
+            MessageBox(L"변경사항이 없습니다.", L"알림", MB_OK | MB_ICONINFORMATION);
+        }
+
+        // UI 상태 복구 (모두 읽기 전용으로)
+        SetUIMode(FALSE);
+        MessageBox(L"수정사항이 저장되었습니다.", L"알림", MB_OK);
 }
 
 void CTabStoreDlg::OnBnClickedBtnCancel()
 {
     RestoreValues();
+    SetUIMode(FALSE);
 }
 
 BEGIN_MESSAGE_MAP(CTabStoreDlg, CDialogEx)

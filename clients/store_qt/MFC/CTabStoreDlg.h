@@ -1,5 +1,9 @@
 ﻿#pragma once
+#include "pch.h"
+#include "MFC.h"
 #include "afxdialogex.h"
+#include "CTabStoreDlg.h"
+#include "json.hpp"
 
 class CTabStoreDlg : public CDialogEx
 {
@@ -8,13 +12,14 @@ class CTabStoreDlg : public CDialogEx
 public:
     CTabStoreDlg(CWnd* pParent = nullptr);
     virtual ~CTabStoreDlg();
+    void SetUIMode(BOOL bEditMode);
 
 #ifdef AFX_DESIGN_TIME
     enum { IDD = IDD_TAB_STORE };
 #endif
 
     // ✅ 서버에서 받은 매장/사장님 정보를 채우는 함수
-    void SetStoreInfo(
+   void SetStoreInfo(
         const CString& storeName, const CString& category,
         const CString& storeAddress, const CString& bizNum,
         const CString& cookTime, const CString& minOrder,
@@ -35,7 +40,6 @@ protected:
     afx_msg void OnBnClickedBtnEditOwnerName();
     afx_msg void OnBnClickedBtnEditOwnerPhone();
     afx_msg void OnBnClickedBtnEditAccount();
-
     // ── 영업 상태 버튼 핸들러 ────────────────────────────────
     afx_msg void OnBnClickedBtnStoreOpen();
     afx_msg void OnBnClickedBtnStoreClose();
@@ -43,14 +47,13 @@ protected:
     // ── 저장 / 취소 버튼 핸들러 ─────────────────────────────
     afx_msg void OnBnClickedBtnSave();
     afx_msg void OnBnClickedBtnCancel();
-
+    void BackupValues();
+    void RestoreValues();
     DECLARE_MESSAGE_MAP()
 
 private:
     int m_nScrollPos = 0;
 
-    void BackupValues();
-    void RestoreValues();
 
     // ── 매장 정보 컨트롤 ─────────────────────────────────────
     CEdit       m_editStoreName;       // IDC_EDIT_STORE_NAME
