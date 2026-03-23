@@ -112,10 +112,10 @@ struct AuthResDTO
     int approvalStatus = 0; // 0: 대기, 1: 승인
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(AuthResDTO,
-        status, message, userId, address, userName, phoneNumber, role, errorType,
-        storeId, storeName, category, storeAddress,
-        cookTime, minOrderAmount, openTime, closeTime,
-        accountNumber, approvalStatus)
+                                   status, message, userId, address, userName, phoneNumber, role, errorType,
+                                   storeId, storeName, category, storeAddress,
+                                   cookTime, minOrderAmount, openTime, closeTime,
+                                   accountNumber, approvalStatus)
 };
 // ---------------------------------------------------------
 // [5] 중복 확인 DTO (1040 ~ 1043)

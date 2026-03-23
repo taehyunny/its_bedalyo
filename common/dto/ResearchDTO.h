@@ -1,4 +1,3 @@
-
 #pragma once
 #include "StoreDTO.h"
 #include <string>
