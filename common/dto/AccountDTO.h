@@ -91,6 +91,8 @@ struct LoginResDTO
 struct AuthResDTO
 {
     int status;
+    std::string userId;
+    std::string address;
     std::string message;
     std::string userName;
     std::string phoneNumber;
@@ -98,7 +100,7 @@ struct AuthResDTO
     std::string errorType;
 
     // ── 사장님 전용 (role == "1" 일 때만 채워짐) ──────────────
-    int storeId = 0;           // 사업자번호 겸 매장 ID
+    int storeId = 0; // 사업자번호 겸 매장 ID
     std::string storeName;
     std::string category;
     std::string storeAddress;
@@ -107,10 +109,10 @@ struct AuthResDTO
     std::string openTime;
     std::string closeTime;
     std::string accountNumber;
-    int approvalStatus = 0;    // 0: 대기, 1: 승인
+    int approvalStatus = 0; // 0: 대기, 1: 승인
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(AuthResDTO,
-        status, message, userName, phoneNumber, role, errorType,
+        status, message, userId, address, userName, phoneNumber, role, errorType,
         storeId, storeName, category, storeAddress,
         cookTime, minOrderAmount, openTime, closeTime,
         accountNumber, approvalStatus)

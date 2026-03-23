@@ -192,8 +192,7 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
                 CString closeTime = toW(resJson.value("closeTime", ""));
 
                 // 1 사업자번호 = 1 매장 → storeId를 문자열로 변환해서 bizNum으로 사용
-                CString bizNum;
-                bizNum.Format(L"%d", storeId);
+                CString bizNum = toW(resJson.value("businessNumber", ""));
 
                 // ── 사장님 정보 수신 ────────────────────────────────
                 CString ownerName = toW(resJson.value("userName", ""));
@@ -207,7 +206,8 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
                 ShowWindow(SW_HIDE);
 
                 CMainMenuDlg mainDlg(
-                    storeId, storeName, category, storeAddress,
+                    storeId, &m_net,           
+                    storeName, category, storeAddress,
                     bizNum, cookTime, minOrder, openTime,
                     closeTime, ownerName, ownerPhone, accountNumber,
                     approvalStatus, this
