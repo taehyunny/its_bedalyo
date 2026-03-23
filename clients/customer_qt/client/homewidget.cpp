@@ -39,6 +39,7 @@ void DragScrollArea::mouseReleaseEvent(QMouseEvent *e)
 
 // ============================================================
 // CatScrollFilter — QScrollArea에 드래그 스크롤을 붙이는 이벤트 필터
+// 가로(horizontal) + 세로(vertical) 드래그 모두 지원
 // ============================================================
 class CatScrollFilter : public QObject {
 public:
@@ -58,9 +59,17 @@ protected:
             }
         } else if (event->type() == QEvent::MouseMove && m_dragging) {
             QMouseEvent *e = static_cast<QMouseEvent*>(event);
-            int delta = e->pos().x() - m_lastPos.x();
+
+            // ── 가로 드래그 ──
+            int deltaX = e->pos().x() - m_lastPos.x();
             m_target->horizontalScrollBar()->setValue(
-                m_target->horizontalScrollBar()->value() - delta);
+                m_target->horizontalScrollBar()->value() - deltaX);
+
+            // ── 세로 드래그 ──
+            int deltaY = e->pos().y() - m_lastPos.y();
+            m_target->verticalScrollBar()->setValue(
+                m_target->verticalScrollBar()->value() - deltaY);
+
             m_lastPos = e->pos();
             return true;
         } else if (event->type() == QEvent::MouseButtonRelease) {
@@ -87,23 +96,20 @@ HomeWidget::HomeWidget(NetworkManager *network, QWidget *parent)
 {
     ui->setupUi(this);
 
-    // ── catScroll1에 드래그 스크롤 필터 설치 ──
+    // ── catScroll1에 드래그 스크롤 필터 설치 (가로) ──
     auto *filter1 = new CatScrollFilter(ui->catScroll1);
     ui->catScroll1->viewport()->installEventFilter(filter1);
     ui->catScroll1->viewport()->setMouseTracking(true);
 
-    // ── catScroll2에도 드래그 스크롤 필터 설치 ──
+    // ── catScroll2에도 드래그 스크롤 필터 설치 (가로) ──
     auto *filter2 = new CatScrollFilter(ui->catScroll2);
     ui->catScroll2->viewport()->installEventFilter(filter2);
     ui->catScroll2->viewport()->setMouseTracking(true);
 
-    // 내비 버튼 연결
-    connect(ui->navHome,     &QPushButton::clicked, this, &HomeWidget::on_navHome_clicked);
-    connect(ui->navSearch,   &QPushButton::clicked, this, &HomeWidget::on_navSearch_clicked);
-    connect(ui->navFavorite, &QPushButton::clicked, this, &HomeWidget::on_navFavorite_clicked);
-    connect(ui->navOrder,    &QPushButton::clicked, this, &HomeWidget::on_navOrder_clicked);
-    connect(ui->navMy,       &QPushButton::clicked, this, &HomeWidget::on_navMy_clicked);
-    connect(ui->btnSearch,   &QPushButton::clicked, this, &HomeWidget::on_btnSearch_clicked);
+    // ── storeScrollArea에 드래그 스크롤 필터 설치 (세로) ──
+    auto *storeFilter = new CatScrollFilter(ui->storeScrollArea);
+    ui->storeScrollArea->viewport()->installEventFilter(storeFilter);
+    ui->storeScrollArea->viewport()->setMouseTracking(true);
 
     // 서버 메인 홈 데이터 수신
     connect(m_network, &NetworkManager::onMainHomeReceived,
@@ -165,7 +171,7 @@ QWidget* HomeWidget::makeCategoryItem(int id, const QString &name, const QString
     Q_UNUSED(iconPath)
 
     QWidget *item = new QWidget();
-    item->setFixedSize(64, 80); // 너비 64, 높이 80px 고정 (이모지52 + 간격6 + 텍스트14 + 여백8)
+    item->setFixedSize(64, 80);
     item->setStyleSheet("background: transparent;");
 
     QVBoxLayout *vl = new QVBoxLayout(item);
@@ -180,7 +186,6 @@ QWidget* HomeWidget::makeCategoryItem(int id, const QString &name, const QString
         "QPushButton:hover { background:#dce8ff; }"
         "QPushButton:pressed { background:#c5d8ff; }"
     );
-    // TODO: iconPath로 실제 이미지 로드
     imgBtn->setText(StoreUtils::categoryEmoji(name));
 
     QLabel *nameLabel = new QLabel(name.isEmpty() ? "-" : name);
@@ -277,43 +282,27 @@ bool HomeWidget::eventFilter(QObject *obj, QEvent *event)
     return QWidget::eventFilter(obj, event);
 }
 
-
-
-
-
-
 // ============================================================
 // 카트 바 UI 갱신
-// CartSession 상태를 읽어 카트 바를 show/hide하고 수량·금액 업데이트
-// 메뉴를 담거나 제거할 때마다 외부에서 이 함수를 호출해야 함
 // ============================================================
 void HomeWidget::updateCartBar()
 {
     CartSession &cart = CartSession::instance();
 
     if (cart.isEmpty()) {
-        // 장바구니가 비어있으면 카트 바 완전히 숨김
         ui->cartBar->hide();
         return;
     }
 
-    // 장바구니에 메뉴가 있으면 카트 바 표시
     ui->cartBar->show();
-
-    // 수량 뱃지 + "카트 보기" 텍스트 업데이트
-    // 예: "  2   카트 보기"
     ui->btnCartView->setText(
         QString("  %1   카트 보기").arg(cart.totalCount())
     );
-
-    // 우측 금액 업데이트
-    // 예: "24,000원"
     ui->labelCartPrice->setText(cart.totalPriceStr());
 }
 
 // ============================================================
 // 카트 바 클릭 → 장바구니 화면으로 전환
-// TODO: 장바구니 화면(CartWidget) 구현 후 MainWindow에서 연결
 // ============================================================
 void HomeWidget::on_btnCartView_clicked()
 {

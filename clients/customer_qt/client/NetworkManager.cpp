@@ -76,9 +76,50 @@ void NetworkManager::sendSearchStore(const QString &keyword)
     sendPacket(CmdID::REQ_SEARCH_STORE, j);
 }
 
+// ── 검색 위젯 요청 (REQ_RESEACH_WIDGET = 2108) ──
+void NetworkManager::sendSearchWidget(const QString &userId)
+{
+    qDebug() << "[NetworkManager] 검색 위젯 요청 userId:" << userId;
+    ReqResearchWidgetDTO dto;
+    dto.userId = userId.toStdString();
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_RESEACH_WIDGET, j);
+}
+
+// ── 검색어 추가 요청 (REQ_RESEARCH_ADD = 2112) ──
+void NetworkManager::sendSearchAdd(const QString &userId, const QString &keyword)
+{
+    qDebug() << "[NetworkManager] 검색어 추가 요청 keyword:" << keyword;
+    ReqResearchAddDTO dto;
+    dto.userId  = userId.toStdString();
+    dto.keyword = keyword.toStdString();
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_RESEARCH_ADD, j);
+}
+
+// ── 검색어 단건 삭제 요청 (REQ_RESEARCH_DELETE = 2110) ──
+void NetworkManager::sendSearchDelete(const QString &userId, int historyId)
+{
+    qDebug() << "[NetworkManager] 검색어 단건 삭제 historyId:" << historyId;
+    ReqResearchDeleteDTO dto;
+    dto.userId    = userId.toStdString();
+    dto.historyId = historyId;
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_RESEARCH_DELETE, j);
+}
+
+// ── 검색어 전체 삭제 요청 (REQ_RESEARCH_DEL_ALL = 2114) ──
+void NetworkManager::sendSearchDeleteAll(const QString &userId)
+{
+    qDebug() << "[NetworkManager] 검색어 전체 삭제 userId:" << userId;
+    ReqResearchDelAllDTO dto;
+    dto.userId = userId.toStdString();
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_RESEARCH_DEL_ALL, j);
+}
+
 // ============================================================
 // TopStoreInfo(C++ DTO) → TopStoreInfoQt(Qt 타입) 변환 헬퍼
-// 동일한 변환 코드가 여러 곳에 반복되는 것을 방지
 // ============================================================
 static TopStoreInfoQt toQt(const TopStoreInfo &s)
 {
@@ -157,9 +198,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         // ── 로그인 응답 ──
         if (cmdId == CmdID::RES_LOGIN) {
             AuthResDTO dto = j.get<AuthResDTO>();
-            qDebug() << "[NetworkManager] 로그인 응답 status:" << dto.status
-                     << "userName:" << QString::fromStdString(dto.userName)
-                     << "address:"  << QString::fromStdString(dto.address);
             emit onLoginResponse(dto.status,
                                  QString::fromStdString(dto.message),
                                  QString::fromStdString(dto.userName),
@@ -169,7 +207,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         // ── 회원가입 응답 ──
         } else if (cmdId == CmdID::RES_SIGNUP) {
             AuthResDTO dto = j.get<AuthResDTO>();
-            qDebug() << "[NetworkManager] 회원가입 응답 status:" << dto.status;
             emit onSignupResponse(dto.status,
                                   QString::fromStdString(dto.message));
 
@@ -190,8 +227,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         // ── 메인 홈 데이터 수신 (RES_CATEGORY) ──
         } else if (cmdId == CmdID::RES_CATEGORY) {
             MainHomeResDTO dto = j.get<MainHomeResDTO>();
-            qDebug() << "[NetworkManager] 메인홈 수신 - 카테고리:"
-                     << dto.categories.size() << "가게:" << dto.topStores.size();
 
             QList<CategoryInfoQt> categories;
             for (const auto &c : dto.categories) {
@@ -209,12 +244,8 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             emit onMainHomeReceived(categories, topStores);
 
         // ── 카테고리별 가게 목록 수신 (RES_STORE_LIST = 2001) ──
-        // 서버 구조: { "status": 200, "message": "...", "stores": [...] }
-        // → StoreListResDTO로 파싱 후 stores 배열 사용
         } else if (cmdId == CmdID::RES_STORE_LIST) {
             StoreListResDTO dto = j.get<StoreListResDTO>();
-            qDebug() << "[NetworkManager] 가게 목록 수신 status:" << dto.status
-                     << "count:" << dto.stores.size();
 
             QList<TopStoreInfoQt> stores;
             for (const auto &s : dto.stores)
@@ -225,13 +256,34 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         // ── 매장 검색 결과 수신 (RES_SEARCH_STORE = 2117) ──
         } else if (cmdId == CmdID::RES_SEARCH_STORE) {
             ResSearchStoreDTO dto = j.get<ResSearchStoreDTO>();
-            qDebug() << "[NetworkManager] 매장 검색 결과 status:" << dto.status
-                     << "count:" << dto.storeList.size();
 
             QList<TopStoreInfoQt> stores;
             for (const auto &s : dto.storeList)
                 stores.append(toQt(s));
+
             emit onSearchResultReceived(stores);
+
+        // ── 검색 위젯 데이터 수신 (RES_RESEACH_WIDGET = 2109) ──
+        } else if (cmdId == CmdID::RES_RESEACH_WIDGET) {
+            ResResearchWidgetDTO dto = j.get<ResResearchWidgetDTO>();
+
+            QList<PopularKeywordQt> popular;
+            for (const auto &p : dto.popularKeywords) {
+                PopularKeywordQt item;
+                item.rank    = p.rank;
+                item.keyword = QString::fromStdString(p.keyword);
+                popular.append(item);
+            }
+
+            QList<RecentSearchQt> recent;
+            for (const auto &r : dto.recentSearches) {
+                RecentSearchQt item;
+                item.historyId = r.historyId;
+                item.keyword   = QString::fromStdString(r.keyword);
+                recent.append(item);
+            }
+
+            emit onSearchWidgetReceived(popular, recent);
 
         } else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"
