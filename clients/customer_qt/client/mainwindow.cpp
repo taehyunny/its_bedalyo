@@ -93,8 +93,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &MainWindow::onMainHomeReceived);
 
-    connect(m_menuWidget, &menucategori::storeSelected, 
-            this, &MainWindow::onStoreSelected);
+//     connect(m_menuWidget, &menucategori::storeSelected, 
+//             this, &MainWindow::onStoreSelected);
+    connect(m_homeWidget, &HomeWidget::storeSelected, this, &MainWindow::onStoreSelected);
 
     // ── 서버 연결 ──
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);

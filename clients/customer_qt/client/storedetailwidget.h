@@ -26,7 +26,7 @@ signals:
 
 private slots:
     void on_btnBack_clicked();
-    void onMenuListReceived(int storeId, QList<MenuDTO> menus); // 서버 응답 받을 슬롯
+    void onStoreDetailReceived(StoreDetailQt detail);
 
 private:
     Ui::StoreDetailWidget *ui;
@@ -34,7 +34,7 @@ private:
     
     int m_currentStoreId; // 현재 보고 있는 가게 ID
 
-    void renderMenuList(const QList<MenuDTO>& menus);
+    // void renderMenuList(const QList<MenuDTO>& menus);
     void clearLayout(QLayout* layout);
-    QWidget* makeMenuCard(const MenuDTO& menu);
+    QWidget* makeMenuCard(const MenuQt& menu);
 };

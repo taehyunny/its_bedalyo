@@ -148,3 +148,54 @@ struct BizNumCheckResDTO
     std::string message;
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(BizNumCheckResDTO, status, isAvailable, message)
 };
+
+// ==========================================================
+// 🚀 3서버 응답 DTO 설계도 추가
+// ==========================================================
+
+struct StoreDataDTO {
+    int store_id;
+    std::string store_name;
+    std::string store_address;
+    std::string operating_hours;
+    std::string delivery_fees;
+    bool is_open;
+    std::string image_url;
+    int min_order_amount;
+    double rating;
+    int review_count;
+    std::string delivery_time_range;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(StoreDataDTO, store_id, store_name, store_address, operating_hours, delivery_fees, is_open, image_url, min_order_amount, rating, review_count, delivery_time_range)
+
+struct MenuDataDTO {
+    int menu_id;
+    int store_id;
+    std::string menu_name;
+    int base_price;
+    bool is_sold_out;
+    std::string description;
+    std::string image_url;
+    std::string menu_category;
+    bool is_popular;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MenuDataDTO, menu_id, store_id, menu_name, base_price, is_sold_out, description, image_url, menu_category, is_popular)
+
+struct ReviewDataDTO {
+    int review_id;
+    int store_id;
+    std::string user_id;
+    int order_id;
+    int rating;
+    std::string comment;
+    std::string created_at;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ReviewDataDTO, review_id, store_id, user_id, order_id, rating, comment, created_at)
+
+struct ResStoreDetailDTO {
+    int status;
+    StoreDataDTO storeData;
+    std::vector<MenuDataDTO> menuList;
+    std::vector<ReviewDataDTO> reviewList;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ResStoreDetailDTO, status, storeData, menuList, reviewList)

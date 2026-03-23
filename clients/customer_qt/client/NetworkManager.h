@@ -40,6 +40,42 @@ struct RecentSearchQt {
     QString searchDate;
 };
 
+// --- 3페이지(가게 상세)용 Qt 구조체 ---
+struct MenuQt {
+    int     menuId;
+    QString menuName;
+    int     basePrice;
+    QString description;
+    QString imageUrl;
+    QString menuCategory;
+    bool    isSoldOut;
+    bool    isPopular;
+};
+
+struct ReviewQt {
+    int     reviewId;
+    QString userId;
+    int     rating;
+    QString comment;
+    QString createdAt;
+};
+
+struct StoreDetailQt {
+    int     storeId;
+    QString storeName;
+    QString storeAddress;
+    QString operatingHours;
+    QString deliveryFees;
+    QString deliveryTimeRange;
+    int     minOrderAmount = 0;
+    double  rating = 0.0;
+    int     reviewCount = 0;
+    QString imageUrl;
+    
+    QList<MenuQt> menus;
+    QList<ReviewQt> reviews;
+};
+
 class NetworkManager : public QObject {
     Q_OBJECT
 
@@ -72,6 +108,9 @@ public:
     // ── 검색어 전체 삭제 요청 (REQ_RESEARCH_DEL_ALL = 2114) ──
     void sendSearchDeleteAll(const QString &userId);
 
+    // 가게 상세 정보(메뉴, 리뷰 포함) 요청
+    void sendStoreDetailRequest(int storeId);
+
 signals:
     void onConnected();
 
@@ -98,6 +137,9 @@ signals:
     // ── 검색 위젯 데이터 수신 (RES_RESEACH_WIDGET = 2109) ──
     void onSearchWidgetReceived(QList<PopularKeywordQt> popular,
                                 QList<RecentSearchQt> recent);
+
+    // 가게 상세 정보 수신 완료 신호
+    void onStoreDetailReceived(StoreDetailQt detail);
 
 private slots:
     void handleConnected();

@@ -267,6 +267,22 @@ QWidget* HomeWidget::makeStoreCard(const TopStoreInfoQt &store)
     divider->setFixedHeight(1);
     vl->addWidget(divider);
 
+    // 글자나 사진이 클릭을 뺏어가지 못하게, 카드 전체를 덮는 투명 버튼 장착
+    QPushButton *clickOverlay = new QPushButton(card);
+    clickOverlay->setStyleSheet("background: transparent; border: none;");
+    clickOverlay->setCursor(Qt::PointingHandCursor);
+    
+    QVBoxLayout* overlayLayout = new QVBoxLayout(card);
+    overlayLayout->setContentsMargins(0,0,0,0);
+    overlayLayout->addWidget(clickOverlay);
+    clickOverlay->raise(); // 버튼을 맨 위로 끌어올림
+
+    // 버튼이 눌리면 곧바로 가게 ID를 담아서 신호 발사
+    connect(clickOverlay, &QPushButton::clicked, this, [this, storeId = store.storeId]() {
+        qDebug() << "[HomeWidget] 가게 클릭됨! ID:" << storeId;
+        emit storeSelected(storeId);
+    });
+
     return card;
 }
 
