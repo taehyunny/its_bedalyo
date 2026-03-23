@@ -5,6 +5,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGridLayout>
+#include <QDateTime>
 #include <QDebug>
 
 // ============================================================
@@ -35,11 +36,24 @@ SearchWidget::~SearchWidget() { delete ui; }
 // ============================================================
 // 화면 진입 시 서버에 검색 위젯 데이터 요청
 // REQ_RESEACH_WIDGET(2108) + userId 전송
+// 인기 검색어 옆 시간은 서버에서 받지 않고 진입 시점의 로컬 시간 표시
 // ============================================================
 void SearchWidget::loadSearchData()
 {
     qDebug() << "[SearchWidget] loadSearchData() - userId:"
              << UserSession::instance().userId;
+
+    // ── 인기 검색어 옆 업데이트 시간 표시 (오전/오후 HH:MM 형식) ──
+    // 예: "오후 11:07 업데이트"
+    QDateTime now = QDateTime::currentDateTime();
+    QString ampm = (now.time().hour() < 12) ? "오전" : "오후";
+    int hour12 = now.time().hour() % 12;
+    if (hour12 == 0) hour12 = 12;
+    QString timeStr = QString("%1 %2:%3 업데이트")
+                        .arg(ampm)
+                        .arg(hour12)
+                        .arg(now.time().minute(), 2, 10, QChar('0'));
+    ui->labelPopularTime->setText(timeStr);
 
     m_network->sendSearchWidget(UserSession::instance().userId);
 }
@@ -53,10 +67,8 @@ void SearchWidget::onSearchWidgetReceived(QList<PopularKeywordQt> popular,
     qDebug() << "[SearchWidget] 서버 응답 - 인기:" << popular.size()
              << "최근:" << recent.size();
 
-    // ── 인기 검색어 빌드 ──
     buildPopularList(popular);
 
-    // ── 최근 검색어 빌드 (Qt 구조체로 변환) ──
     QList<RecentSearchItem> recentItems;
     for (const RecentSearchQt &r : recent) {
         RecentSearchItem item;
@@ -69,11 +81,14 @@ void SearchWidget::onSearchWidgetReceived(QList<PopularKeywordQt> popular,
 
 // ============================================================
 // 인기 검색어 목록 빌드
+// TODO: 현재 상위 5개만 표시 중 — 서버에서 10개 오더라도 5개만 렌더링
+//       추후 UI 확장 시 && i < 5 조건 제거 또는 개수 조정 필요
 // ============================================================
 void SearchWidget::buildPopularList(const QList<PopularKeywordQt> &keywords)
 {
     clearLayout(ui->popularGridLayout);
 
+    // TODO: 현재 5개 고정 표시 — 전체 표시로 변경 시 "&& i < 5" 제거
     for (int i = 0; i < keywords.size() && i < 5; ++i) {
         QWidget *row = new QWidget();
         row->setStyleSheet("background: transparent;");
@@ -81,7 +96,7 @@ void SearchWidget::buildPopularList(const QList<PopularKeywordQt> &keywords)
         hl->setContentsMargins(0, 0, 0, 0);
         hl->setSpacing(8);
 
-        // 순위 번호
+        // 순위 번호 (1~3위: 파란색, 4~5위: 검정)
         QLabel *rankLabel = new QLabel(QString::number(keywords[i].rank));
         rankLabel->setFixedWidth(20);
         rankLabel->setAlignment(Qt::AlignCenter);
@@ -140,7 +155,9 @@ void SearchWidget::buildRecentList(const QList<RecentSearchItem> &items)
 
 // ============================================================
 // 최근 검색어 단건 위젯 생성
-// [ 🕐 검색어   X ]  (날짜 제거 — 서버 DTO에 없음)
+// [ 🕐 검색어   X ]
+// TODO: 서버에서 searchDate 내려주면 날짜 표시 추가 예정
+//       RecentSearchItem에 QString searchDate 필드 추가 후 dateLabel 활성화
 // ============================================================
 QWidget* SearchWidget::makeRecentItemWidget(const RecentSearchItem &item)
 {
@@ -175,6 +192,11 @@ QWidget* SearchWidget::makeRecentItemWidget(const RecentSearchItem &item)
         executeSearch(keyword);
     });
 
+    // TODO: 서버에서 searchDate 내려주면 아래 dateLabel 활성화
+    // QLabel *dateLabel = new QLabel(item.searchDate);
+    // dateLabel->setStyleSheet("font-size:12px; color:#aaaaaa; background:transparent;");
+    // dateLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
     // X 삭제 버튼
     QPushButton *delBtn = new QPushButton("✕");
     delBtn->setFixedSize(24, 24);
@@ -193,6 +215,7 @@ QWidget* SearchWidget::makeRecentItemWidget(const RecentSearchItem &item)
 
     hl->addWidget(iconLabel);
     hl->addWidget(kwBtn, 1);
+    // TODO: hl->addWidget(dateLabel); // searchDate 확정 후 활성화
     hl->addWidget(delBtn);
 
     // 하단 구분선
@@ -236,13 +259,12 @@ void SearchWidget::executeSearch(const QString &keyword)
 
 // ============================================================
 // 최근 검색어 단건 삭제
-// UI 즉시 제거 → REQ_RESEARCH_DELETE(2110) 전송
+// UI 즉시 제거 (낙관적 업데이트) → REQ_RESEARCH_DELETE(2110) 전송
 // ============================================================
 void SearchWidget::deleteRecentItem(int historyId, const QString &keyword)
 {
     Q_UNUSED(keyword)
 
-    // UI에서 해당 행 제거
     QWidget *wrapper = ui->recentContainer->findChild<QWidget*>(
         QString("recentWrapper_%1").arg(historyId));
     if (wrapper) {
@@ -250,12 +272,10 @@ void SearchWidget::deleteRecentItem(int historyId, const QString &keyword)
         wrapper->deleteLater();
     }
 
-    // m_recentItems에서도 제거
     m_recentItems.removeIf([historyId](const RecentSearchItem &i) {
         return i.historyId == historyId;
     });
 
-    // 모두 삭제됐으면 섹션 숨김
     if (m_recentItems.isEmpty()) {
         ui->recentSection->hide();
         ui->divider->hide();
@@ -263,12 +283,12 @@ void SearchWidget::deleteRecentItem(int historyId, const QString &keyword)
 
     qDebug() << "[SearchWidget] 단건 삭제 - historyId:" << historyId;
 
-    // REQ_RESEARCH_DELETE(2110) 전송
     m_network->sendSearchDelete(UserSession::instance().userId, historyId);
 }
 
 // ============================================================
 // 전체 삭제
+// UI 즉시 제거 (낙관적 업데이트) → REQ_RESEARCH_DEL_ALL(2114) 전송
 // ============================================================
 void SearchWidget::on_btnDeleteAll_clicked()
 {
@@ -279,22 +299,21 @@ void SearchWidget::on_btnDeleteAll_clicked()
 
     qDebug() << "[SearchWidget] 전체 삭제 - userId:" << UserSession::instance().userId;
 
-    // REQ_RESEARCH_DEL_ALL(2114) 전송
     m_network->sendSearchDeleteAll(UserSession::instance().userId);
 }
 
 // ============================================================
 // 버튼 슬롯
 // ============================================================
-void SearchWidget::on_btnBack_clicked()            { emit backRequested(); }
-void SearchWidget::on_btnSearch_clicked()          { executeSearch(ui->searchEdit->text().trimmed()); }
-void SearchWidget::onSearchEditReturnPressed()     { executeSearch(ui->searchEdit->text().trimmed()); }
+void SearchWidget::on_btnBack_clicked()        { emit backRequested(); }
+void SearchWidget::on_btnSearch_clicked()      { executeSearch(ui->searchEdit->text().trimmed()); }
+void SearchWidget::onSearchEditReturnPressed() { executeSearch(ui->searchEdit->text().trimmed()); }
 
-void SearchWidget::on_navHome_clicked()            { emit backRequested(); }
-void SearchWidget::on_navSearch_clicked()          {}
-void SearchWidget::on_navFavorite_clicked()        { emit favoriteRequested(); }
-void SearchWidget::on_navOrder_clicked()           { emit orderListRequested(); }
-void SearchWidget::on_navMy_clicked()              { emit mypageRequested(); }
+void SearchWidget::on_navHome_clicked()        { emit backRequested(); }
+void SearchWidget::on_navSearch_clicked()      {}
+void SearchWidget::on_navFavorite_clicked()    { emit favoriteRequested(); }
+void SearchWidget::on_navOrder_clicked()       { emit orderListRequested(); }
+void SearchWidget::on_navMy_clicked()          { emit mypageRequested(); }
 
 // ============================================================
 // 레이아웃 전체 비우기

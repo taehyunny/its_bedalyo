@@ -87,12 +87,38 @@
           <property name="rightMargin"><number>16</number></property>
           <property name="bottomMargin"><number>16</number></property>
           <property name="spacing"><number>0</number></property>
+
+          <!-- 인기 검색어 타이틀 + 업데이트 시간 헤더 -->
           <item>
-           <widget class="QLabel" name="labelPopularTitle">
-            <property name="text"><string>인기 검색어</string></property>
-            <property name="styleSheet"><string notr="true">font-size:16px;font-weight:bold;color:#111111;padding-bottom:14px;</string></property>
-           </widget>
+           <layout class="QHBoxLayout" name="popularHeaderLayout">
+            <property name="leftMargin"><number>0</number></property>
+            <property name="topMargin"><number>0</number></property>
+            <property name="rightMargin"><number>0</number></property>
+            <property name="bottomMargin"><number>14</number></property>
+            <property name="spacing"><number>0</number></property>
+            <item>
+             <widget class="QLabel" name="labelPopularTitle">
+              <property name="text"><string>인기 검색어</string></property>
+              <property name="styleSheet"><string notr="true">font-size:16px;font-weight:bold;color:#111111;</string></property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="popularHeaderSpacer">
+              <property name="orientation"><enum>Qt::Horizontal</enum></property>
+              <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+             </spacer>
+            </item>
+            <item>
+             <!-- 검색 위젯 진입 시점의 시간 표시 (클라이언트 로컬 시간) -->
+             <widget class="QLabel" name="labelPopularTime">
+              <property name="text"><string></string></property>
+              <property name="styleSheet"><string notr="true">font-size:12px;color:#aaaaaa;</string></property>
+              <property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property>
+             </widget>
+            </item>
+           </layout>
           </item>
+
           <item>
            <widget class="QWidget" name="popularContainer">
             <property name="styleSheet"><string notr="true">QWidget#popularContainer{background:transparent;}</string></property>

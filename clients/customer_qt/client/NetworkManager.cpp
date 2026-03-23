@@ -285,6 +285,26 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
             emit onSearchWidgetReceived(popular, recent);
 
+        // ── 검색어 단건 삭제 응답 (RES_RESEARCH_DELETE = 2111) ──
+        // UI는 낙관적 업데이트로 이미 처리됨 → 실패 시에만 경고 로그
+        } else if (cmdId == CmdID::RES_RESEARCH_DELETE) {
+            ResResearchDeleteDTO dto = j.get<ResResearchDeleteDTO>();
+            if (dto.status != 200)
+                qWarning() << "[NetworkManager] 검색어 단건 삭제 실패 status:" << dto.status;
+
+        // ── 검색어 추가 응답 (RES_RESEARCH_ADD = 2113) ──
+        } else if (cmdId == CmdID::RES_RESEARCH_ADD) {
+            ResResearchAddDTO dto = j.get<ResResearchAddDTO>();
+            if (dto.status != 200)
+                qWarning() << "[NetworkManager] 검색어 추가 실패 status:" << dto.status;
+
+        // ── 검색어 전체 삭제 응답 (RES_RESEARCH_DEL_ALL = 2115) ──
+        // UI는 낙관적 업데이트로 이미 처리됨 → 실패 시에만 경고 로그
+        } else if (cmdId == CmdID::RES_RESEARCH_DEL_ALL) {
+            ResResearchDelAllDTO dto = j.get<ResResearchDelAllDTO>();
+            if (dto.status != 200)
+                qWarning() << "[NetworkManager] 검색어 전체 삭제 실패 status:" << dto.status;
+
         } else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"
                        << static_cast<uint16_t>(cmdId);
