@@ -1,11 +1,8 @@
 #pragma once
 #include <string>
 #include <vector>
-<<<<<<< HEAD
-#include <nlohmann/json.hpp> // 경로 확인 필수!
-=======
 #include "json.hpp" // 경로 확인 필수!
->>>>>>> jinada
+
 
 using json = nlohmann::json;
 
