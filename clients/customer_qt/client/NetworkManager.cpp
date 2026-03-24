@@ -1,4 +1,4 @@
-#include "NetworkManager.h"
+﻿#include "NetworkManager.h"
 #include "json.hpp"
 #include <QDebug>
 #include <QDataStream>
@@ -77,14 +77,14 @@ void NetworkManager::sendSearchStore(const QString &keyword)
     sendPacket(CmdID::REQ_SEARCH_STORE, j);
 }
 
-// ── 검색 위젯 요청 (REQ_RESEACH_WIDGET = 2108) ──
+// ── 검색 위젯 요청 (REQ_RESEARCH_WIDGET = 2108) ──
 void NetworkManager::sendSearchWidget(const QString &userId)
 {
     qDebug() << "[NetworkManager] 검색 위젯 요청 userId:" << userId;
     ReqResearchWidgetDTO dto;
     dto.userId = userId.toStdString();
     nlohmann::json j = dto;
-    sendPacket(CmdID::REQ_RESEACH_WIDGET, j);
+    sendPacket(CmdID::REQ_RESEARCH_WIDGET, j);
 }
 
 // ── 검색어 추가 요청 (REQ_RESEARCH_ADD = 2112) ──
@@ -374,8 +374,10 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
             emit onSearchResultReceived(stores);
 
-        } else if (cmdId == CmdID::RES_RESEACH_WIDGET) {
-            qDebug() << "[DEBUG] RES_RESEACH_WIDGET raw:" << QString::fromUtf8(body);
+        // ── 검색 위젯 데이터 수신 (RES_RESEARCH_WIDGET = 2109) ──
+        } else if (cmdId == CmdID::RES_RESEARCH_WIDGET) {
+            qDebug() << "[DEBUG] RES_RESEARCH_WIDGET raw:" << QString::fromUtf8(body);
+
             ResResearchWidgetDTO dto = j.get<ResResearchWidgetDTO>();
 
             QList<PopularKeywordQt> popular;

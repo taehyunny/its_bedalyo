@@ -1,4 +1,4 @@
-#pragma once // 중복 포함 방지 필수!
+﻿#pragma once // 중복 포함 방지 필수!
 
 #include <string>
 #include <cstdint>
@@ -133,7 +133,7 @@ enum class CmdID : uint16_t
 
     REQ_STORE_INFO_UPDATE = 2102,   // 매장 정보 업데이트 요청 (영업시간, 휴무일 등)
     RES_STORE_INFO_UPDATE = 2103,   // 매장 정보 업데이트 응답
-    REQ_RESEACH_WIDGET = 2108,      // 매장 검색 위젯 요청 (최근 검색어 출력용)
+    REQ_RESEARCH_WIDGET = 2108,      // 매장 검색 위젯 요청 (최근 검색어 출력용)
     RES_RESEARCH_WIDGET = 2109,     // 매장 검색 위젯 응답 (최근 검색어 리스트)
     REQ_RESEARCH_DELETE = 2110,     // 매장 검색 위젯 개별 삭제 요청 (최근 검색어 삭제)
     RES_RESEARCH_DELETE = 2111,     // 매장 검색 위젯 개별 삭제 응답
