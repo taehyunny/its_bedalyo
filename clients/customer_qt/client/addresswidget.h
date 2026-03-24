@@ -36,15 +36,13 @@ public:
 
     void loadData();
     QString selectedAddress() const { return m_selectedAddress; }
-
-    // 주소 삭제 (addressdetailwidget에서 호출)
     void deleteAddress(int addressId);
 
 signals:
     void backRequested();
     void addressSelected(const QString &address);
-    void addressDetailRequested(const QString &roadAddr);   // 새 주소 설정
-    void addressEditRequested(const AddressItem &item);     // 기존 주소 수정
+    void addressDetailRequested(const QString &roadAddr);
+    void addressEditRequested(const AddressItem &item);
 
 private slots:
     void on_btnBack_clicked();
@@ -54,6 +52,13 @@ private slots:
     void onSearchTextChanged(const QString &text);
     void onSearchTimerTimeout();
     void onApiReplyFinished(QNetworkReply *reply);
+
+    // ── 서버 응답 슬롯 ──
+    void onAddressListReceived(QList<AddressItemQt> addresses);
+    void onAddressSaveReceived(int status, int addressId);
+    void onAddressDeleteReceived(int status);
+    void onAddressUpdateReceived(int status);
+    void onAddressDefaultReceived(int status);
 
 public slots:
     void onAddressDetailCompleted(const AddressItem &item);
@@ -66,7 +71,8 @@ private:
     QTimer               *m_searchTimer;
 
     QList<AddressItem>    m_addressList;
-    int                   m_nextLocalId = 1;
+    int                   m_nextLocalId  = 1;
+    bool                  m_serverLoaded = false;
 
     void searchAddress(const QString &keyword);
     void buildSearchResults(const QJsonArray &results);

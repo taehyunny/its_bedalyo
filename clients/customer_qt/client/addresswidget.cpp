@@ -35,6 +35,18 @@ AddressWidget::AddressWidget(NetworkManager *network, QWidget *parent)
             this, &AddressWidget::onSearchTimerTimeout);
     connect(m_http, &QNetworkAccessManager::finished,
             this, &AddressWidget::onApiReplyFinished);
+
+    // ── 서버 응답 연결 ──
+    connect(m_network, &NetworkManager::onAddressListReceived,
+            this, &AddressWidget::onAddressListReceived);
+    connect(m_network, &NetworkManager::onAddressSaveReceived,
+            this, &AddressWidget::onAddressSaveReceived);
+    connect(m_network, &NetworkManager::onAddressDeleteReceived,
+            this, &AddressWidget::onAddressDeleteReceived);
+    connect(m_network, &NetworkManager::onAddressUpdateReceived,
+            this, &AddressWidget::onAddressUpdateReceived);
+    connect(m_network, &NetworkManager::onAddressDefaultReceived,
+            this, &AddressWidget::onAddressDefaultReceived);
 }
 
 AddressWidget::~AddressWidget() { delete ui; }
@@ -48,19 +60,8 @@ void AddressWidget::loadData()
     ui->searchEdit->clear();
     clearSearchResults();
 
-    if (m_addressList.isEmpty()) {
-        const QString curAddr = UserSession::instance().address;
-        if (!curAddr.isEmpty()) {
-            AddressItem item;
-            item.addressId = m_nextLocalId++;
-            item.address   = curAddr;
-            item.label     = "기타";
-            item.isDefault = true;
-            m_addressList.append(item);
-        }
-    }
-
-    buildAddressList();
+    // 서버에서 주소 목록 요청
+    m_network->sendAddressList(UserSession::instance().userId);
 }
 
 // ============================================================
@@ -68,24 +69,35 @@ void AddressWidget::loadData()
 // ============================================================
 void AddressWidget::onAddressDetailCompleted(const AddressItem &item)
 {
-    bool found = false;
-    for (int i = 0; i < m_addressList.size(); ++i) {
-        if (m_addressList[i].addressId == item.addressId) {
-            m_addressList[i] = item;
-            found = true;
+    bool isEdit = false;
+    for (const auto &a : std::as_const(m_addressList)) {
+        if (a.addressId == item.addressId && a.addressId > 0) {
+            isEdit = true;
             break;
         }
     }
-    if (!found) {
-        AddressItem newItem = item;
-        newItem.addressId = m_nextLocalId++;
-        if (m_addressList.isEmpty()) {
-            newItem.isDefault = true;
-        } else {
-            // 새 주소 추가 시 기존 isDefault 해제 후 새 주소를 기본으로
-            for (auto &a : m_addressList) a.isDefault = false;
-            newItem.isDefault = true;
+
+    if (isEdit) {
+        // 수정 모드 → REQ_ADDRESS_UPDATE
+        m_network->sendAddressUpdate(
+            UserSession::instance().userId,
+            item.addressId, item.detail, item.guide, item.label
+        );
+        // 낙관적 업데이트
+        for (auto &a : m_addressList) {
+            if (a.addressId == item.addressId) { a = item; break; }
         }
+    } else {
+        // 새 주소 → REQ_ADDRESS_SAVE
+        m_network->sendAddressSave(
+            UserSession::instance().userId,
+            item.address, item.detail, item.guide, item.label
+        );
+        // 로컬 임시 추가 (서버 응답 후 목록 새로고침)
+        AddressItem newItem = item;
+        newItem.addressId = -(m_nextLocalId++);
+        for (auto &a : m_addressList) a.isDefault = false;
+        newItem.isDefault = true;
         m_addressList.append(newItem);
     }
 
@@ -99,11 +111,93 @@ void AddressWidget::onAddressDetailCompleted(const AddressItem &item)
 // ============================================================
 void AddressWidget::deleteAddress(int addressId)
 {
+    // 낙관적 업데이트: UI 먼저 제거
     m_addressList.removeIf([addressId](const AddressItem &a) {
         return a.addressId == addressId;
     });
     clearSearchResults();
     buildAddressList();
+
+    // 서버에 삭제 요청
+    m_network->sendAddressDelete(UserSession::instance().userId, addressId);
+}
+
+// ============================================================
+// 서버 응답: 주소 목록 수신
+// ============================================================
+void AddressWidget::onAddressListReceived(QList<AddressItemQt> addresses)
+{
+    qDebug() << "[AddressWidget] 주소 목록 수신:" << addresses.size() << "개";
+
+    m_addressList.clear();
+
+    for (const AddressItemQt &a : addresses) {
+        AddressItem item;
+        item.addressId = a.addressId;
+        item.address   = a.address;
+        item.detail    = a.detail;
+        item.guide     = a.guide;
+        item.label     = a.label;
+        item.isDefault = a.isDefault;
+        m_addressList.append(item);
+    }
+
+    // 서버 목록 비어있으면 UserSession 주소로 폴백
+    if (m_addressList.isEmpty()) {
+        const QString curAddr = UserSession::instance().address;
+        if (!curAddr.isEmpty()) {
+            AddressItem item;
+            item.addressId = m_nextLocalId++;
+            item.address   = curAddr;
+            item.label     = "기타";
+            item.isDefault = true;
+            m_addressList.append(item);
+        }
+    }
+
+    clearSearchResults();
+    buildAddressList();
+}
+
+// ── 서버 응답: 주소 저장 ──
+void AddressWidget::onAddressSaveReceived(int status, int addressId)
+{
+    qDebug() << "[AddressWidget] 주소 저장 응답 status:" << status << "id:" << addressId;
+    if (status == 200)
+        m_network->sendAddressList(UserSession::instance().userId);
+    else
+        qWarning() << "[AddressWidget] 주소 저장 실패";
+}
+
+// ── 서버 응답: 주소 삭제 ──
+void AddressWidget::onAddressDeleteReceived(int status)
+{
+    qDebug() << "[AddressWidget] 주소 삭제 응답 status:" << status;
+    if (status == 200)
+        m_network->sendAddressList(UserSession::instance().userId);
+    else {
+        qWarning() << "[AddressWidget] 주소 삭제 실패";
+        QMessageBox::warning(this, "삭제 실패", "선택된 주소는 삭제할 수 없습니다.");
+        m_network->sendAddressList(UserSession::instance().userId); // 목록 복원
+    }
+}
+
+// ── 서버 응답: 주소 수정 ──
+void AddressWidget::onAddressUpdateReceived(int status)
+{
+    qDebug() << "[AddressWidget] 주소 수정 응답 status:" << status;
+    if (status == 200)
+        m_network->sendAddressList(UserSession::instance().userId);
+    else
+        qWarning() << "[AddressWidget] 주소 수정 실패";
+}
+
+// ── 서버 응답: 기본 주소 변경 ──
+void AddressWidget::onAddressDefaultReceived(int status)
+{
+    qDebug() << "[AddressWidget] 기본 주소 변경 응답 status:" << status;
+    if (status != 200)
+        qWarning() << "[AddressWidget] 기본 주소 변경 실패";
 }
 
 // ============================================================
@@ -203,7 +297,9 @@ QWidget* AddressWidget::makeAddressCard(const AddressItem &item)
         "QPushButton:pressed{background:rgba(0,0,0,0.05);}"
     );
     clickOverlay->setCursor(Qt::PointingHandCursor);
-    clickOverlay->lower();
+    clickOverlay->setGeometry(0, 0, card->width(), card->height());
+    clickOverlay->raise();
+    editBtn->raise();
 
     connect(clickOverlay, &QPushButton::clicked, this, [this, id = item.addressId, addr = item.address]() {
         for (auto &a : m_addressList)
@@ -212,6 +308,10 @@ QWidget* AddressWidget::makeAddressCard(const AddressItem &item)
         clearSearchResults();
         buildAddressList();
         qDebug() << "[AddressWidget] 주소 선택:" << addr;
+
+        // 서버에 기본 주소 변경 요청
+        m_network->sendAddressDefault(UserSession::instance().userId, id);
+
         emit addressSelected(addr);
     });
 

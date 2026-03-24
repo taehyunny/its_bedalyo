@@ -130,6 +130,87 @@ void NetworkManager::sendStoreDetailRequest(int storeId)
 
 
 
+// ── 주소 저장 요청 (REQ_ADDRESS_SAVE = 2070) ──
+void NetworkManager::sendAddressSave(const QString &userId, const QString &address,
+                                      const QString &detail, const QString &guide, const QString &label)
+{
+    qDebug() << "[NetworkManager] 주소 저장 요청:" << address;
+    ReqAddressSaveDTO dto;
+    dto.userId  = userId.toStdString();
+    dto.address = address.toStdString();
+    dto.detail  = detail.toStdString();
+    dto.guide   = guide.toStdString();
+    dto.label   = label.toStdString();
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_ADDRESS_SAVE, j);
+}
+
+// ── 주소 목록 요청 (REQ_ADDRESS_LIST = 2072) ──
+void NetworkManager::sendAddressList(const QString &userId)
+{
+    qDebug() << "[NetworkManager] 주소 목록 요청 userId:" << userId;
+    ReqAddressListDTO dto;
+    dto.userId = userId.toStdString();
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_ADDRESS_LIST, j);
+}
+
+// ── 주소 삭제 요청 (REQ_ADDRESS_DELETE = 2074) ──
+void NetworkManager::sendAddressDelete(const QString &userId, int addressId)
+{
+    qDebug() << "[NetworkManager] 주소 삭제 요청 addressId:" << addressId;
+    ReqAddressDeleteDTO dto;
+    dto.userId    = userId.toStdString();
+    dto.addressId = addressId;
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_ADDRESS_DELETE, j);
+}
+
+// ── 주소 수정 요청 (REQ_ADDRESS_UPDATE = 2076) ──
+void NetworkManager::sendAddressUpdate(const QString &userId, int addressId,
+                                        const QString &detail, const QString &guide, const QString &label)
+{
+    qDebug() << "[NetworkManager] 주소 수정 요청 addressId:" << addressId;
+    ReqAddressUpdateDTO dto;
+    dto.userId    = userId.toStdString();
+    dto.addressId = addressId;
+    dto.detail    = detail.toStdString();
+    dto.guide     = guide.toStdString();
+    dto.label     = label.toStdString();
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_ADDRESS_UPDATE, j);
+}
+
+// ── 기본 주소 변경 요청 (REQ_ADDRESS_DEFAULT = 2078) ──
+void NetworkManager::sendAddressDefault(const QString &userId, int addressId)
+{
+    qDebug() << "[NetworkManager] 기본 주소 변경 요청 addressId:" << addressId;
+    ReqAddressDefaultDTO dto;
+    dto.userId    = userId.toStdString();
+    dto.addressId = addressId;
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_ADDRESS_DEFAULT, j);
+}
+
+// ── 결제 화면 정보 요청 (REQ_CHECKOUT_INFO = 2026) ──
+void NetworkManager::sendCheckoutInfo(const QString &userId, int storeId)
+{
+    qDebug() << "[NetworkManager] 결제 화면 정보 요청 storeId:" << storeId;
+    ReqCheckoutInfoDTO dto;
+    dto.userId  = userId.toStdString();
+    dto.storeId = storeId;
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_CHECKOUT_INFO, j);
+}
+
+// ── 주문 생성 요청 (REQ_ORDER_CREATE = 2020) ──
+void NetworkManager::sendOrderCreate(const OrderCreateReqDTO &dto)
+{
+    qDebug() << "[NetworkManager] 주문 생성 요청 storeId:" << dto.storeId;
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_ORDER_CREATE, j);
+}
+
 // ============================================================
 // TopStoreInfo(C++ DTO) → TopStoreInfoQt(Qt 타입) 변환 헬퍼
 // ============================================================
@@ -364,12 +445,67 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 review.reviewId  = r.review_id;
                 review.userId    = QString::fromStdString(r.user_id);
                 review.rating    = r.rating;
-                review.comment   = QString::fromStdString(r.comment);
+                review.comment   = QString::fromStdString(r.content);
                 review.createdAt = QString::fromStdString(r.created_at);
                 detail.reviews.append(review);
             }
 
             emit onStoreDetailReceived(detail);        
+        // ── 주소 저장 응답 (RES_ADDRESS_SAVE = 2071) ──
+        } else if (cmdId == CmdID::RES_ADDRESS_SAVE) {
+            ResAddressSaveDTO dto = j.get<ResAddressSaveDTO>();
+            emit onAddressSaveReceived(dto.status, dto.addressId);
+
+        // ── 주소 목록 응답 (RES_ADDRESS_LIST = 2073) ──
+        } else if (cmdId == CmdID::RES_ADDRESS_LIST) {
+            ResAddressListDTO dto = j.get<ResAddressListDTO>();
+            QList<AddressItemQt> list;
+            for (const auto &a : dto.addresses) {
+                AddressItemQt item;
+                item.addressId = a.addressId;
+                item.address   = QString::fromStdString(a.address);
+                item.detail    = QString::fromStdString(a.detail);
+                item.guide     = QString::fromStdString(a.guide);
+                item.label     = QString::fromStdString(a.label);
+                item.isDefault = a.isDefault;
+                list.append(item);
+            }
+            emit onAddressListReceived(list);
+
+        // ── 주소 삭제 응답 (RES_ADDRESS_DELETE = 2075) ──
+        } else if (cmdId == CmdID::RES_ADDRESS_DELETE) {
+            ResAddressDeleteDTO dto = j.get<ResAddressDeleteDTO>();
+            emit onAddressDeleteReceived(dto.status);
+
+        // ── 주소 수정 응답 (RES_ADDRESS_UPDATE = 2077) ──
+        } else if (cmdId == CmdID::RES_ADDRESS_UPDATE) {
+            ResAddressUpdateDTO dto = j.get<ResAddressUpdateDTO>();
+            emit onAddressUpdateReceived(dto.status);
+
+        // ── 기본 주소 변경 응답 (RES_ADDRESS_DEFAULT = 2079) ──
+        } else if (cmdId == CmdID::RES_ADDRESS_DEFAULT) {
+            ResAddressDefaultDTO dto = j.get<ResAddressDefaultDTO>();
+            emit onAddressDefaultReceived(dto.status);
+
+        // ── 결제 화면 정보 응답 (RES_CHECKOUT_INFO = 2027) ──
+        } else if (cmdId == CmdID::RES_CHECKOUT_INFO) {
+            ResCheckoutInfoDTO dto = j.get<ResCheckoutInfoDTO>();
+            CheckoutInfoQt info;
+            info.customerGrade  = QString::fromStdString(dto.customerGrade);
+            info.cardNumber     = QString::fromStdString(dto.cardNumber);
+            info.accountNumber  = QString::fromStdString(dto.accountNumber);
+            info.userPoint      = dto.userPoint;
+            info.minOrderAmount = dto.minOrderAmount;
+            info.deliveryFee    = dto.deliveryFee;
+            emit onCheckoutInfoReceived(info);
+
+        // ── 주문 생성 응답 (RES_ORDER_CREATE = 2021) ──
+        } else if (cmdId == CmdID::RES_ORDER_CREATE) {
+            OrderCreateResDTO dto = j.get<OrderCreateResDTO>();
+            emit onOrderCreateReceived(dto.status,
+                                       QString::fromStdString(dto.message),
+                                       QString::fromStdString(dto.orderId));
+
         } else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"
                        << static_cast<uint16_t>(cmdId);
