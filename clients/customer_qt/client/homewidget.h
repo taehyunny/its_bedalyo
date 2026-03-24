@@ -38,6 +38,7 @@ public:
     void setAddress(const QString &address);
 
     bool eventFilter(QObject *obj, QEvent *event) override;
+    void updateCartBar();
 
 signals:
     void categorySelected(int categoryId, const QString &categoryName);
@@ -72,5 +73,4 @@ private:
 
     QWidget* makeCategoryItem(int id, const QString &name, const QString &iconPath);
     QWidget* makeStoreCard(const TopStoreInfoQt &store);
-    void updateCartBar();
 };

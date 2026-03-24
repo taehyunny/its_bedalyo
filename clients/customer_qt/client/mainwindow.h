@@ -14,6 +14,7 @@
 #include "settingswidget.h"
 #include "addresswidget.h"
 #include "addressdetailwidget.h"
+#include "cartwidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -52,6 +53,9 @@ private slots:
 
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
                             QList<TopStoreInfoQt> topStores);
+    void onCartRequested();
+    void onCartClose();
+    void onOrderSuccess();
 
 private:
     Ui::MainWindow        *ui;
@@ -68,6 +72,7 @@ private:
     SettingsWidget        *m_settingsWidget;
     AddressWidget         *m_addressWidget;
     AddressDetailWidget   *m_addressDetailWidget;
+    CartWidget            *m_cartWidget;
 
     QList<CategoryInfoQt> m_cachedCategories;
 };

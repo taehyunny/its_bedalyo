@@ -124,11 +124,8 @@ void NetworkManager::sendStoreDetailRequest(int storeId)
     qDebug() << "[NetworkManager] 가게 상세 정보 요청 storeId:" << storeId;
     nlohmann::json j;
     j["storeId"] = storeId;
-    // CmdID::REQ_STORE_DETAIL 부분은 Global_protocol.h에 맞춰 이름을 변경해야 할 수 있습니다
-    sendPacket(CmdID::REQ_STORE_DETAIL, j); 
+    sendPacket(CmdID::REQ_STORE_DETAIL, j);
 }
-
-
 
 // ── 주소 저장 요청 (REQ_ADDRESS_SAVE = 2070) ──
 void NetworkManager::sendAddressSave(const QString &userId, const QString &address,
@@ -359,7 +356,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
         // ── 검색 위젯 데이터 수신 (RES_RESEACH_WIDGET = 2109) ──
         } else if (cmdId == CmdID::RES_RESEACH_WIDGET) {
-            // ── 디버그: 서버 응답 원문 출력 ──
             qDebug() << "[DEBUG] RES_RESEACH_WIDGET raw:" << QString::fromUtf8(body);
 
             ResResearchWidgetDTO dto = j.get<ResResearchWidgetDTO>();
@@ -375,8 +371,8 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             QList<RecentSearchQt> recent;
             for (const auto &r : dto.recentSearches) {
                 RecentSearchQt item;
-                item.historyId = r.historyId;
-                item.keyword   = QString::fromStdString(r.keyword);
+                item.historyId  = r.historyId;
+                item.keyword    = QString::fromStdString(r.keyword);
                 item.searchDate = QString::fromStdString(r.searchDate);
                 recent.append(item);
             }
@@ -384,7 +380,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             emit onSearchWidgetReceived(popular, recent);
 
         // ── 검색어 단건 삭제 응답 (RES_RESEARCH_DELETE = 2111) ──
-        // UI는 낙관적 업데이트로 이미 처리됨 → 실패 시에만 경고 로그
         } else if (cmdId == CmdID::RES_RESEARCH_DELETE) {
             ResResearchDeleteDTO dto = j.get<ResResearchDeleteDTO>();
             if (dto.status != 200)
@@ -397,7 +392,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 qWarning() << "[NetworkManager] 검색어 추가 실패 status:" << dto.status;
 
         // ── 검색어 전체 삭제 응답 (RES_RESEARCH_DEL_ALL = 2115) ──
-        // UI는 낙관적 업데이트로 이미 처리됨 → 실패 시에만 경고 로그
         } else if (cmdId == CmdID::RES_RESEARCH_DEL_ALL) {
             ResResearchDelAllDTO dto = j.get<ResResearchDelAllDTO>();
             if (dto.status != 200)
@@ -405,52 +399,51 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
         // ── 가게 상세 정보(3페이지) 데이터 수신 ──
         } else if (cmdId == CmdID::RES_STORE_DETAIL) {
-            // (서버의 ResStoreDetailDTO를 파싱합니다)
             ResStoreDetailDTO dto = j.get<ResStoreDetailDTO>();
-            
+
             if (dto.status != 200) {
                 qWarning() << "매장 정보를 불러오지 못했습니다. status:" << dto.status;
                 return;
             }
 
             StoreDetailQt detail;
-            detail.storeId           = dto.storeData.store_id;
-            detail.storeName         = QString::fromStdString(dto.storeData.store_name);
-            detail.storeAddress      = QString::fromStdString(dto.storeData.store_address);
-            detail.operatingHours    = QString::fromStdString(dto.storeData.operating_hours);
-            detail.deliveryFees      = QString::fromStdString(dto.storeData.delivery_fees);
-            detail.deliveryTimeRange = QString::fromStdString(dto.storeData.delivery_time_range);
-            detail.minOrderAmount    = dto.storeData.min_order_amount;
+            // [수정] StoreDetailDTO.h 멤버명은 camelCase → 일치시킴
+            detail.storeId           = dto.storeData.storeId;
+            detail.storeName         = QString::fromStdString(dto.storeData.storeName);
+            detail.storeAddress      = QString::fromStdString(dto.storeData.storeAddress);
+            detail.operatingHours    = QString::fromStdString(dto.storeData.operatingHours);
+            detail.deliveryFees      = QString::fromStdString(dto.storeData.deliveryFees);
+            detail.deliveryTimeRange = QString::fromStdString(dto.storeData.deliveryTimeRange);
+            detail.minOrderAmount    = dto.storeData.minOrderAmount;
             detail.rating            = dto.storeData.rating;
-            detail.reviewCount       = dto.storeData.review_count;
-            detail.imageUrl          = QString::fromStdString(dto.storeData.image_url);
+            detail.reviewCount       = dto.storeData.reviewCount;
+            detail.imageUrl          = QString::fromStdString(dto.storeData.imageUrl);
 
-            // 메뉴 리스트 파싱
             for (const auto &m : dto.menuList) {
                 MenuQt menu;
-                menu.menuId       = m.menu_id;
-                menu.menuName     = QString::fromStdString(m.menu_name);
-                menu.basePrice    = m.base_price;
+                menu.menuId       = m.menuId;
+                menu.menuName     = QString::fromStdString(m.menuName);
+                menu.basePrice    = m.basePrice;
                 menu.description  = QString::fromStdString(m.description);
-                menu.imageUrl     = QString::fromStdString(m.image_url);
-                menu.menuCategory = QString::fromStdString(m.menu_category);
-                menu.isSoldOut    = m.is_sold_out;
-                menu.isPopular    = m.is_popular;
+                menu.imageUrl     = QString::fromStdString(m.imageUrl);
+                menu.menuCategory = QString::fromStdString(m.menuCategory);
+                menu.isSoldOut    = m.isSoldOut;
+                menu.isPopular    = m.isPopular;
                 detail.menus.append(menu);
             }
 
-            // 리뷰 리스트 파싱
             for (const auto &r : dto.reviewList) {
                 ReviewQt review;
-                review.reviewId  = r.review_id;
-                review.userId    = QString::fromStdString(r.user_id);
+                review.reviewId  = r.reviewId;
+                review.userId    = QString::fromStdString(r.userId);
                 review.rating    = r.rating;
                 review.comment   = QString::fromStdString(r.content);
-                review.createdAt = QString::fromStdString(r.created_at);
+                review.createdAt = QString::fromStdString(r.createdAt);
                 detail.reviews.append(review);
             }
 
-            emit onStoreDetailReceived(detail);        
+            emit onStoreDetailReceived(detail);
+
         // ── 주소 저장 응답 (RES_ADDRESS_SAVE = 2071) ──
         } else if (cmdId == CmdID::RES_ADDRESS_SAVE) {
             ResAddressSaveDTO dto = j.get<ResAddressSaveDTO>();
@@ -488,16 +481,13 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             emit onAddressDefaultReceived(dto.status);
 
         // ── 결제 화면 정보 응답 (RES_CHECKOUT_INFO = 2027) ──
+        // [수정] 중복 핸들러 제거 → 4-param 시그널만 사용
         } else if (cmdId == CmdID::RES_CHECKOUT_INFO) {
             ResCheckoutInfoDTO dto = j.get<ResCheckoutInfoDTO>();
-            CheckoutInfoQt info;
-            info.customerGrade  = QString::fromStdString(dto.customerGrade);
-            info.cardNumber     = QString::fromStdString(dto.cardNumber);
-            info.accountNumber  = QString::fromStdString(dto.accountNumber);
-            info.userPoint      = dto.userPoint;
-            info.minOrderAmount = dto.minOrderAmount;
-            info.deliveryFee    = dto.deliveryFee;
-            emit onCheckoutInfoReceived(info);
+            emit onCheckoutInfoReceived(dto.status,
+                                        QString::fromStdString(dto.customerGrade),
+                                        dto.deliveryFee,
+                                        dto.minOrderAmount);
 
         // ── 주문 생성 응답 (RES_ORDER_CREATE = 2021) ──
         } else if (cmdId == CmdID::RES_ORDER_CREATE) {
