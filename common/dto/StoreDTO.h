@@ -29,7 +29,7 @@ struct OptionGroup
     std::vector<OptionItem> options;
 
     // 🚀 [해결책] to_json 추가 (서버 -> 클라이언트로 보낼 때 필요)
-    friend void to_json(nlohmann::json& j, const OptionGroup& dto)
+    friend void to_json(nlohmann::json &j, const OptionGroup &dto)
     {
         j = nlohmann::json{
             {"groupId", dto.groupId},
@@ -37,11 +37,11 @@ struct OptionGroup
             {"isRequired", dto.isRequired},
             {"maxCount", dto.maxCount},
             {"displayOrder", dto.displayOrder},
-            {"options", dto.options} };
+            {"options", dto.options}};
     }
 
     // 🚀 from_json 커스텀 구현 (클라이언트 -> 서버로 받을 때 필요)
-    friend void from_json(const nlohmann::json& j, OptionGroup& dto)
+    friend void from_json(const nlohmann::json &j, OptionGroup &dto)
     {
         j.at("groupId").get_to(dto.groupId);
         j.at("groupName").get_to(dto.groupName);
@@ -65,7 +65,7 @@ struct MenuDTO
     bool isPopular;
     std::vector<OptionGroup> optionGroups;
     // 🚀 1. to_json: 서버 -> 클라이언트로 보낼 때 (DB 데이터를 JSON으로 변환)
-    friend void to_json(nlohmann::json& j, const MenuDTO& dto)
+    friend void to_json(nlohmann::json &j, const MenuDTO &dto)
     {
         j = nlohmann::json{
             {"menuId", dto.menuId},
@@ -77,11 +77,11 @@ struct MenuDTO
             {"imageUrl", dto.imageUrl},
             {"menuCategory", dto.menuCategory},
             // 🚀 핵심: 하위 배열인 OptionGroup도 연쇄적으로 자동 직렬화됩니다!
-            {"optionGroups", dto.optionGroups} };
+            {"optionGroups", dto.optionGroups}};
     }
 
     // 🚀 2. from_json: 클라이언트 -> 서버로 받을 때 (JSON을 C++ 구조체로 변환)
-    friend void from_json(const nlohmann::json& j, MenuDTO& dto)
+    friend void from_json(const nlohmann::json &j, MenuDTO &dto)
     {
         // 필수로 들어와야 하는 값들은 예외를 던지도록 at() 사용 (옵션)
         // 하지만 서버가 죽는 걸 막으려면 가급적 value()를 쓰는 것이 좋습니다.
@@ -102,8 +102,6 @@ struct MenuDTO
             j.at("optionGroups").get_to(dto.optionGroups);
         }
     }
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(MenuDTO, menuId, menuName, basePrice, isSoldOut, description, imageUrl, menuCategory, isPopular, optionGroups)
 };
 
 struct MenuListReqDTO // 클라이언트 -> 서버: "이 가게 메뉴 다 주세요!" 요청 DTO
@@ -147,9 +145,9 @@ struct StoreDTO
 
     // ⚠️ 매크로 마지막 부분에 새 변수 3개를 꼭 추가해야 합니다!
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(StoreDTO,
-        storeId, storeName, category, status, deliveryFees, cookTime,
-        imageUrl, minOrderAmount, rating, reviewCount, deliveryTimeRange,
-        storeAddress, openTime, closeTime, popularMenu)
+                                   storeId, storeName, category, status, deliveryFees, cookTime,
+                                   imageUrl, minOrderAmount, rating, reviewCount, deliveryTimeRange,
+                                   storeAddress, openTime, closeTime, popularMenu)
 };
 
 // 3. StoreListResDTO (가게 목록 전송용 껍데기)

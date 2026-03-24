@@ -72,6 +72,8 @@ struct ReviewQt {
     int     rating;
     QString comment;
     QString createdAt;
+    QString ownerReply;   // 사장님 답글
+    QString orderedMenus; // 주문한 메뉴
 };
 
 struct StoreDetailQt {

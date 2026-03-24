@@ -405,7 +405,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
         // ── 가게 상세 정보(3페이지) 데이터 수신 ──
         } else if (cmdId == CmdID::RES_STORE_DETAIL) {
-            // (서버의 ResStoreDetailDTO를 파싱합니다)
             ResStoreDetailDTO dto = j.get<ResStoreDetailDTO>();
             
             if (dto.status != 200) {
@@ -414,39 +413,40 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             }
 
             StoreDetailQt detail;
-            detail.storeId           = dto.storeData.store_id;
-            detail.storeName         = QString::fromStdString(dto.storeData.store_name);
-            detail.storeAddress      = QString::fromStdString(dto.storeData.store_address);
-            detail.operatingHours    = QString::fromStdString(dto.storeData.operating_hours);
-            detail.deliveryFees      = QString::fromStdString(dto.storeData.delivery_fees);
-            detail.deliveryTimeRange = QString::fromStdString(dto.storeData.delivery_time_range);
-            detail.minOrderAmount    = dto.storeData.min_order_amount;
+            detail.storeId           = dto.storeData.storeId;
+            detail.storeName         = QString::fromStdString(dto.storeData.storeName);
+            detail.storeAddress      = QString::fromStdString(dto.storeData.storeAddress);
+            detail.operatingHours    = QString::fromStdString(dto.storeData.operatingHours);
+            detail.deliveryFees      = QString::fromStdString(dto.storeData.deliveryFees);
+            detail.deliveryTimeRange = QString::fromStdString(dto.storeData.deliveryTimeRange);
+            detail.minOrderAmount    = dto.storeData.minOrderAmount;
             detail.rating            = dto.storeData.rating;
-            detail.reviewCount       = dto.storeData.review_count;
-            detail.imageUrl          = QString::fromStdString(dto.storeData.image_url);
+            detail.reviewCount       = dto.storeData.reviewCount;
+            detail.imageUrl          = QString::fromStdString(dto.storeData.imageUrl);
 
             // 메뉴 리스트 파싱
             for (const auto &m : dto.menuList) {
                 MenuQt menu;
-                menu.menuId       = m.menu_id;
-                menu.menuName     = QString::fromStdString(m.menu_name);
-                menu.basePrice    = m.base_price;
+                menu.menuId       = m.menuId;
+                menu.menuName     = QString::fromStdString(m.menuName);
+                menu.basePrice    = m.basePrice;
                 menu.description  = QString::fromStdString(m.description);
-                menu.imageUrl     = QString::fromStdString(m.image_url);
-                menu.menuCategory = QString::fromStdString(m.menu_category);
-                menu.isSoldOut    = m.is_sold_out;
-                menu.isPopular    = m.is_popular;
+                menu.imageUrl     = QString::fromStdString(m.imageUrl);
+                menu.menuCategory = QString::fromStdString(m.menuCategory);
+                menu.isSoldOut    = m.isSoldOut;
+                menu.isPopular    = m.isPopular;
                 detail.menus.append(menu);
             }
 
             // 리뷰 리스트 파싱
             for (const auto &r : dto.reviewList) {
                 ReviewQt review;
-                review.reviewId  = r.review_id;
-                review.userId    = QString::fromStdString(r.user_id);
-                review.rating    = r.rating;
-                review.comment   = QString::fromStdString(r.content);
-                review.createdAt = QString::fromStdString(r.created_at);
+                review.reviewId   = r.reviewId;
+                review.userId     = QString::fromStdString(r.userId);
+                review.rating     = r.rating;
+                review.comment    = QString::fromStdString(r.content);
+                review.createdAt  = QString::fromStdString(r.createdAt);
+                review.ownerReply = QString::fromStdString(r.ownerReply);
                 detail.reviews.append(review);
             }
 
