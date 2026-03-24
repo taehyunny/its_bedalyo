@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
-    <ProjectGuid>{5DB368FE-5624-5D08-D62C-C646C38133E4}</ProjectGuid>
+    <ProjectGuid>{0628054D-21ED-4F86-66DB-A5A9E30B6200}</ProjectGuid>
     <Keyword>MFCProj</Keyword>
-    <RootNamespace>adminmfc</RootNamespace>
+    <RootNamespace>admin</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -183,16 +183,18 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="admin_mfc.h" />
-    <ClInclude Include="admin_mfcDlg.h" />
+    <ClInclude Include="admin.h" />
+    <ClInclude Include="adminDlg.h" />
+    <ClInclude Include="CChatDlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="admin_mfc.cpp" />
-    <ClCompile Include="admin_mfcDlg.cpp" />
+    <ClCompile Include="admin.cpp" />
+    <ClCompile Include="adminDlg.cpp" />
+    <ClCompile Include="CChatDlg.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -201,13 +203,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="adminmfc.rc" />
+    <ResourceCompile Include="admin.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\adminmfc.rc2" />
+    <None Include="res\admin.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\admin_mfc.ico" />
+    <Image Include="res\admin.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

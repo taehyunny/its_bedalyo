@@ -1,5 +1,5 @@
 ﻿
-// admin_mfc.h: PROJECT_NAME 애플리케이션에 대한 주 헤더 파일입니다.
+// admin.h: PROJECT_NAME 애플리케이션에 대한 주 헤더 파일입니다.
 //
 
 #pragma once
@@ -11,14 +11,14 @@
 #include "resource.h"		// 주 기호입니다.
 
 
-// CadminmfcApp:
-// 이 클래스의 구현에 대해서는 admin_mfc.cpp을(를) 참조하세요.
+// CadminApp:
+// 이 클래스의 구현에 대해서는 admin.cpp을(를) 참조하세요.
 //
 
-class CadminmfcApp : public CWinApp
+class CadminApp : public CWinApp
 {
 public:
-	CadminmfcApp();
+	CadminApp();
 
 // 재정의입니다.
 public:
@@ -29,4 +29,4 @@ public:
 	DECLARE_MESSAGE_MAP()
 };
 
-extern CadminmfcApp theApp;
+extern CadminApp theApp;
