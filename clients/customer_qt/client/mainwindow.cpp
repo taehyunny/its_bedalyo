@@ -136,6 +136,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // ── 서버 연결 ──
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
+
+    
 }
 
 MainWindow::~MainWindow() { delete ui; }

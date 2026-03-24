@@ -12,10 +12,13 @@ StoreDetailWidget::StoreDetailWidget(NetworkManager *network, QWidget *parent)
 {
     ui->setupUi(this);
 
-    // 뒤로가기 버튼 연결
+    // UI 파일에 만들어둔 메인 뒤로가기 버튼(btnBackToMain) 연결
+    connect(ui->btnBackToMain, &QPushButton::clicked, this, &StoreDetailWidget::on_btnBackToMain_clicked);
+    
+    // 기존 리뷰/정보 페이지용 뒤로가기 버튼 연결
     connect(ui->btnBack, &QPushButton::clicked, this, &StoreDetailWidget::on_btnBack_clicked);
 
-    // 🚀 [수정됨] 이제 onMenuListReceived가 아니라 onStoreDetailReceived를 듣습니다!
+    // 서버 응답 신호 연결
     connect(m_network, &NetworkManager::onStoreDetailReceived,
             this, &StoreDetailWidget::onStoreDetailReceived);
 }
@@ -38,30 +41,30 @@ void StoreDetailWidget::loadStoreData(int storeId)
     ui->lblStoreName->setText("메뉴를 불러오는 중...");
 
     // 원래 코드: 서버에 요청 (잠시 주석 처리)
-    // m_network->sendStoreDetailRequest(storeId);
+    m_network->sendStoreDetailRequest(storeId);
 
     // 더미 코드: 가짜 데이터 직접 만들어서 UI 함수 강제 실행(테스트용)
-    StoreDetailQt fakeData;
-    fakeData.storeId = storeId;
-    fakeData.storeName = "🔥 테스트용 불향 쭈꾸미 (가짜데이터)";
+    // StoreDetailQt fakeData;
+    // fakeData.storeId = storeId;
+    // fakeData.storeName = "🔥 테스트용 불향 쭈꾸미 (가짜데이터)";
     
-    MenuQt menu1;
-    menu1.menuName = "쭈꾸미 삼겹살 2인분";
-    menu1.description = "매콤달콤 끝판왕!";
-    menu1.basePrice = 28000;
-    menu1.menuCategory = "메인 메뉴";
+    // MenuQt menu1;
+    // menu1.menuName = "쭈꾸미 삼겹살 2인분";
+    // menu1.description = "매콤달콤 끝판왕!";
+    // menu1.basePrice = 28000;
+    // menu1.menuCategory = "메인 메뉴";
     
-    MenuQt menu2;
-    menu2.menuName = "날치알 볶음밥";
-    menu2.description = "K-디저트는 못 참지";
-    menu2.basePrice = 4000;
-    menu2.menuCategory = "사이드 메뉴";
+    // MenuQt menu2;
+    // menu2.menuName = "날치알 볶음밥";
+    // menu2.description = "K-디저트는 못 참지";
+    // menu2.basePrice = 4000;
+    // menu2.menuCategory = "사이드 메뉴";
     
-    fakeData.menus.append(menu1);
-    fakeData.menus.append(menu2);
+    // fakeData.menus.append(menu1);
+    // fakeData.menus.append(menu2);
 
-    // 가짜 데이터를 넣어서 화면 그리는 함수를 직접 호출!
-    onStoreDetailReceived(fakeData);
+    // // 가짜 데이터를 넣어서 화면 그리는 함수를 직접 호출!
+    // onStoreDetailReceived(fakeData);
 }
 
 // ============================================================
@@ -73,6 +76,13 @@ void StoreDetailWidget::onStoreDetailReceived(StoreDetailQt detail)
 
     // 1. 가게 이름 세팅
     ui->lblStoreName->setText(detail.storeName);
+
+    // 별점 & 리뷰수 세팅
+    ui->btnRating->setText(QString("⭐ %1 (%2) >").arg(detail.rating, 0, 'f', 1).arg(detail.reviewCount));
+    
+    // 배달 정보 세팅
+    ui->lblDeliveryStats->setText(QString("배달 %1 | 최소주문 %2원 | 배달비 %3")
+                                  .arg(detail.deliveryTimeRange).arg(detail.minOrderAmount).arg(detail.deliveryFees));
 
     // 2. 메뉴판 쫙 깔아주기
     QMap<QString, QList<MenuQt>> groupedMenus;
@@ -175,4 +185,10 @@ void StoreDetailWidget::on_btnStoreInfo_clicked() {
 
 void StoreDetailWidget::on_btnStoreInfoBack_clicked() {
     ui->stackedWidget->setCurrentIndex(0); 
+}
+
+//  메인 화면에서 뒤로가기 버튼을 눌렀을 때 실행되는 함수
+void StoreDetailWidget::on_btnBackToMain_clicked() 
+{
+    emit backRequested(); // "나 2페이지(가게목록)로 돌아갈래!" 하고 신호 발사!
 }

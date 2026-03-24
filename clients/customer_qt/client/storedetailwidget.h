@@ -23,6 +23,8 @@ public:
 signals:
     void backRequested();
     void menuSelected(int menuId, QString menuName, int price);
+    // 뒤로가기 버튼 눌림을 알리는 신호
+    void backButtonClicked();
 
 private slots:
     void on_btnBack_clicked();
@@ -30,6 +32,8 @@ private slots:
 
     void on_btnStoreInfo_clicked();
     void on_btnStoreInfoBack_clicked();
+    // 메인 화면 뒤로가기 버튼 클릭 슬롯
+    void on_btnBackToMain_clicked();
     
 private:
     Ui::StoreDetailWidget *ui;
