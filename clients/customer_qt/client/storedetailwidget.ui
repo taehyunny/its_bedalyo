@@ -309,10 +309,21 @@
        </widget>
       </widget>
      </item>
+     <item>
+      <widget class="CartBarWidget" name="myCartBar" native="true"/>
+     </item>
     </layout>
    </item>
   </layout>
  </widget>
- <resources/>
- <connections/>
-</ui>
+ <customwidgets>
+   <customwidget>
+    <class>CartBarWidget</class>
+    <extends>QWidget</extends>
+    <header>cartbarwidget.h</header>
+    <container>1</container>
+   </customwidget>
+  </customwidgets>
+  <resources/>
+  <connections/>
+ </ui>

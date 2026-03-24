@@ -105,10 +105,6 @@ HomeWidget::HomeWidget(NetworkManager *network, QWidget *parent)
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &HomeWidget::onMainHomeReceived);
 
-    connect(ui->btnCartView, &QPushButton::clicked,
-            this, &HomeWidget::on_btnCartView_clicked);
-
-    updateCartBar();
 }
 
 HomeWidget::~HomeWidget() { delete ui; }
@@ -291,22 +287,7 @@ bool HomeWidget::eventFilter(QObject *obj, QEvent *event)
     return QWidget::eventFilter(obj, event);
 }
 
-// ============================================================
-// 카트 바
-// ============================================================
-void HomeWidget::updateCartBar()
-{
-    CartSession &cart = CartSession::instance();
-    if (cart.isEmpty()) {
-        ui->cartBar->hide();
-        return;
-    }
-    ui->cartBar->show();
-    ui->btnCartView->setText(QString("  %1   카트 보기").arg(cart.totalCount()));
-    ui->labelCartPrice->setText(cart.totalPriceStr());
-}
 
-void HomeWidget::on_btnCartView_clicked() { emit cartRequested(); }
 void HomeWidget::on_btnSearch_clicked()   { emit searchRequested(); }
 void HomeWidget::on_navHome_clicked()     {}
 void HomeWidget::on_navSearch_clicked()   { emit searchRequested(); }

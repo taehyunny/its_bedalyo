@@ -650,3 +650,7 @@ QWidget* StoreDetailWidget::createPhotoReviewCard(const ReviewQt& review)
 
     return card;
 }
+
+void StoreDetailWidget::updateCartBar() {
+    // 이제 이 함수는 아무 일도 하지 않습니다.
+}

@@ -5,6 +5,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
 SOURCES += \
+    cartbarwidget.cpp \
     loginwidget.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
 
 
 HEADERS += \
+    cartbarwidget.h \
     loginwidget.h \
     mainwindow.h \
     NetworkManager.h \
@@ -44,10 +46,11 @@ HEADERS += \
     settingswidget.h \
     addresswidget.h \
     addressdetailwidget.h \
-    cartwidget.h
+    cartwidget.h \
 
 
 FORMS += \
+    cartbarwidget.ui \
     loginwidget.ui \
     mainwindow.ui \
     homewidget.ui \
@@ -62,7 +65,7 @@ FORMS += \
     settingswidget.ui \
     addresswidget.ui \
     addressdetailwidget.ui \
-    cartwidget.ui
+    cartwidget.ui \
 
 
 

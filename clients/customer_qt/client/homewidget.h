@@ -38,7 +38,6 @@ public:
     void setAddress(const QString &address);
 
     bool eventFilter(QObject *obj, QEvent *event) override;
-    void updateCartBar();
 
 signals:
     void categorySelected(int categoryId, const QString &categoryName);
@@ -63,7 +62,6 @@ private slots:
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
                             QList<TopStoreInfoQt> topStores);
 
-    void on_btnCartView_clicked();
 
 private:
     Ui::HomeWidget *ui;

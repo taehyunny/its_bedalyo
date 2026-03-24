@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "UserSession.h"
+#include "cartbarwidget.h"
 #include <QDebug>
 #include <QMessageBox>
 
@@ -56,6 +57,14 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::onCategorySelected);
     connect(m_menuWidget, &menucategori::backRequested,
             this, &MainWindow::onBackToHome);
+
+    // 홈 화면의 장바구니 바를 눌렀을 때 장바구니 화면으로 이동!
+    CartBarWidget* homeBar = m_homeWidget->findChild<CartBarWidget*>("myCartBar");
+    if (homeBar) connect(homeBar, &CartBarWidget::cartRequested, this, &MainWindow::onCartRequested);
+
+    // 가게 상세 화면의 장바구니 바를 눌렀을 때도 똑같이!
+    CartBarWidget* detailBar = m_storeDetailWidget->findChild<CartBarWidget*>("myCartBar");
+    if (detailBar) connect(detailBar, &CartBarWidget::cartRequested, this, &MainWindow::onCartRequested);
 
     // ── 검색 화면 ──
     connect(m_homeWidget, &HomeWidget::searchRequested,
@@ -143,25 +152,25 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_storeDetailWidget, &StoreDetailWidget::backRequested,
             this, &MainWindow::onBackToHome);
 
-    // ── 3페이지에서 메뉴 클릭 시 -> 4페이지(주문 옵션)로 이동할 준비 ──
-    connect(m_storeDetailWidget, &StoreDetailWidget::menuSelected, 
-            this, [this](int menuId, QString menuName, int price) {
-                
-        // 일단 클릭이 잘 되는지 터미널에 로그만 찍어둡니다.
-        qDebug() << "[MainWindow] 메뉴 선택됨! 4페이지 연결 대기중 -> ID:" << menuId << "이름:" << menuName << "가격:" << price;
-    });
-
-
-    // ── 장바구니 ──
-    connect(m_homeWidget, &HomeWidget::cartRequested,
-            this, &MainWindow::onCartRequested);
+    // ── 가게 상세 화면에서 메뉴 클릭 시 -> 옵션 선택 화면으로 이동 ──
     connect(m_storeDetailWidget, &StoreDetailWidget::menuSelected,
             this, [this](int menuId, QString menuName, int price) {
-                CartItemQt item;
-                item.menuId    = menuId;
-                item.menuName  = menuName;
-                item.unitPrice = price;
-                item.quantity  = 1;
+
+                qDebug() << "[MainWindow] 메뉴 상세 페이지로 이동 -> " << menuName;
+                // 1. 데이터를 menuoption 위젯에 로드
+                m_menuOptionWidget->loadMenuOption(menuId, menuName, price);
+                // 2. 화면을 menuoption 위젯으로 전환
+                ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);
+            });
+
+    // ── 옵션 선택 화면에서 뒤로가기 클릭 시 ──
+    connect(m_menuOptionWidget, &menuoption::backRequested, this, [this]() {
+        ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
+    });
+
+    // ── 🚀 옵션 선택 화면에서 [장바구니 담기]를 완료했을 때의 찐 로직! ──
+    connect(m_menuOptionWidget, &menuoption::selectedMenuFinished,
+            this, [this](CartItemQt item) {
 
                 // 다른 가게 메뉴면 경고 팝업
                 if (CartSession::instance().isFromDifferentStore(m_storeDetailWidget->currentStoreId())) {
@@ -179,11 +188,24 @@ MainWindow::MainWindow(QWidget *parent)
                     CartSession::instance().storeName = m_storeDetailWidget->currentStoreName();
                 }
 
+                // 1. 장바구니 창고에 데이터 진짜로 담기
                 CartSession::instance().addItem(item);
-                m_storeDetailWidget->updateCartBar();
-                qDebug() << "[MainWindow] 메뉴 담김:" << menuName << "총:" << CartSession::instance().totalCount();
+
+                // 2. 홈 화면에 있는 카트 바에게 새로고침 지시
+                CartBarWidget* homeCartBar = m_homeWidget->findChild<CartBarWidget*>("myCartBar");
+                if (homeCartBar) homeCartBar->updateCartUI();
+
+                // 3. 가게 상세 화면에 있는 카트 바에게 새로고침 지시
+                CartBarWidget* detailCartBar = m_storeDetailWidget->findChild<CartBarWidget*>("myCartBar");
+                if (detailCartBar) detailCartBar->updateCartUI();
+
+                qDebug() << "[MainWindow] 메뉴 담김:" << item.menuName << "총:" << CartSession::instance().totalCount();
+
+                // 4. 장바구니에 담았으니 다시 가게 상세 화면으로 튕겨주기 (쿠팡이츠 UX)
+                ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
             });
 
+    // ── 장바구니 위젯 관련 ──
     connect(m_cartWidget, &CartWidget::closeRequested,
             this, &MainWindow::onCartClose);
     connect(m_cartWidget, &CartWidget::addMenuRequested,
@@ -193,30 +215,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_cartWidget, &CartWidget::orderSuccess,
             this, &MainWindow::onOrderSuccess);
 
-
-    // ── 가게 상세 화면에서 메뉴 클릭 시 로직 수정 ──
-    connect(m_storeDetailWidget, &StoreDetailWidget::menuSelected, 
-            this, [this](int menuId, QString menuName, int price) {
-        
-        qDebug() << "[MainWindow] 메뉴 상세 페이지로 이동 -> " << menuName;
-
-        // 1. 데이터를 menuoption 위젯에 로드
-        m_menuOptionWidget->loadMenuOption(menuId, menuName, price);
-
-        // 2. 화면을 menuoption 위젯으로 전환
-        ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);
-    });
-
-    // ── 메뉴 상세에서 뒤로가기 클릭 시 로직 추가 ──
-    connect(m_menuOptionWidget, &menuoption::backRequested, this, [this]() {
-        // 다시 가게 상세 화면(m_storeDetailWidget)으로 복귀
-        ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
-    });
-
     // ── 서버 연결 ──
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
-
-    
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -366,7 +366,13 @@ void MainWindow::onCartClose()
 void MainWindow::onOrderSuccess()
 {
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
-    m_homeWidget->updateCartBar();
+
+    // 주문 성공했으니 장바구니 바 업데이트 (아마 장바구니가 비워졌으니 바가 숨겨지겠지?)
+    CartBarWidget* homeCartBar = m_homeWidget->findChild<CartBarWidget*>("myCartBar");
+    if (homeCartBar) homeCartBar->updateCartUI();
+
+    CartBarWidget* detailCartBar = m_storeDetailWidget->findChild<CartBarWidget*>("myCartBar");
+    if (detailCartBar) detailCartBar->updateCartUI();
 }
 
 
