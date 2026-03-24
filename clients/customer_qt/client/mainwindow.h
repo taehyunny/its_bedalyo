@@ -45,8 +45,10 @@ private slots:
     void onSettingsRequested();
     void onAddressRequested();
     void onAddressSelected(const QString &address);
-    void onAddressDetailRequested(const QString &roadAddr);
+    void onAddressDetailRequested(const QString &roadAddr);  // 새 주소
+    void onAddressEditRequested(const AddressItem &item);    // 기존 주소 수정
     void onAddressDetailCompleted(const AddressItem &item);
+    void onAddressDeleteRequested(int addressId);
 
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
                             QList<TopStoreInfoQt> topStores);

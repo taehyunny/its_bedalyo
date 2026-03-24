@@ -1,5 +1,6 @@
 #include "addressdetailwidget.h"
 #include "ui_addressdetailwidget.h"
+#include <QMessageBox>
 #include <QDebug>
 
 AddressDetailWidget::AddressDetailWidget(QWidget *parent)
@@ -8,7 +9,6 @@ AddressDetailWidget::AddressDetailWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // 라벨 버튼 그룹처럼 동작 (하나만 선택)
     connect(ui->btnLabelHome, &QPushButton::clicked,
             this, &AddressDetailWidget::on_btnLabelHome_clicked);
     connect(ui->btnLabelWork, &QPushButton::clicked,
@@ -24,14 +24,18 @@ AddressDetailWidget::~AddressDetailWidget() { delete ui; }
 // ============================================================
 void AddressDetailWidget::loadNewAddress(const QString &roadAddr)
 {
-    m_item = AddressItem();
-    m_item.address = roadAddr;
-    m_item.label   = "기타";
+    m_item          = AddressItem();
+    m_item.address  = roadAddr;
+    m_item.label    = "기타";
+    m_item.isDefault = false;
 
     ui->labelAddress->setText(roadAddr.isEmpty() ? "주소를 선택해주세요" : roadAddr);
     ui->detailEdit->clear();
     ui->guideEdit->clear();
     updateLabelButtons("기타");
+
+    // 새 주소 → 삭제 버튼 숨김
+    ui->btnDelete->hide();
 
     qDebug() << "[AddressDetailWidget] 새 주소 설정:" << roadAddr;
 }
@@ -48,7 +52,17 @@ void AddressDetailWidget::loadEditAddress(const AddressItem &item)
     ui->guideEdit->setText(item.guide);
     updateLabelButtons(item.label);
 
-    qDebug() << "[AddressDetailWidget] 주소 수정 모드:" << item.address;
+    // 현재 선택된(기본) 주소 → 삭제 버튼 숨김
+    // 선택 안 된 주소 → 삭제 버튼 표시
+    if (item.isDefault) {
+        ui->btnDelete->hide();
+    } else {
+        ui->btnDelete->show();
+        ui->btnDelete->setText("삭제");
+    }
+
+    qDebug() << "[AddressDetailWidget] 수정 모드:" << item.address
+             << "isDefault:" << item.isDefault;
 }
 
 // ============================================================
@@ -85,7 +99,7 @@ void AddressDetailWidget::on_btnLabelEtc_clicked()
 }
 
 // ============================================================
-// 완료 버튼 → AddressWidget으로 결과 전달
+// 완료 버튼
 // ============================================================
 void AddressDetailWidget::on_btnComplete_clicked()
 {
@@ -96,4 +110,20 @@ void AddressDetailWidget::on_btnComplete_clicked()
              << m_item.address << m_item.detail << m_item.label;
 
     emit completed(m_item);
+}
+
+// ============================================================
+// 삭제 버튼 (선택 안 된 주소만 표시됨)
+// ============================================================
+void AddressDetailWidget::on_btnDelete_clicked()
+{
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this, "주소 삭제",
+        "이 주소를 삭제하시겠습니까?",
+        QMessageBox::Yes | QMessageBox::No
+    );
+    if (reply == QMessageBox::Yes) {
+        qDebug() << "[AddressDetailWidget] 삭제 요청 addressId:" << m_item.addressId;
+        emit deleteRequested(m_item.addressId);
+    }
 }

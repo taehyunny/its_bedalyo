@@ -80,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_orderHistoryWidget, &OrderHistoryWidget::mypageRequested,
             this, &MainWindow::onMypageRequested);
 
-    // ── 마이페이지 화면 ──
+    // ── 마이페이지 ──
     connect(m_homeWidget, &HomeWidget::mypageRequested,
             this, &MainWindow::onMypageRequested);
     connect(m_myPageWidget, &MyPageWidget::homeRequested,
@@ -115,14 +115,18 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::onAddressSelected);
     connect(m_addressWidget, &AddressWidget::addressDetailRequested,
             this, &MainWindow::onAddressDetailRequested);
+    connect(m_addressWidget, &AddressWidget::addressEditRequested,
+            this, &MainWindow::onAddressEditRequested);
 
     // ── 주소 설정 화면 ──
     connect(m_addressDetailWidget, &AddressDetailWidget::backRequested,
             this, [this]() { ui->stackedWidget->setCurrentWidget(m_addressWidget); });
     connect(m_addressDetailWidget, &AddressDetailWidget::completed,
             this, &MainWindow::onAddressDetailCompleted);
+    connect(m_addressDetailWidget, &AddressDetailWidget::deleteRequested,
+            this, &MainWindow::onAddressDeleteRequested);
 
-    // ── 가게 상세 화면 ──
+    // ── 가게 상세 ──
     connect(m_homeWidget, &HomeWidget::storeSelected,
             this, &MainWindow::onStoreSelected);
 
@@ -208,23 +212,37 @@ void MainWindow::onAddressSelected(const QString &address)
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
 }
 
+// 새 주소 설정 화면
 void MainWindow::onAddressDetailRequested(const QString &roadAddr)
 {
     m_addressDetailWidget->loadNewAddress(roadAddr);
     ui->stackedWidget->setCurrentWidget(m_addressDetailWidget);
 }
 
+// 기존 주소 수정 화면
+void MainWindow::onAddressEditRequested(const AddressItem &item)
+{
+    m_addressDetailWidget->loadEditAddress(item);
+    ui->stackedWidget->setCurrentWidget(m_addressDetailWidget);
+}
+
+// 주소 설정 완료
 void MainWindow::onAddressDetailCompleted(const AddressItem &item)
 {
-    // AddressWidget에 결과 전달
     m_addressWidget->onAddressDetailCompleted(item);
 
-    // 새로 추가된 주소가 첫 번째면 홈 화면 주소도 업데이트
     if (item.isDefault) {
         UserSession::instance().address = item.address;
         m_homeWidget->setAddress(item.address);
     }
 
+    ui->stackedWidget->setCurrentWidget(m_addressWidget);
+}
+
+// 주소 삭제
+void MainWindow::onAddressDeleteRequested(int addressId)
+{
+    m_addressWidget->deleteAddress(addressId);
     ui->stackedWidget->setCurrentWidget(m_addressWidget);
 }
 

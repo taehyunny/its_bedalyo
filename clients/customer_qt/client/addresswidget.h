@@ -12,15 +12,15 @@ namespace Ui { class AddressWidget; }
 QT_END_NAMESPACE
 
 // ============================================================
-// 로컬 주소 아이템 (서버 연동 전 메모리 관리용)
+// 로컬 주소 아이템
 // ============================================================
 struct AddressItem {
-    int     addressId   = -1;       // 서버 PK (임시: -1)
-    QString address;                // 도로명 주소
-    QString detail;                 // 상세주소
-    QString guide;                  // 길안내
-    QString label       = "기타";  // 집 / 회사 / 기타
-    bool    isDefault   = false;    // 현재 선택된 주소
+    int     addressId   = -1;
+    QString address;
+    QString detail;
+    QString guide;
+    QString label       = "기타";
+    bool    isDefault   = false;
 };
 
 // ============================================================
@@ -37,11 +37,14 @@ public:
     void loadData();
     QString selectedAddress() const { return m_selectedAddress; }
 
+    // 주소 삭제 (addressdetailwidget에서 호출)
+    void deleteAddress(int addressId);
+
 signals:
     void backRequested();
     void addressSelected(const QString &address);
-    // 검색 결과 선택 → 주소 설정 화면으로
-    void addressDetailRequested(const QString &roadAddr);
+    void addressDetailRequested(const QString &roadAddr);   // 새 주소 설정
+    void addressEditRequested(const AddressItem &item);     // 기존 주소 수정
 
 private slots:
     void on_btnBack_clicked();
@@ -53,7 +56,6 @@ private slots:
     void onApiReplyFinished(QNetworkReply *reply);
 
 public slots:
-    // 주소 설정 화면에서 완료 후 호출
     void onAddressDetailCompleted(const AddressItem &item);
 
 private:
@@ -63,16 +65,14 @@ private:
     QNetworkAccessManager *m_http;
     QTimer               *m_searchTimer;
 
-    QList<AddressItem>    m_addressList;   // 로컬 주소 목록
-    int                   m_nextLocalId = 1; // 임시 ID 증가용
+    QList<AddressItem>    m_addressList;
+    int                   m_nextLocalId = 1;
 
     void searchAddress(const QString &keyword);
     void buildSearchResults(const QJsonArray &results);
     void buildAddressList();
     void clearSearchResults();
 
-    // 주소 카드 (저장된 주소)
     QWidget* makeAddressCard(const AddressItem &item);
-    // 검색 결과 카드
     QWidget* makeSearchResultCard(const QString &roadAddr, const QString &jibunAddr);
 };

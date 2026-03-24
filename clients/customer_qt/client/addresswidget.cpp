@@ -2,6 +2,7 @@
 #include "ui_addresswidget.h"
 #include "UserSession.h"
 #include "config.h"
+#include <utility>
 #include <QMessageBox>
 #include <QDebug>
 #include <QHBoxLayout>
@@ -47,7 +48,6 @@ void AddressWidget::loadData()
     ui->searchEdit->clear();
     clearSearchResults();
 
-    // 로컬 목록이 비어있으면 UserSession 주소로 초기화
     if (m_addressList.isEmpty()) {
         const QString curAddr = UserSession::instance().address;
         if (!curAddr.isEmpty()) {
@@ -68,7 +68,6 @@ void AddressWidget::loadData()
 // ============================================================
 void AddressWidget::onAddressDetailCompleted(const AddressItem &item)
 {
-    // 기존 목록에 있으면 수정, 없으면 추가
     bool found = false;
     for (int i = 0; i < m_addressList.size(); ++i) {
         if (m_addressList[i].addressId == item.addressId) {
@@ -80,8 +79,13 @@ void AddressWidget::onAddressDetailCompleted(const AddressItem &item)
     if (!found) {
         AddressItem newItem = item;
         newItem.addressId = m_nextLocalId++;
-        // 첫 주소면 기본으로
-        if (m_addressList.isEmpty()) newItem.isDefault = true;
+        if (m_addressList.isEmpty()) {
+            newItem.isDefault = true;
+        } else {
+            // 새 주소 추가 시 기존 isDefault 해제 후 새 주소를 기본으로
+            for (auto &a : m_addressList) a.isDefault = false;
+            newItem.isDefault = true;
+        }
         m_addressList.append(newItem);
     }
 
@@ -91,27 +95,39 @@ void AddressWidget::onAddressDetailCompleted(const AddressItem &item)
 }
 
 // ============================================================
+// 주소 삭제 (addressdetailwidget에서 호출)
+// ============================================================
+void AddressWidget::deleteAddress(int addressId)
+{
+    m_addressList.removeIf([addressId](const AddressItem &a) {
+        return a.addressId == addressId;
+    });
+    clearSearchResults();
+    buildAddressList();
+}
+
+// ============================================================
 // 저장된 주소 목록 빌드
 // ============================================================
 void AddressWidget::buildAddressList()
 {
-    for (const AddressItem &item : m_addressList)
+    for (const AddressItem &item : std::as_const(m_addressList))
         ui->addressListLayout->addWidget(makeAddressCard(item));
 }
 
 // ============================================================
-// 주소 카드 위젯 (저장된 주소)
+// 주소 카드 위젯 (삭제 버튼 없음 — 연필 버튼으로 설정 화면 진입)
 // ============================================================
 QWidget* AddressWidget::makeAddressCard(const AddressItem &item)
 {
     QWidget *card = new QWidget();
     card->setMinimumHeight(72);
+    card->setObjectName("addrCard");
     card->setStyleSheet(
         item.isDefault
         ? "QWidget#addrCard { background:#f0f4ff; border-bottom:1px solid #d0dcff; }"
         : "QWidget#addrCard { background:#ffffff; border-bottom:1px solid #f0f0f0; }"
     );
-    card->setObjectName("addrCard");
 
     QHBoxLayout *hl = new QHBoxLayout(card);
     hl->setContentsMargins(20, 12, 12, 12);
@@ -125,20 +141,20 @@ QWidget* AddressWidget::makeAddressCard(const AddressItem &item)
     iconLabel->setAlignment(Qt::AlignCenter);
     iconLabel->setStyleSheet("font-size:18px; background:transparent;");
 
-    // 텍스트
+    // 텍스트 영역
     QWidget *textWidget = new QWidget();
     textWidget->setStyleSheet("background:transparent;");
     QVBoxLayout *vl = new QVBoxLayout(textWidget);
     vl->setContentsMargins(0, 0, 0, 0);
     vl->setSpacing(2);
 
-    // 라벨 + 현재 선택 뱃지
     QHBoxLayout *labelRow = new QHBoxLayout();
     labelRow->setContentsMargins(0, 0, 0, 0);
     labelRow->setSpacing(6);
 
     QLabel *labelTag = new QLabel(item.label);
     labelTag->setStyleSheet("font-size:12px; color:#888888; background:transparent;");
+    labelRow->addWidget(labelTag);
 
     if (item.isDefault) {
         QLabel *badge = new QLabel("선택됨");
@@ -146,33 +162,27 @@ QWidget* AddressWidget::makeAddressCard(const AddressItem &item)
             "font-size:11px; color:#1565c0; font-weight:bold;"
             "background:#e0eaff; border-radius:4px; padding:1px 6px;"
         );
-        labelRow->addWidget(labelTag);
         labelRow->addWidget(badge);
-        labelRow->addStretch();
-    } else {
-        labelRow->addWidget(labelTag);
-        labelRow->addStretch();
     }
+    labelRow->addStretch();
 
     QLabel *addrLabel = new QLabel(item.address);
     addrLabel->setStyleSheet("font-size:14px; color:#222222; background:transparent;");
     addrLabel->setWordWrap(true);
 
+    vl->addLayout(labelRow);
+    vl->addWidget(addrLabel);
+
     if (!item.detail.isEmpty()) {
         QLabel *detailLabel = new QLabel(item.detail);
         detailLabel->setStyleSheet("font-size:12px; color:#888888; background:transparent;");
-        vl->addLayout(labelRow);
-        vl->addWidget(addrLabel);
         vl->addWidget(detailLabel);
-    } else {
-        vl->addLayout(labelRow);
-        vl->addWidget(addrLabel);
     }
 
     hl->addWidget(iconLabel);
     hl->addWidget(textWidget, 1);
 
-    // 연필 버튼 (수정)
+    // 연필 버튼 → 주소 설정 화면으로 (수정 모드)
     QPushButton *editBtn = new QPushButton("✏️");
     editBtn->setFixedSize(32, 32);
     editBtn->setStyleSheet(
@@ -181,29 +191,9 @@ QWidget* AddressWidget::makeAddressCard(const AddressItem &item)
     );
     editBtn->setCursor(Qt::PointingHandCursor);
     connect(editBtn, &QPushButton::clicked, this, [this, item]() {
-        emit addressDetailRequested(item.address);
-        // TODO: 수정 모드로 addressdetailwidget 열기
+        emit addressEditRequested(item);
     });
     hl->addWidget(editBtn);
-
-    // 삭제 버튼 (현재 선택된 주소는 표시 안 함)
-    if (!item.isDefault) {
-        QPushButton *delBtn = new QPushButton("✕");
-        delBtn->setFixedSize(32, 32);
-        delBtn->setStyleSheet(
-            "QPushButton{background:transparent;border:none;font-size:14px;color:#bbbbbb;}"
-            "QPushButton:hover{color:#e53935;background:#fff0f0;border-radius:16px;}"
-        );
-        delBtn->setCursor(Qt::PointingHandCursor);
-        connect(delBtn, &QPushButton::clicked, this, [this, id = item.addressId]() {
-            m_addressList.removeIf([id](const AddressItem &a) {
-                return a.addressId == id;
-            });
-            clearSearchResults();
-            buildAddressList();
-        });
-        hl->addWidget(delBtn);
-    }
 
     // 카드 클릭 → 해당 주소 선택 (현재 배달 주소로 설정)
     QPushButton *clickOverlay = new QPushButton(card);
@@ -213,22 +203,14 @@ QWidget* AddressWidget::makeAddressCard(const AddressItem &item)
         "QPushButton:pressed{background:rgba(0,0,0,0.05);}"
     );
     clickOverlay->setCursor(Qt::PointingHandCursor);
-
-    QVBoxLayout *overlayLayout = new QVBoxLayout(card);
-    overlayLayout->setContentsMargins(0, 0, 0, 0);
-    overlayLayout->addWidget(clickOverlay);
-    clickOverlay->lower(); // 버튼들 뒤로
-    clickOverlay->stackUnder(iconLabel);
+    clickOverlay->lower();
 
     connect(clickOverlay, &QPushButton::clicked, this, [this, id = item.addressId, addr = item.address]() {
-        // 선택된 주소 변경
         for (auto &a : m_addressList)
             a.isDefault = (a.addressId == id);
         m_selectedAddress = addr;
-
         clearSearchResults();
         buildAddressList();
-
         qDebug() << "[AddressWidget] 주소 선택:" << addr;
         emit addressSelected(addr);
     });
@@ -330,38 +312,46 @@ void AddressWidget::buildSearchResults(const QJsonArray &results)
 }
 
 // ============================================================
-// 검색 결과 카드 — 클릭 시 주소 설정 화면으로
+// 검색 결과 카드 — 카드 전체가 클릭 영역
 // ============================================================
 QWidget* AddressWidget::makeSearchResultCard(const QString &roadAddr,
                                               const QString &jibunAddr)
 {
-    QWidget *card = new QWidget();
-    card->setStyleSheet("QWidget { background:#ffffff; border-bottom:1px solid #f0f0f0; }");
-    card->setMinimumHeight(68);
+    QPushButton *card = new QPushButton();
+    card->setStyleSheet(
+        "QPushButton{background:#ffffff;border:none;border-bottom:1px solid #f0f0f0;text-align:left;padding:0;}"
+        "QPushButton:hover{background:#f5f8ff;}"
+        "QPushButton:pressed{background:#e8f0ff;}"
+    );
+    card->setMinimumHeight(72);
     card->setCursor(Qt::PointingHandCursor);
 
     QHBoxLayout *hl = new QHBoxLayout(card);
-    hl->setContentsMargins(20, 12, 12, 12);
+    hl->setContentsMargins(20, 12, 16, 12);
     hl->setSpacing(12);
 
     QLabel *iconLabel = new QLabel("📍");
     iconLabel->setFixedWidth(24);
     iconLabel->setAlignment(Qt::AlignCenter);
     iconLabel->setStyleSheet("font-size:18px; background:transparent;");
+    iconLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 
     QWidget *textWidget = new QWidget();
     textWidget->setStyleSheet("background:transparent;");
+    textWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
     QVBoxLayout *vl = new QVBoxLayout(textWidget);
     vl->setContentsMargins(0, 0, 0, 0);
-    vl->setSpacing(2);
+    vl->setSpacing(3);
 
     QLabel *roadLabel = new QLabel(roadAddr);
     roadLabel->setStyleSheet("font-size:14px; color:#222222; font-weight:bold; background:transparent;");
     roadLabel->setWordWrap(true);
+    roadLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 
     QLabel *jibunLabel = new QLabel(jibunAddr);
     jibunLabel->setStyleSheet("font-size:12px; color:#888888; background:transparent;");
     jibunLabel->setWordWrap(true);
+    jibunLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 
     vl->addWidget(roadLabel);
     vl->addWidget(jibunLabel);
@@ -369,21 +359,7 @@ QWidget* AddressWidget::makeSearchResultCard(const QString &roadAddr,
     hl->addWidget(iconLabel);
     hl->addWidget(textWidget, 1);
 
-    // 카드 전체 클릭 → 주소 설정 화면으로
-    QPushButton *clickBtn = new QPushButton(card);
-    clickBtn->setStyleSheet(
-        "QPushButton{background:transparent;border:none;}"
-        "QPushButton:hover{background:rgba(0,0,0,0.03);}"
-        "QPushButton:pressed{background:rgba(0,0,0,0.07);}"
-    );
-    clickBtn->setCursor(Qt::PointingHandCursor);
-
-    QVBoxLayout *overlayLayout = new QVBoxLayout(card);
-    overlayLayout->setContentsMargins(0, 0, 0, 0);
-    overlayLayout->addWidget(clickBtn);
-    clickBtn->raise();
-
-    connect(clickBtn, &QPushButton::clicked, this, [this, roadAddr]() {
+    connect(card, &QPushButton::clicked, this, [this, roadAddr]() {
         qDebug() << "[AddressWidget] 검색결과 선택 → 설정 화면:" << roadAddr;
         emit addressDetailRequested(roadAddr);
     });
@@ -414,12 +390,5 @@ void AddressWidget::on_btnCurrentLocation_clicked()
     QMessageBox::information(this, "준비 중", "현재 위치 기능은 준비 중입니다.");
 }
 
-void AddressWidget::on_btnAddHome_clicked()
-{
-    emit addressDetailRequested("");
-}
-
-void AddressWidget::on_btnAddWork_clicked()
-{
-    emit addressDetailRequested("");
-}
+void AddressWidget::on_btnAddHome_clicked()  { emit addressDetailRequested(""); }
+void AddressWidget::on_btnAddWork_clicked()  { emit addressDetailRequested(""); }
