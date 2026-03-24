@@ -3,6 +3,7 @@
 #include "afxdialogex.h"
 #include "CMainMenuDlg.h"
 #include "NetworkHelper.h"
+#include "CTabSettlementDlg.h"
 
 IMPLEMENT_DYNAMIC(CMainMenuDlg, CDialogEx)
 
@@ -94,11 +95,14 @@ BOOL CMainMenuDlg::OnInitDialog()
     m_tabSalesDlg.Create(IDD_TAB_SALES, &m_tabCtrl);
     m_tabSalesDlg.MoveWindow(&rcTab);
     m_tabSalesDlg.ShowWindow(SW_HIDE);
+    m_tabSalesDlg.SetSalesInfo(m_storeId, m_pNet);
+    m_tabSettlementDlg.SetSettlementInfo(m_storeId, m_pNet);
 
     m_tabSettlementDlg.Create(IDD_TAB_SETTLEMENT, &m_tabCtrl);
     m_tabSettlementDlg.MoveWindow(&rcTab);
     m_tabSettlementDlg.ShowWindow(SW_HIDE);
     m_tabOrderDlg.SetOrderInfo(m_storeId, m_pNet, _ttoi(m_cookTime));
+
 
     return TRUE;
 }
@@ -128,6 +132,21 @@ void CMainMenuDlg::OnTcnSelchangeTabStatusSet(NMHDR* pNMHDR, LRESULT* pResult)
     }
 
     *pResult = 0;
+}
+void CMainMenuDlg::OnClose()
+{
+    if (MessageBox(L"종료하시겠습니까?", L"종료", MB_YESNO | MB_ICONQUESTION) == IDYES)
+    {
+        //  로그아웃 신호 전송 후 완전 종료
+        if (m_pNet)
+        {
+            json body;
+            m_pNet->Send(CmdID::REQ_LOGOUT, body);
+        }
+        CDialogEx::OnClose();
+        AfxGetMainWnd()->PostMessage(WM_QUIT); // 앱 완전 종료
+    }
+    // 취소 시 아무것도 안 함 → 창 유지
 }
 
 
@@ -210,11 +229,24 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         json resJson = json::parse(pkt->body);
         m_tabOrderDlg.OnOrderRejectResult(resJson);
     }
+    else if (pkt->cmdId == CmdID::RES_SALES_STAT)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) == 200)
+        {
+            int totalSales = resJson.value("totalSales", 0);
+            m_tabSalesDlg.OnSalesStatReceived(resJson);
+            m_tabSettlementDlg.ShowDummyData(totalSales);
+        }
+        else
+            MessageBox(L"매출 조회에 실패했습니다.", L"오류", MB_ICONERROR);
+    }
     delete pkt;
     return 0;
 }
 
 BEGIN_MESSAGE_MAP(CMainMenuDlg, CDialogEx)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_STATUS_SET, &CMainMenuDlg::OnTcnSelchangeTabStatusSet)
-    ON_MESSAGE(WM_PACKET_RECEIVED, &CMainMenuDlg::OnPacketReceived)  // ✅ 추가
+    ON_MESSAGE(WM_PACKET_RECEIVED, &CMainMenuDlg::OnPacketReceived)
+    ON_WM_CLOSE()
 END_MESSAGE_MAP()

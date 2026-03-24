@@ -1,5 +1,9 @@
 ﻿#pragma once
 #include "afxdialogex.h"
+#include "NetworkHelper.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 class CTabSettlementDlg : public CDialogEx
 {
@@ -13,27 +17,28 @@ public:
     enum { IDD = IDD_TAB_SETTLEMENT };
 #endif
 
+    void SetSettlementInfo(int storeId, CNetworkHelper* pNet);
+    void ShowDummyData(int totalSales); // total_sales 기반 하드코딩 표시
+
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
-
-    afx_msg void OnBnClickedBtnSettlementSearch(); // 조회 버튼
-
+    afx_msg void OnBnClickedBtnSettlementSearch();
     DECLARE_MESSAGE_MAP()
 
 private:
     void InitListCtrl();
 
-    // ── 수수료율 (클라이언트 자체 계산) ─────────────────────
-    const double COMMISSION_RATE = 0.128; // 12.8%
 
-    // ── 컨트롤 바인딩 ────────────────────────────────────────
-    CDateTimeCtrl m_dtSetStart;           // IDC_DATETIMEPICKER_SET_START
-    CDateTimeCtrl m_dtSetEnd;             // IDC_DATETIMEPICKER_SET_END
-    CButton       m_btnSettlementSearch;  // IDC_BTN_SETTLEMENT_SEARCH
+    const double COMMISSION_RATE = 0.128;
 
-    CStatic       m_staticPendingAmount;  // IDC_STATIC_PENDING_AMOUNT
-    CStatic       m_staticCompletedAmount;// IDC_STATIC_COMPLETED_AMOUNT
+    int             m_storeId = 0;
+    CNetworkHelper* m_pNet = nullptr;
 
-    CListCtrl     m_listSettlement;       // IDC_LIST_SETTLEMENT
+    CDateTimeCtrl m_dtSetStart;
+    CDateTimeCtrl m_dtSetEnd;
+    CButton       m_btnSettlementSearch;
+    CStatic       m_staticPendingAmount;
+    CStatic       m_staticCompletedAmount;
+    CListCtrl     m_listSettlement;
 };

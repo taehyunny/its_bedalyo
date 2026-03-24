@@ -54,12 +54,12 @@ void CMenuEditDlg::OnBnClickedOk()
     m_resultBody["actionType"] = (m_menuId == -1) ? 0 : 1;
 
     m_resultBody["menuData"]["menuName"] = (const char*)CT2A(strName, CP_UTF8);
-    m_resultBody["menuData"]["basePrice"] = _ttoi(strPrice);  // ✅ 추가
-    m_resultBody["menuData"]["menuCategory"] = (const char*)CT2A(strCat, CP_UTF8);  // ✅ 하나만
+    m_resultBody["menuData"]["basePrice"] = _ttoi(strPrice);
+    m_resultBody["menuData"]["menuCategory"] = (const char*)CT2A(strCat, CP_UTF8);
     m_resultBody["menuData"]["description"] = (const char*)CT2A(strDesc, CP_UTF8);
     m_resultBody["menuData"]["isPopular"] = (m_chkPopular.GetCheck() == BST_CHECKED);
     m_resultBody["menuData"]["isSoldOut"] = false;
-    m_resultBody["menuData"]["menuOptions"] = m_optionsJson;  // ✅ 옵션 포함
+    m_resultBody["menuData"]["optionGroups"] = m_optionsJson;  //  menuOptions → optionGroups
 
     if (m_menuId != -1)
         m_resultBody["menuData"]["menuId"] = m_menuId;
