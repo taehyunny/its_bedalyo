@@ -33,8 +33,9 @@ public:
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
-    afx_msg LRESULT OnPacketReceived(WPARAM wParam, LPARAM lParam);
     afx_msg void OnTcnSelchangeTabStatusSet(NMHDR* pNMHDR, LRESULT* pResult);
+    afx_msg LRESULT OnPacketReceived(WPARAM wParam, LPARAM lParam);
+    afx_msg void OnClose();
     DECLARE_MESSAGE_MAP()
 
 private:
