@@ -407,7 +407,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             }
 
             StoreDetailQt detail;
-            // [수정] StoreDetailDTO.h 멤버명은 camelCase → 일치시킴
             detail.storeId           = dto.storeData.storeId;
             detail.storeName         = QString::fromStdString(dto.storeData.storeName);
             detail.storeAddress      = QString::fromStdString(dto.storeData.storeAddress);
@@ -434,11 +433,12 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
             for (const auto &r : dto.reviewList) {
                 ReviewQt review;
-                review.reviewId  = r.reviewId;
-                review.userId    = QString::fromStdString(r.userId);
-                review.rating    = r.rating;
-                review.comment   = QString::fromStdString(r.content);
-                review.createdAt = QString::fromStdString(r.createdAt);
+                review.reviewId   = r.reviewId;
+                review.userId     = QString::fromStdString(r.userId);
+                review.rating     = r.rating;
+                review.comment    = QString::fromStdString(r.content);
+                review.createdAt  = QString::fromStdString(r.createdAt);
+                review.ownerReply = QString::fromStdString(r.ownerReply);
                 detail.reviews.append(review);
             }
 
