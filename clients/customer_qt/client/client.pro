@@ -18,7 +18,10 @@ SOURCES += \
     mypagewidget.cpp \
     storedetailwidget.cpp \
     policywidget.cpp \
-    settingswidget.cpp
+    settingswidget.cpp \
+    addresswidget.cpp \
+    addressdetailwidget.cpp
+
 
 HEADERS += \
     loginwidget.h \
@@ -37,7 +40,10 @@ HEADERS += \
     config.h \
     cartsession.h \
     policywidget.h \
-    settingswidget.h
+    settingswidget.h \
+    addresswidget.h \
+    addressdetailwidget.h
+
 
 FORMS += \
     loginwidget.ui \
@@ -51,7 +57,10 @@ FORMS += \
     mypagewidget.ui \
     storedetailwidget.ui \
     policywidget.ui \
-    settingswidget.ui
+    settingswidget.ui \
+    addresswidget.ui \
+    addressdetailwidget.ui
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

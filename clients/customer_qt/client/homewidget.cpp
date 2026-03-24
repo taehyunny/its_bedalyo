@@ -1,4 +1,4 @@
-#include "HomeWidget.h"
+#include "homewidget.h"
 #include "storeutils.h"
 #include "cartsession.h"
 #include "ui_homewidget.h"
@@ -38,8 +38,7 @@ void DragScrollArea::mouseReleaseEvent(QMouseEvent *e)
 }
 
 // ============================================================
-// CatScrollFilter — QScrollArea에 드래그 스크롤을 붙이는 이벤트 필터
-// 가로(horizontal) + 세로(vertical) 드래그 모두 지원
+// CatScrollFilter
 // ============================================================
 class CatScrollFilter : public QObject {
 public:
@@ -59,17 +58,12 @@ protected:
             }
         } else if (event->type() == QEvent::MouseMove && m_dragging) {
             QMouseEvent *e = static_cast<QMouseEvent*>(event);
-
-            // ── 가로 드래그 ──
             int deltaX = e->pos().x() - m_lastPos.x();
             m_target->horizontalScrollBar()->setValue(
                 m_target->horizontalScrollBar()->value() - deltaX);
-
-            // ── 세로 드래그 ──
             int deltaY = e->pos().y() - m_lastPos.y();
             m_target->verticalScrollBar()->setValue(
                 m_target->verticalScrollBar()->value() - deltaY);
-
             m_lastPos = e->pos();
             return true;
         } else if (event->type() == QEvent::MouseButtonRelease) {
@@ -96,44 +90,47 @@ HomeWidget::HomeWidget(NetworkManager *network, QWidget *parent)
 {
     ui->setupUi(this);
 
-    // ── catScroll1에 드래그 스크롤 필터 설치 (가로) ──
     auto *filter1 = new CatScrollFilter(ui->catScroll1);
     ui->catScroll1->viewport()->installEventFilter(filter1);
     ui->catScroll1->viewport()->setMouseTracking(true);
 
-    // ── catScroll2에도 드래그 스크롤 필터 설치 (가로) ──
     auto *filter2 = new CatScrollFilter(ui->catScroll2);
     ui->catScroll2->viewport()->installEventFilter(filter2);
     ui->catScroll2->viewport()->setMouseTracking(true);
 
-    // ── storeScrollArea에 드래그 스크롤 필터 설치 (세로) ──
     auto *storeFilter = new CatScrollFilter(ui->storeScrollArea);
     ui->storeScrollArea->viewport()->installEventFilter(storeFilter);
     ui->storeScrollArea->viewport()->setMouseTracking(true);
 
-    // 서버 메인 홈 데이터 수신
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &HomeWidget::onMainHomeReceived);
 
-    // ── 카트 바 버튼 연결 ──
     connect(ui->btnCartView, &QPushButton::clicked,
             this, &HomeWidget::on_btnCartView_clicked);
 
-    // ── 초기 카트 바 상태 설정 (앱 시작 시 장바구니 비어있으므로 숨김) ──
     updateCartBar();
 }
 
 HomeWidget::~HomeWidget() { delete ui; }
 
 void HomeWidget::setUserName(const QString &userName) { m_userName = userName; }
+
 void HomeWidget::setAddress(const QString &address)
 {
     m_address = address;
-    ui->label_address->setText(address.isEmpty() ? "주소뭐게" : address);
+    ui->btnAddress->setText(address.isEmpty() ? "주소를 설정해주세요 ▾" : address + " ▾");
 }
 
 // ============================================================
-// 서버 데이터 수신 → UI 채우기
+// 주소 버튼 클릭 → 주소 관리 화면으로
+// ============================================================
+void HomeWidget::on_btnAddress_clicked()
+{
+    emit addressRequested();
+}
+
+// ============================================================
+// 서버 데이터 수신
 // ============================================================
 void HomeWidget::onMainHomeReceived(QList<CategoryInfoQt> categories,
                                      QList<TopStoreInfoQt> topStores)
@@ -141,7 +138,6 @@ void HomeWidget::onMainHomeReceived(QList<CategoryInfoQt> categories,
     qDebug() << "[HomeWidget] 카테고리:" << categories.size()
              << "가게:" << topStores.size();
 
-    // ── 카테고리 채우기 ──
     QLayout *catLayout = ui->catContent1->layout();
     QLayoutItem *child;
     while ((child = catLayout->takeAt(0)) != nullptr) {
@@ -152,7 +148,6 @@ void HomeWidget::onMainHomeReceived(QList<CategoryInfoQt> categories,
         catLayout->addWidget(makeCategoryItem(cat.id, cat.name, cat.iconPath));
     static_cast<QHBoxLayout*>(catLayout)->addStretch();
 
-    // ── 가게 카드 채우기 ──
     QLayout *storeLayout = ui->storeContent->layout();
     while ((child = storeLayout->takeAt(0)) != nullptr) {
         if (child->widget()) delete child->widget();
@@ -164,7 +159,7 @@ void HomeWidget::onMainHomeReceived(QList<CategoryInfoQt> categories,
 }
 
 // ============================================================
-// 카테고리 아이템 위젯
+// 카테고리 아이템
 // ============================================================
 QWidget* HomeWidget::makeCategoryItem(int id, const QString &name, const QString &iconPath)
 {
@@ -204,7 +199,7 @@ QWidget* HomeWidget::makeCategoryItem(int id, const QString &name, const QString
 }
 
 // ============================================================
-// 가게 카드 위젯
+// 가게 카드
 // ============================================================
 QWidget* HomeWidget::makeStoreCard(const TopStoreInfoQt &store)
 {
@@ -267,17 +262,15 @@ QWidget* HomeWidget::makeStoreCard(const TopStoreInfoQt &store)
     divider->setFixedHeight(1);
     vl->addWidget(divider);
 
-    // 글자나 사진이 클릭을 뺏어가지 못하게, 카드 전체를 덮는 투명 버튼 장착
     QPushButton *clickOverlay = new QPushButton(card);
     clickOverlay->setStyleSheet("background: transparent; border: none;");
     clickOverlay->setCursor(Qt::PointingHandCursor);
-    
-    QVBoxLayout* overlayLayout = new QVBoxLayout(card);
-    overlayLayout->setContentsMargins(0,0,0,0);
-    overlayLayout->addWidget(clickOverlay);
-    clickOverlay->raise(); // 버튼을 맨 위로 끌어올림
 
-    // 버튼이 눌리면 곧바로 가게 ID를 담아서 신호 발사
+    QVBoxLayout *overlayLayout = new QVBoxLayout(card);
+    overlayLayout->setContentsMargins(0, 0, 0, 0);
+    overlayLayout->addWidget(clickOverlay);
+    clickOverlay->raise();
+
     connect(clickOverlay, &QPushButton::clicked, this, [this, storeId = store.storeId]() {
         qDebug() << "[HomeWidget] 가게 클릭됨! ID:" << storeId;
         emit storeSelected(storeId);
@@ -299,35 +292,24 @@ bool HomeWidget::eventFilter(QObject *obj, QEvent *event)
 }
 
 // ============================================================
-// 카트 바 UI 갱신
+// 카트 바
 // ============================================================
 void HomeWidget::updateCartBar()
 {
     CartSession &cart = CartSession::instance();
-
     if (cart.isEmpty()) {
         ui->cartBar->hide();
         return;
     }
-
     ui->cartBar->show();
-    ui->btnCartView->setText(
-        QString("  %1   카트 보기").arg(cart.totalCount())
-    );
+    ui->btnCartView->setText(QString("  %1   카트 보기").arg(cart.totalCount()));
     ui->labelCartPrice->setText(cart.totalPriceStr());
 }
 
-// ============================================================
-// 카트 바 클릭 → 장바구니 화면으로 전환
-// ============================================================
-void HomeWidget::on_btnCartView_clicked()
-{
-    emit cartRequested();
-}
-
-void HomeWidget::on_btnSearch_clicked()    { emit searchRequested(); }
-void HomeWidget::on_navHome_clicked()      {}
-void HomeWidget::on_navSearch_clicked()    { emit searchRequested(); }
-void HomeWidget::on_navFavorite_clicked()  { emit favoriteRequested(); }
-void HomeWidget::on_navOrder_clicked()     { emit orderListRequested(); }
-void HomeWidget::on_navMy_clicked()        { emit mypageRequested(); }
+void HomeWidget::on_btnCartView_clicked() { emit cartRequested(); }
+void HomeWidget::on_btnSearch_clicked()   { emit searchRequested(); }
+void HomeWidget::on_navHome_clicked()     {}
+void HomeWidget::on_navSearch_clicked()   { emit searchRequested(); }
+void HomeWidget::on_navFavorite_clicked() { emit favoriteRequested(); }
+void HomeWidget::on_navOrder_clicked()    { emit orderListRequested(); }
+void HomeWidget::on_navMy_clicked()       { emit mypageRequested(); }

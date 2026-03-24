@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_storeDetailWidget(new StoreDetailWidget(m_network, this))
     , m_policyWidget(new PolicyWidget(this))
     , m_settingsWidget(new SettingsWidget(m_network, this))
+    , m_addressWidget(new AddressWidget(m_network, this))
+    , m_addressDetailWidget(new AddressDetailWidget(this))
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -36,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_storeDetailWidget);
     ui->stackedWidget->addWidget(m_policyWidget);
     ui->stackedWidget->addWidget(m_settingsWidget);
+    ui->stackedWidget->addWidget(m_addressWidget);
+    ui->stackedWidget->addWidget(m_addressDetailWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
 
     // ── 로그인 ──
@@ -57,8 +61,6 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::onSearchExecuted);
     connect(m_searchResultWidget, &SearchResultWidget::backRequested,
             this, &MainWindow::onSearchRequested);
-
-    // ── 검색 내비바 ──
     connect(m_searchWidget, &SearchWidget::orderListRequested,
             this, &MainWindow::onOrderListRequested);
     connect(m_searchWidget, &SearchWidget::mypageRequested,
@@ -78,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_orderHistoryWidget, &OrderHistoryWidget::mypageRequested,
             this, &MainWindow::onMypageRequested);
 
-    // ── 마이페이지 화면 ──
+    // ── 마이페이지 ──
     connect(m_homeWidget, &HomeWidget::mypageRequested,
             this, &MainWindow::onMypageRequested);
     connect(m_myPageWidget, &MyPageWidget::homeRequested,
@@ -94,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_myPageWidget, &MyPageWidget::settingsRequested,
             this, &MainWindow::onSettingsRequested);
 
-    // ── 약관 및 정책 화면 ──
+    // ── 약관 및 정책 ──
     connect(m_policyWidget, &PolicyWidget::backRequested,
             this, &MainWindow::onMypageRequested);
 
@@ -104,11 +106,29 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_settingsWidget, &SettingsWidget::logoutRequested,
             this, &MainWindow::onLogoutRequested);
 
-    // ── 가게 상세 화면 ──
+    // ── 주소 관리 화면 ──
+    connect(m_homeWidget, &HomeWidget::addressRequested,
+            this, &MainWindow::onAddressRequested);
+    connect(m_addressWidget, &AddressWidget::backRequested,
+            this, &MainWindow::onBackToHome);
+    connect(m_addressWidget, &AddressWidget::addressSelected,
+            this, &MainWindow::onAddressSelected);
+    connect(m_addressWidget, &AddressWidget::addressDetailRequested,
+            this, &MainWindow::onAddressDetailRequested);
+    connect(m_addressWidget, &AddressWidget::addressEditRequested,
+            this, &MainWindow::onAddressEditRequested);
+
+    // ── 주소 설정 화면 ──
+    connect(m_addressDetailWidget, &AddressDetailWidget::backRequested,
+            this, [this]() { ui->stackedWidget->setCurrentWidget(m_addressWidget); });
+    connect(m_addressDetailWidget, &AddressDetailWidget::completed,
+            this, &MainWindow::onAddressDetailCompleted);
+    connect(m_addressDetailWidget, &AddressDetailWidget::deleteRequested,
+            this, &MainWindow::onAddressDeleteRequested);
+
+    // ── 가게 상세 ──
     connect(m_homeWidget, &HomeWidget::storeSelected,
             this, &MainWindow::onStoreSelected);
-    // connect(m_menuWidget, &menucategori::storeSelected,
-    //         this, &MainWindow::onStoreSelected);
 
     // ── 카테고리 데이터 캐싱 ──
     connect(m_network, &NetworkManager::onMainHomeReceived,
@@ -179,6 +199,53 @@ void MainWindow::onSettingsRequested()
     ui->stackedWidget->setCurrentWidget(m_settingsWidget);
 }
 
+void MainWindow::onAddressRequested()
+{
+    m_addressWidget->loadData();
+    ui->stackedWidget->setCurrentWidget(m_addressWidget);
+}
+
+void MainWindow::onAddressSelected(const QString &address)
+{
+    UserSession::instance().address = address;
+    m_homeWidget->setAddress(address);
+    ui->stackedWidget->setCurrentWidget(m_homeWidget);
+}
+
+// 새 주소 설정 화면
+void MainWindow::onAddressDetailRequested(const QString &roadAddr)
+{
+    m_addressDetailWidget->loadNewAddress(roadAddr);
+    ui->stackedWidget->setCurrentWidget(m_addressDetailWidget);
+}
+
+// 기존 주소 수정 화면
+void MainWindow::onAddressEditRequested(const AddressItem &item)
+{
+    m_addressDetailWidget->loadEditAddress(item);
+    ui->stackedWidget->setCurrentWidget(m_addressDetailWidget);
+}
+
+// 주소 설정 완료
+void MainWindow::onAddressDetailCompleted(const AddressItem &item)
+{
+    m_addressWidget->onAddressDetailCompleted(item);
+
+    if (item.isDefault) {
+        UserSession::instance().address = item.address;
+        m_homeWidget->setAddress(item.address);
+    }
+
+    ui->stackedWidget->setCurrentWidget(m_addressWidget);
+}
+
+// 주소 삭제
+void MainWindow::onAddressDeleteRequested(int addressId)
+{
+    m_addressWidget->deleteAddress(addressId);
+    ui->stackedWidget->setCurrentWidget(m_addressWidget);
+}
+
 void MainWindow::onBackToHome()
 {
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
@@ -186,8 +253,7 @@ void MainWindow::onBackToHome()
 
 void MainWindow::onFavoriteRequested()
 {
-    // TODO: m_favoriteWidget->loadData();
-    // ui->stackedWidget->setCurrentWidget(m_favoriteWidget);
+    // TODO: 즐겨찾기 화면
 }
 
 void MainWindow::onStoreSelected(int storeId)

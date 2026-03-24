@@ -12,6 +12,8 @@
 #include "storedetailwidget.h"
 #include "policywidget.h"
 #include "settingswidget.h"
+#include "addresswidget.h"
+#include "addressdetailwidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -41,23 +43,31 @@ private slots:
     void onStoreSelected(int storeId);
     void onPolicyRequested();
     void onSettingsRequested();
+    void onAddressRequested();
+    void onAddressSelected(const QString &address);
+    void onAddressDetailRequested(const QString &roadAddr);  // 새 주소
+    void onAddressEditRequested(const AddressItem &item);    // 기존 주소 수정
+    void onAddressDetailCompleted(const AddressItem &item);
+    void onAddressDeleteRequested(int addressId);
 
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
                             QList<TopStoreInfoQt> topStores);
 
 private:
-    Ui::MainWindow     *ui;
-    NetworkManager     *m_network;
-    LoginWidget        *m_loginWidget;
-    HomeWidget         *m_homeWidget;
-    menucategori       *m_menuWidget;
-    SearchWidget       *m_searchWidget;
-    SearchResultWidget *m_searchResultWidget;
-    OrderHistoryWidget *m_orderHistoryWidget;
-    MyPageWidget       *m_myPageWidget;
-    StoreDetailWidget  *m_storeDetailWidget;
-    PolicyWidget       *m_policyWidget;
-    SettingsWidget     *m_settingsWidget;
+    Ui::MainWindow        *ui;
+    NetworkManager        *m_network;
+    LoginWidget           *m_loginWidget;
+    HomeWidget            *m_homeWidget;
+    menucategori          *m_menuWidget;
+    SearchWidget          *m_searchWidget;
+    SearchResultWidget    *m_searchResultWidget;
+    OrderHistoryWidget    *m_orderHistoryWidget;
+    MyPageWidget          *m_myPageWidget;
+    StoreDetailWidget     *m_storeDetailWidget;
+    PolicyWidget          *m_policyWidget;
+    SettingsWidget        *m_settingsWidget;
+    AddressWidget         *m_addressWidget;
+    AddressDetailWidget   *m_addressDetailWidget;
 
     QList<CategoryInfoQt> m_cachedCategories;
 };

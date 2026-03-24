@@ -8,41 +8,27 @@
   <property name="styleSheet">
    <string>
 QWidget#HomeWidget { background-color: #ffffff; }
-
-/* ── 헤더 ── */
 QWidget#headerWidget { background-color: #ffffff; border-bottom: 1px solid #f0f0f0; }
-QLabel#label_address { font-size: 13px; font-weight: bold; color: #111111; }
+QPushButton#btnAddress {
+  font-size: 13px; font-weight: bold; color: #111111;
+  background: transparent; border: none;
+  text-align: left; padding: 0;
+}
+QPushButton#btnAddress:hover { color: #1565c0; }
 QPushButton#btnNotification {
   background: transparent; border: none; font-size: 20px; padding: 4px;
   min-width: 36px; min-height: 36px;
 }
-
-/* ── 검색바 ── */
 QWidget#searchAreaWidget { background: #ffffff; }
-
-/* ── 카테고리 공통 ── */
 QScrollArea#catScroll1, QScrollArea#catScroll2 { background: transparent; border: none; }
 QWidget#catContent1, QWidget#catContent2 { background: transparent; }
-
-/* ── 섹션 제목 ── */
 QLabel#label_storeSection { font-size: 16px; font-weight: bold; color: #111111; }
-
-/* ── 가게 목록 ── */
 QScrollArea#storeScrollArea { background: transparent; border: none; }
 QWidget#storeContent { background: transparent; }
-
-/* ── 하단 내비 ── */
-QWidget#navBar {
-  background-color: #ffffff;
-  border-top: 1px solid #eeeeee;
-}
+QWidget#navBar { background-color: #ffffff; border-top: 1px solid #eeeeee; }
 QPushButton#navHome, QPushButton#navSearch,
 QPushButton#navFavorite, QPushButton#navOrder, QPushButton#navMy {
-  background: transparent;
-  border: none;
-  font-size: 10px;
-  color: #aaaaaa;
-  padding: 4px 0px 4px 0px;
+  background: transparent; border: none; font-size: 10px; color: #aaaaaa; padding: 4px 0px;
 }
 QPushButton#navHome { color: #1565c0; font-weight: bold; }
    </string>
@@ -52,7 +38,7 @@ QPushButton#navHome { color: #1565c0; font-weight: bold; }
    <property name="spacing"><number>0</number></property>
    <property name="margin"><number>0</number></property>
 
-   <!-- ══ 1. 상단 헤더 (고정) ══ -->
+   <!-- 헤더 -->
    <item>
     <widget class="QWidget" name="headerWidget">
      <property name="minimumHeight"><number>56</number></property>
@@ -73,8 +59,9 @@ QPushButton#navHome { color: #1565c0; font-weight: bold; }
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_address">
-          <property name="text"><string>주소를 불러오는 중...</string></property>
+         <widget class="QPushButton" name="btnAddress">
+          <property name="text"><string>주소를 설정해주세요 ▾</string></property>
+          <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
          </widget>
         </item>
        </layout>
@@ -94,7 +81,7 @@ QPushButton#navHome { color: #1565c0; font-weight: bold; }
     </widget>
    </item>
 
-   <!-- ══ 2. 검색바 (고정) ══ -->
+   <!-- 검색바 -->
    <item>
     <widget class="QWidget" name="searchAreaWidget">
      <property name="maximumHeight"><number>72</number></property>
@@ -109,13 +96,8 @@ QPushButton#navHome { color: #1565c0; font-weight: bold; }
         <property name="styleSheet">
          <string>
 QPushButton#btnSearch {
-  background-color: #f5f5f5;
-  border: none;
-  border-radius: 22px;
-  text-align: left;
-  padding-left: 16px;
-  font-size: 14px;
-  color: #aaaaaa;
+  background-color: #f5f5f5; border: none; border-radius: 22px;
+  text-align: left; padding-left: 16px; font-size: 14px; color: #aaaaaa;
 }
 QPushButton#btnSearch:hover { background-color: #eeeeee; }
          </string>
@@ -127,7 +109,7 @@ QPushButton#btnSearch:hover { background-color: #eeeeee; }
     </widget>
    </item>
 
-   <!-- ══ 3. 카테고리 1줄 (고정, 드래그 슬라이드) ══ -->
+   <!-- 카테고리 1줄 -->
    <item>
     <widget class="QScrollArea" name="catScroll1">
      <property name="minimumHeight"><number>96</number></property>
@@ -153,7 +135,7 @@ QPushButton#btnSearch:hover { background-color: #eeeeee; }
     </widget>
    </item>
 
-   <!-- 카테고리 구분선 -->
+   <!-- 구분선 -->
    <item>
     <widget class="QFrame" name="catDivider">
      <property name="frameShape"><enum>QFrame::HLine</enum></property>
@@ -163,7 +145,7 @@ QPushButton#btnSearch:hover { background-color: #eeeeee; }
     </widget>
    </item>
 
-   <!-- ══ 4. 카테고리 2줄 (고정, 드래그 슬라이드) ══ -->
+   <!-- 카테고리 2줄 -->
    <item>
     <widget class="QScrollArea" name="catScroll2">
      <property name="minimumHeight"><number>96</number></property>
@@ -189,7 +171,7 @@ QPushButton#btnSearch:hover { background-color: #eeeeee; }
     </widget>
    </item>
 
-   <!-- ══ 5. 가게 목록 섹션 타이틀 (고정) ══ -->
+   <!-- 가게 섹션 타이틀 -->
    <item>
     <widget class="QWidget" name="storeTitleWidget">
      <property name="maximumHeight"><number>40</number></property>
@@ -208,7 +190,7 @@ QPushButton#btnSearch:hover { background-color: #eeeeee; }
     </widget>
    </item>
 
-   <!-- ══ 6. 가게 목록 (스크롤/드래그 가능) ══ -->
+   <!-- 가게 목록 -->
    <item>
     <widget class="QScrollArea" name="storeScrollArea">
      <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
@@ -230,30 +212,19 @@ QPushButton#btnSearch:hover { background-color: #eeeeee; }
     </widget>
    </item>
 
-   <!-- ══ 7. 카트 바 (장바구니에 메뉴가 담겼을 때만 표시) ══
-        - CartSession이 비어있으면 hide(), 담기면 show()
-        - homewidget.cpp의 updateCartBar()에서 제어
-   -->
+   <!-- 카트 바 -->
    <item>
     <widget class="QWidget" name="cartBar">
      <property name="minimumHeight"><number>56</number></property>
      <property name="maximumHeight"><number>56</number></property>
      <property name="styleSheet">
       <string notr="true">
-       QWidget#cartBar {
-        background: #1565c0;
-       }
-       /* 카트 보기 버튼 전체 영역을 클릭 가능하게 */
+       QWidget#cartBar { background: #1565c0; }
        QPushButton#btnCartView {
-        background: transparent;
-        border: none;
-        color: #ffffff;
-        font-size: 15px;
-        font-weight: bold;
-        text-align: left;
-        padding: 0px 16px;
+        background: transparent; border: none; color: #ffffff;
+        font-size: 15px; font-weight: bold; text-align: left; padding: 0px 16px;
        }
-       QPushButton#btnCartView:hover  { background: rgba(255,255,255,0.08); }
+       QPushButton#btnCartView:hover { background: rgba(255,255,255,0.08); }
        QPushButton#btnCartView:pressed { background: rgba(255,255,255,0.15); }
       </string>
      </property>
@@ -263,36 +234,25 @@ QPushButton#btnSearch:hover { background-color: #eeeeee; }
       <property name="rightMargin"><number>16</number></property>
       <property name="bottomMargin"><number>0</number></property>
       <property name="spacing"><number>0</number></property>
-
-      <!-- 수량 뱃지 + "카트 보기" 텍스트를 하나의 버튼으로 묶음 -->
       <item>
        <widget class="QPushButton" name="btnCartView">
-        <!-- 텍스트는 cpp에서 동적으로 설정: "  2   카트 보기" -->
         <property name="text"><string>  🛒  카트 보기</string></property>
        </widget>
       </item>
-
-      <!-- 총 금액 라벨 (우측 정렬) -->
       <item>
        <widget class="QLabel" name="labelCartPrice">
-        <!-- 텍스트는 cpp에서 동적으로 설정: "24,000원" -->
         <property name="text"><string>0원</string></property>
         <property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property>
         <property name="styleSheet">
-         <string notr="true">
-          font-size: 15px;
-          font-weight: bold;
-          color: #ffffff;
-         </string>
+         <string notr="true">font-size: 15px; font-weight: bold; color: #ffffff;</string>
         </property>
        </widget>
       </item>
-
      </layout>
     </widget>
    </item>
 
-   <!-- ══ 8. 하단 내비 (고정) ══ -->
+   <!-- 내비바 -->
    <item>
     <widget class="QWidget" name="navBar">
      <property name="minimumHeight"><number>60</number></property>
@@ -304,7 +264,6 @@ QPushButton#btnSearch:hover { background-color: #eeeeee; }
        <widget class="QPushButton" name="navHome">
         <property name="text"><string>🏠
 홈</string></property>
-        <property name="toolTip"><string>홈</string></property>
        </widget>
       </item>
       <item>
