@@ -17,6 +17,7 @@ NetworkManager::NetworkManager(QObject *parent)
     connect(m_socket, &QTcpSocket::disconnected, this, []() {
         qWarning() << "[NetworkManager] 서버 연결 끊김";
     });
+    qRegisterMetaType<QList<OptionGroup>>("QList<OptionGroup>");
 }
 
 void NetworkManager::connectToServer(const QString &ip, quint16 port)
@@ -127,9 +128,24 @@ void NetworkManager::sendStoreDetailRequest(int storeId)
     sendPacket(CmdID::REQ_STORE_DETAIL, j);
 }
 
+// ============================================================
+// [핵심 추가] 메뉴 옵션 요청 (REQ_MENU_OPTION = 2012)
+//   menuoption::loadMenuOption() 에서 호출됨
+//   서버 응답(RES_MENU_OPTION)은 processPacket()에서 처리 →
+//   onMenuOptionsReceived(menuId, groups) 시그널 발사
+// ============================================================
+void NetworkManager::sendMenuOptionRequest(int menuId)
+{
+    qDebug() << "[NetworkManager] 메뉴 옵션 요청 menuId:" << menuId;
+    nlohmann::json j;
+    j["menuId"] = menuId;
+    sendPacket(CmdID::REQ_MENU_OPTION, j);
+}
+
 // ── 주소 저장 요청 (REQ_ADDRESS_SAVE = 2070) ──
 void NetworkManager::sendAddressSave(const QString &userId, const QString &address,
-                                      const QString &detail, const QString &guide, const QString &label)
+                                      const QString &detail, const QString &guide,
+                                      const QString &label)
 {
     qDebug() << "[NetworkManager] 주소 저장 요청:" << address;
     ReqAddressSaveDTO dto;
@@ -165,7 +181,8 @@ void NetworkManager::sendAddressDelete(const QString &userId, int addressId)
 
 // ── 주소 수정 요청 (REQ_ADDRESS_UPDATE = 2076) ──
 void NetworkManager::sendAddressUpdate(const QString &userId, int addressId,
-                                        const QString &detail, const QString &guide, const QString &label)
+                                        const QString &detail, const QString &guide,
+                                        const QString &label)
 {
     qDebug() << "[NetworkManager] 주소 수정 요청 addressId:" << addressId;
     ReqAddressUpdateDTO dto;
@@ -226,6 +243,9 @@ static TopStoreInfoQt toQt(const TopStoreInfo &s)
     return item;
 }
 
+// ============================================================
+// 패킷 전송
+// ============================================================
 void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
 {
     if (m_socket->state() != QAbstractSocket::ConnectedState) {
@@ -250,6 +270,9 @@ void NetworkManager::sendPacket(CmdID cmdId, const nlohmann::json &body)
     m_socket->flush();
 }
 
+// ============================================================
+// 수신 버퍼 처리
+// ============================================================
 void NetworkManager::handleReadyRead()
 {
     m_buffer.append(m_socket->readAll());
@@ -280,6 +303,9 @@ void NetworkManager::handleReadyRead()
     }
 }
 
+// ============================================================
+// 수신 패킷 처리
+// ============================================================
 void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 {
     try {
@@ -295,27 +321,23 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                                  QString::fromStdString(dto.address),
                                  QString::fromStdString(dto.phoneNumber));
 
-        // ── 회원가입 응답 ──
         } else if (cmdId == CmdID::RES_SIGNUP) {
             AuthResDTO dto = j.get<AuthResDTO>();
             emit onSignupResponse(dto.status,
                                   QString::fromStdString(dto.message));
 
-        // ── 아이디 중복확인 응답 ──
         } else if (cmdId == CmdID::RES_AUTH_CHECK) {
             AuthCheckResDTO dto = j.get<AuthCheckResDTO>();
             emit onIdCheckResponse(dto.status,
                                    QString::fromStdString(dto.message),
                                    dto.isAvailable);
 
-        // ── 전화번호 중복확인 응답 ──
         } else if (cmdId == CmdID::RES_PHONE_CHECK) {
             PhoneCheckResDTO dto = j.get<PhoneCheckResDTO>();
             emit onPhoneCheckResponse(dto.status,
                                       QString::fromStdString(dto.message),
                                       dto.isAvailable);
 
-        // ── 메인 홈 데이터 수신 (RES_CATEGORY) ──
         } else if (cmdId == CmdID::RES_CATEGORY) {
             MainHomeResDTO dto = j.get<MainHomeResDTO>();
 
@@ -334,7 +356,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
             emit onMainHomeReceived(categories, topStores);
 
-        // ── 카테고리별 가게 목록 수신 (RES_STORE_LIST = 2001) ──
         } else if (cmdId == CmdID::RES_STORE_LIST) {
             StoreListResDTO dto = j.get<StoreListResDTO>();
 
@@ -344,7 +365,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
             emit onStoreListReceived(stores);
 
-        // ── 매장 검색 결과 수신 (RES_SEARCH_STORE = 2117) ──
         } else if (cmdId == CmdID::RES_SEARCH_STORE) {
             ResSearchStoreDTO dto = j.get<ResSearchStoreDTO>();
 
@@ -354,10 +374,8 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
             emit onSearchResultReceived(stores);
 
-        // ── 검색 위젯 데이터 수신 (RES_RESEACH_WIDGET = 2109) ──
         } else if (cmdId == CmdID::RES_RESEACH_WIDGET) {
             qDebug() << "[DEBUG] RES_RESEACH_WIDGET raw:" << QString::fromUtf8(body);
-
             ResResearchWidgetDTO dto = j.get<ResResearchWidgetDTO>();
 
             QList<PopularKeywordQt> popular;
@@ -379,25 +397,21 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
             emit onSearchWidgetReceived(popular, recent);
 
-        // ── 검색어 단건 삭제 응답 (RES_RESEARCH_DELETE = 2111) ──
         } else if (cmdId == CmdID::RES_RESEARCH_DELETE) {
             ResResearchDeleteDTO dto = j.get<ResResearchDeleteDTO>();
             if (dto.status != 200)
                 qWarning() << "[NetworkManager] 검색어 단건 삭제 실패 status:" << dto.status;
 
-        // ── 검색어 추가 응답 (RES_RESEARCH_ADD = 2113) ──
         } else if (cmdId == CmdID::RES_RESEARCH_ADD) {
             ResResearchAddDTO dto = j.get<ResResearchAddDTO>();
             if (dto.status != 200)
                 qWarning() << "[NetworkManager] 검색어 추가 실패 status:" << dto.status;
 
-        // ── 검색어 전체 삭제 응답 (RES_RESEARCH_DEL_ALL = 2115) ──
         } else if (cmdId == CmdID::RES_RESEARCH_DEL_ALL) {
             ResResearchDelAllDTO dto = j.get<ResResearchDelAllDTO>();
             if (dto.status != 200)
                 qWarning() << "[NetworkManager] 검색어 전체 삭제 실패 status:" << dto.status;
 
-        // ── 가게 상세 정보(3페이지) 데이터 수신 ──
         } else if (cmdId == CmdID::RES_STORE_DETAIL) {
             ResStoreDetailDTO dto = j.get<ResStoreDetailDTO>();
 
@@ -444,12 +458,65 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
             emit onStoreDetailReceived(detail);
 
-        // ── 주소 저장 응답 (RES_ADDRESS_SAVE = 2071) ──
+        // ============================================================
+        // [핵심 추가] 메뉴 옵션 수신 (RES_MENU_OPTION)
+        //
+        // 서버 JSON 예시:
+        // {
+        //   "status": 200,
+        //   "menuId": 5,
+        //   "optionGroups": [
+        //     {
+        //       "groupId": 1,
+        //       "groupName": "디저트 선택",
+        //       "isRequired": true,
+        //       "options": [
+        //         { "optionId": 1, "optionName": "세트포테이토", "additionalPrice": 0 },
+        //         { "optionId": 2, "optionName": "포테이토(L)", "additionalPrice": 500 }
+        //       ]
+        //     }
+        //   ]
+        // }
+        // ============================================================
+        } else if (cmdId == CmdID::RES_MENU_OPTION) {
+            qDebug() << "[NetworkManager] RES_MENU_OPTION 수신 raw:" << QString::fromUtf8(body);
+
+            int status = j.value("status", 0);
+            if (status != 200) {
+                qWarning() << "[NetworkManager] 메뉴 옵션 수신 실패 status:" << status;
+                return;
+            }
+
+            int menuId = j.value("menuId", 0);
+
+            QList<OptionGroup> groups;
+            if (j.contains("optionGroups") && j["optionGroups"].is_array()) {
+                for (const auto &gJson : j["optionGroups"]) {
+                    OptionGroup group;
+                    group.groupName  = gJson.value("groupName", "");
+                    group.isRequired = gJson.value("isRequired", false);
+
+                    if (gJson.contains("options") && gJson["options"].is_array()) {
+                        for (const auto &oJson : gJson["options"]) {
+                            OptionItem item;
+                            item.optionId        = oJson.value("optionId", 0);
+                            item.optionName      = oJson.value("optionName", "");
+                            item.additionalPrice = oJson.value("additionalPrice", 0);
+                            group.options.push_back(item);
+                        }
+                    }
+                    groups.append(group);
+                }
+            }
+
+            qDebug() << "[NetworkManager] 옵션 그룹 수" << groups.size()
+                     << "menuId:" << menuId;
+            emit onMenuOptionsReceived(menuId, groups);
+
         } else if (cmdId == CmdID::RES_ADDRESS_SAVE) {
             ResAddressSaveDTO dto = j.get<ResAddressSaveDTO>();
             emit onAddressSaveReceived(dto.status, dto.addressId);
 
-        // ── 주소 목록 응답 (RES_ADDRESS_LIST = 2073) ──
         } else if (cmdId == CmdID::RES_ADDRESS_LIST) {
             ResAddressListDTO dto = j.get<ResAddressListDTO>();
             QList<AddressItemQt> list;
@@ -465,23 +532,18 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             }
             emit onAddressListReceived(list);
 
-        // ── 주소 삭제 응답 (RES_ADDRESS_DELETE = 2075) ──
         } else if (cmdId == CmdID::RES_ADDRESS_DELETE) {
             ResAddressDeleteDTO dto = j.get<ResAddressDeleteDTO>();
             emit onAddressDeleteReceived(dto.status);
 
-        // ── 주소 수정 응답 (RES_ADDRESS_UPDATE = 2077) ──
         } else if (cmdId == CmdID::RES_ADDRESS_UPDATE) {
             ResAddressUpdateDTO dto = j.get<ResAddressUpdateDTO>();
             emit onAddressUpdateReceived(dto.status);
 
-        // ── 기본 주소 변경 응답 (RES_ADDRESS_DEFAULT = 2079) ──
         } else if (cmdId == CmdID::RES_ADDRESS_DEFAULT) {
             ResAddressDefaultDTO dto = j.get<ResAddressDefaultDTO>();
             emit onAddressDefaultReceived(dto.status);
 
-        // ── 결제 화면 정보 응답 (RES_CHECKOUT_INFO = 2027) ──
-        // [수정] 중복 핸들러 제거 → 4-param 시그널만 사용
         } else if (cmdId == CmdID::RES_CHECKOUT_INFO) {
             ResCheckoutInfoDTO dto = j.get<ResCheckoutInfoDTO>();
             emit onCheckoutInfoReceived(dto.status,
@@ -489,20 +551,40 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                                         dto.deliveryFee,
                                         dto.minOrderAmount);
 
-        // ── 주문 생성 응답 (RES_ORDER_CREATE = 2021) ──
         } else if (cmdId == CmdID::RES_ORDER_CREATE) {
             OrderCreateResDTO dto = j.get<OrderCreateResDTO>();
             emit onOrderCreateReceived(dto.status,
                                        QString::fromStdString(dto.message),
                                        QString::fromStdString(dto.orderId));
 
+        
+        } else if (cmdId == CmdID::RES_MENU_OPTION) {
+            qDebug() << "[NetworkManager] 옵션 데이터 해석 시작";
+            
+            try {
+                int menuId = j.at("menuId").get<int>();
+                std::vector<OptionGroup> stdGroups = j.at("optionGroups").get<std::vector<OptionGroup>>();
+                
+                QList<OptionGroup> qGroups;
+                for(const auto& g : stdGroups) {
+                    qGroups.append(g);
+                }
+
+                qDebug() << "[NetworkManager] 옵션 그룹 수:" << qGroups.size();
+                emit onMenuOptionsReceived(menuId, qGroups);
+                
+            } catch(const std::exception &e) {
+                qWarning() << "[NetworkManager] MenuOption 내부 파싱 에러:" << e.what();
+            }
+
+        // ── 여기서부터는 기존 else if 체인과 맞춰서 닫힙니다 ──
         } else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"
                        << static_cast<uint16_t>(cmdId);
         }
 
     } catch (const std::exception &e) {
-        qWarning() << "[NetworkManager] JSON 파싱 오류:" << e.what();
+        qWarning() << "[NetworkManager] 전체 JSON 파싱 오류:" << e.what();
     }
 }
 

@@ -15,6 +15,7 @@
 #include "addresswidget.h"
 #include "addressdetailwidget.h"
 #include "cartwidget.h"
+#include "menuoption.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -73,6 +74,7 @@ private:
     AddressWidget         *m_addressWidget;
     AddressDetailWidget   *m_addressDetailWidget;
     CartWidget            *m_cartWidget;
+    menuoption* m_menuOptionWidget;
 
     QList<CategoryInfoQt> m_cachedCategories;
 };

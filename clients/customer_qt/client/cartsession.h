@@ -15,7 +15,7 @@ struct CartItemQt {
     int     quantity;     // 수량
     int     unitPrice;    // 단가 (원)
     // TODO: 옵션 목록 추가 예정 (서버팀과 DTO 확정 후)
-    // QList<int> optionIds;
+    QList<int> optionIds;
 };
 
 // ============================================================
