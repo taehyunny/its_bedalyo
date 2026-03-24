@@ -4,6 +4,7 @@
 #include "MFC.h"
 #include "afxdialogex.h"
 #include "CTabMenuDlg.h"
+#include "CMenuEditDlg.h"
 
 IMPLEMENT_DYNAMIC(CTabMenuDlg, CDialogEx)
 
@@ -151,8 +152,12 @@ void CTabMenuDlg::OnLvnItemchangedListMenu(NMHDR* pNMHDR, LRESULT* pResult)
 // =========================================================================
 void CTabMenuDlg::OnBnClickedBtnMenuAdd()
 {
-    // TODO: 메뉴 추가 다이얼로그 열기 -> REQ_MENU_EDIT 전송
-    MessageBox(L"메뉴 추가 기능은 준비 중입니다.", L"알림", MB_OK);
+    CMenuEditDlg dlg(m_storeId, -1, this); // -1 = 추가 모드
+    if (dlg.DoModal() == IDOK)
+    {
+        m_pNet->Send(CmdID::REQ_MENU_EDIT, dlg.GetResultBody());
+        // 서버 응답(RES_MENU_EDIT) 후 LoadMenuList()로 목록 갱신
+    }
 }
 
 // =========================================================================
@@ -163,9 +168,13 @@ void CTabMenuDlg::OnBnClickedBtnMenuEdit()
     int nIdx = GetSelectedIndex();
     if (nIdx == -1) return;
 
-    CString strName = m_listMenu.GetItemText(nIdx, 0);
-    // TODO: 선택된 메뉴 수정 다이얼로그 열기 -> REQ_MENU_EDIT 전송
-    MessageBox(L"메뉴 수정 기능은 준비 중입니다.", L"알림", MB_OK);
+    int menuId = (int)m_listMenu.GetItemData(nIdx);
+
+    CMenuEditDlg dlg(m_storeId, menuId, this); // 실제 menuId = 수정 모드
+    if (dlg.DoModal() == IDOK)
+    {
+        m_pNet->Send(CmdID::REQ_MENU_EDIT, dlg.GetResultBody());
+    }
 }
 
 // =========================================================================
@@ -182,8 +191,20 @@ void CTabMenuDlg::OnBnClickedBtnMenuDelete()
 
     if (MessageBox(strMsg, L"메뉴 삭제", MB_YESNO | MB_ICONQUESTION) == IDYES)
     {
-        // TODO: REQ_MENU_EDIT (actionType: 2 삭제) 전송
-        m_listMenu.DeleteItem(nIdx); // 임시로 로컬에서만 삭제
+        int menuId = (int)m_listMenu.GetItemData(nIdx);
+
+        // MenuUpdateReqDTO 구조에 맞게 전송
+        // actionType: 2 = 삭제, menuId만 필요
+        json body;
+        body["storeId"] = m_storeId;
+        body["actionType"] = 2;  // 삭제
+        body["menuData"]["menuId"] = menuId;  // 삭제는 menuId만 필요
+
+        m_pNet->Send(CmdID::REQ_MENU_EDIT, body);
+
+        // UI에서 즉시 제거
+        m_listMenu.DeleteItem(nIdx);
+        UpdateButtonState();
     }
 }
 
@@ -195,22 +216,20 @@ void CTabMenuDlg::OnBnClickedBtnMenuSoldout()
     int nIdx = GetSelectedIndex();
     if (nIdx == -1) return;
 
+    int menuId = (int)m_listMenu.GetItemData(nIdx); // SetItemData로 저장해둔 menuId
     CString strStatus = m_listMenu.GetItemText(nIdx, 3);
+    bool bSoldOut = (strStatus != L"품절"); // 현재 판매중이면 품절로 변경
 
-    if (strStatus == L"품절")
-    {
-        // 판매재개
-        m_listMenu.SetItemText(nIdx, 3, L"판매중");
-        m_btnMenuSoldout.SetWindowText(L"품절처리");
-        // TODO: REQ_MENU_SOLD_OUT 전송 (isSoldOut: 0)
-    }
-    else
-    {
-        // 품절처리
-        m_listMenu.SetItemText(nIdx, 3, L"품절");
-        m_btnMenuSoldout.SetWindowText(L"판매재개");
-        // TODO: REQ_MENU_SOLD_OUT 전송 (isSoldOut: 1)
-    }
+    //  서버 전송
+    json body;
+    body["menuId"] = menuId;
+    body["isSoldOut"] = bSoldOut;  // true: 품절, false: 판매재개
+    body["storeId"] = m_storeId;
+    m_pNet->Send(CmdID::REQ_MENU_SOLD_OUT, body);
+
+    // UI 즉시 반영
+    m_listMenu.SetItemText(nIdx, 3, bSoldOut ? L"품절" : L"판매중");
+    m_btnMenuSoldout.SetWindowText(bSoldOut ? L"판매재개" : L"품절처리");
 }
 
 BEGIN_MESSAGE_MAP(CTabMenuDlg, CDialogEx)

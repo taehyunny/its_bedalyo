@@ -86,7 +86,7 @@ BOOL CMainMenuDlg::OnInitDialog()
         m_ownerName, m_ownerPhone, m_accountNumber, m_approvalStatus
     );
     m_tabMenuDlg.SetMenuInfo(m_storeId, m_pNet);
-
+    m_tabReviewDlg.SetReviewInfo(m_storeId, m_pNet);
     m_tabReviewDlg.Create(IDD_TAB_REVIEW, &m_tabCtrl);
     m_tabReviewDlg.MoveWindow(&rcTab);
     m_tabReviewDlg.ShowWindow(SW_HIDE);
@@ -143,12 +143,46 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         else
             MessageBox(L"저장에 실패했습니다.", L"오류", MB_ICONERROR);
     }
-
+    else if (pkt->cmdId == CmdID::RES_STORE_STATUS_SET)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) != 200)
+            MessageBox(L"영업 상태 변경에 실패했습니다.", L"오류", MB_ICONERROR);
+    }
     else if (pkt->cmdId == CmdID::RES_MENU_LIST)
     {
         json resJson = json::parse(pkt->body);
         if (resJson.value("status", 0) == 200)
             m_tabMenuDlg.SetMenuList(resJson["menus"]);
+    }
+    else if (pkt->cmdId == CmdID::RES_MENU_EDIT)
+    {
+        json res = json::parse(pkt->body);
+        if (res.value("status", 0) == 200)
+        {
+            m_tabMenuDlg.LoadMenuList();
+            MessageBox(L"메뉴가 변경되었습니다.", L"알림", MB_OK);
+        }
+        else
+            MessageBox(L"메뉴 변경에 실패했습니다.", L"오류", MB_ICONERROR);
+    }
+    else if (pkt->cmdId == CmdID::RES_MENU_SOLD_OUT)
+    {
+        json res = json::parse(pkt->body);
+        if (res.value("status", 0) != 200)
+            MessageBox(L"품절 상태 변경에 실패했습니다.", L"오류", MB_ICONERROR);
+    }
+    else if (pkt->cmdId == CmdID::RES_REVIEW_LIST)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) == 200)
+            m_tabReviewDlg.SetReviewList(resJson["reviews"]);
+    }
+    else if (pkt->cmdId == CmdID::RES_REVIEW_REPLY)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) != 200)
+            MessageBox(L"답글 등록에 실패했습니다.", L"오류", MB_ICONERROR);
     }
 
     delete pkt;

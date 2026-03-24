@@ -21,7 +21,7 @@ void CTabStoreDlg::SetUIMode(BOOL bEditMode)
 {
     BOOL bReadOnly = !bEditMode;
 
-    // --- [그룹 1] 수정 버튼을 눌러야 활성화되는 항목들 ---
+    // ---  수정 버튼을 눌러야 활성화되는 항목들 ---
     m_editStoreName.SetReadOnly(bReadOnly);
     m_editStoreAddress.SetReadOnly(bReadOnly);
     m_editOwnerName.SetReadOnly(bReadOnly);
@@ -29,7 +29,7 @@ void CTabStoreDlg::SetUIMode(BOOL bEditMode)
     m_editAccount.SetReadOnly(bReadOnly);
     m_comboCategory.EnableWindow(bEditMode);
 
-    // --- [그룹 2] 항상 활성화 (자주 바뀌는 설정) ---
+    // ---  항상 활성화 (자주 바뀌는 설정) ---
     // 이 항목들은 bReadOnly 값과 상관없이 항상 FALSE(입력가능) / TRUE(활성)
     m_editCookTime.SetReadOnly(FALSE);
     m_editMinOrder.SetReadOnly(FALSE);
@@ -38,11 +38,11 @@ void CTabStoreDlg::SetUIMode(BOOL bEditMode)
     m_btnStoreOpen.EnableWindow(TRUE);
     m_btnStoreClose.EnableWindow(TRUE);
 
-    // --- [그룹 3] 항상 읽기 전용 (관리자 문의 대상) ---
+    // - 항상 읽기 전용 (관리자 문의 대상) ---
     m_editStoreBiznum.SetReadOnly(TRUE);
     m_staticApproval.EnableWindow(FALSE); // 승인 상태 등
 
-    // --- [그룹 4] 수정 버튼 자체 제어 ---
+    // --- 수정 버튼 자체 제어 ---
     // 수정 중일 때는 다른 '수정' 버튼을 못 누르게 막음
     m_btnEditName.EnableWindow(bReadOnly);
     m_btnEditCategory.EnableWindow(bReadOnly);
@@ -109,7 +109,7 @@ BOOL CTabStoreDlg::OnInitDialog()
     m_editOwnerPhone.SetReadOnly(TRUE);
     m_editAccount.SetReadOnly(TRUE);
     m_comboCategory.EnableWindow(FALSE);
-    // ✅ 더미 데이터 제거 - SetStoreInfo()에서 채워짐
+    //  더미 데이터 제거 - SetStoreInfo()에서 채워짐
 
     // 스크롤 범위 설정
     CRect rcClient;
@@ -127,7 +127,7 @@ BOOL CTabStoreDlg::OnInitDialog()
 }
 
 // =========================================================================
-// ✅ 서버에서 받은 데이터로 컨트롤 채우기
+//  서버에서 받은 데이터로 컨트롤 채우기
 // =========================================================================
 void CTabStoreDlg::SetStoreInfo(
     int storeId,
@@ -302,7 +302,7 @@ void CTabStoreDlg::OnBnClickedBtnStoreOpen()
     body["status"] = 1;
     m_pNet->Send(CmdID::REQ_STORE_STATUS_SET, body);
 
-    // ✅ 즉시 피드백 - 저장 버튼 불필요함을 알림
+    //  즉시 피드백 - 저장 버튼 불필요함을 알림
     MessageBox(L"영업 상태 변경 요청을 전송했습니다.\n(저장 버튼과 무관하게 즉시 적용됩니다.)",
         L"영업 상태", MB_OK);
 }
@@ -325,10 +325,10 @@ void CTabStoreDlg::OnBnClickedBtnStoreClose()
 // =========================================================================
 void CTabStoreDlg::OnBnClickedBtnSave()
 {
-    // 1. 변경된 값을 담을 JSON 객체 생성
+    //  변경된 값을 담을 JSON 객체 생성
     nlohmann::json updateBody;
 
-    // 2. 각 필드별로 백업값(원본)과 현재 입력값을 비교 (Dirty Check)
+    // 각 필드별로 백업값(원본)과 현재 입력값을 비교 (Dirty Check)
     CString currentVal;
 
     m_editStoreName.GetWindowText(currentVal);
@@ -352,7 +352,7 @@ void CTabStoreDlg::OnBnClickedBtnSave()
 
     m_editMinOrder.GetWindowText(currentVal);
     if (currentVal != m_bakMinOrder)
-        updateBody["minOrderAmount"] = _ttoi(currentVal); // ✅ minOrderPrice → minOrderAmount
+        updateBody["minOrderAmount"] = _ttoi(currentVal); 
 
     m_editOpenTime.GetWindowText(currentVal);
     if (currentVal != m_bakOpenTime)
@@ -374,15 +374,14 @@ void CTabStoreDlg::OnBnClickedBtnSave()
     if (currentVal != m_bakAccount)
         updateBody["accountNumber"] = CT2A(currentVal, CP_UTF8).m_psz;
 
-    // 3. 서버 전송
+    //  서버 전송
     if (!updateBody.empty())
     {
-        updateBody["storeId"] = m_storeId; // ✅ 주석 해제 - 어떤 매장인지 서버에 알려야 함
+        updateBody["storeId"] = m_storeId;
 
-        m_pNet->Send(CmdID::REQ_STORE_INFO_UPDATE, updateBody); // ✅ 실제 전송
+        m_pNet->Send(CmdID::REQ_STORE_INFO_UPDATE, updateBody); // 실제 전송
 
-        // ✅ BackupValues() 제거 → 서버 성공 응답(OnStoreUpdateSuccess)에서 처리
-        // ✅ MessageBox 제거 → 서버 응답 후 띄워야 함
+
     }
     else
     {
@@ -392,7 +391,7 @@ void CTabStoreDlg::OnBnClickedBtnSave()
 }
 
 void CTabStoreDlg::OnStoreUpdateSuccess() {
-    BackupValues();  // ✅ 여기서 갱신
+    BackupValues();  // 여기서 갱신
     SetUIMode(FALSE);
     MessageBox(L"저장되었습니다.", L"알림", MB_OK);
 }

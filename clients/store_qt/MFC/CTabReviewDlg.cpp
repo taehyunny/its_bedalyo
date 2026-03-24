@@ -57,21 +57,55 @@ void CTabReviewDlg::InitListCtrl()
     m_listReview.InsertColumn(3, L"답글 여부", LVCFMT_CENTER, 80);
     m_listReview.InsertColumn(4, L"작성일", LVCFMT_LEFT, 100);
 
-    // TODO: 서버에서 REQ_REVIEW_LIST 수신 시 채우기
-    // 현재는 임시 더미 데이터
-    int nIdx = m_listReview.InsertItem(0, L"user123");
-    m_listReview.SetItemText(nIdx, 1, L"★★★★★");
-    m_listReview.SetItemText(nIdx, 2, L"떡볶이가 정말 맛있어요!");
-    m_listReview.SetItemText(nIdx, 3, L"없음");
-    m_listReview.SetItemText(nIdx, 4, L"2026-03-20");
-
-    nIdx = m_listReview.InsertItem(1, L"user456");
-    m_listReview.SetItemText(nIdx, 1, L"★★★☆☆");
-    m_listReview.SetItemText(nIdx, 2, L"음식은 맛있는데 배달이 늦었어요.");
-    m_listReview.SetItemText(nIdx, 3, L"완료");
-    m_listReview.SetItemText(nIdx, 4, L"2026-03-19");
 }
 
+void CTabReviewDlg::SetReviewInfo(int storeId, CNetworkHelper* pNet)
+{
+    m_storeId = storeId;
+    m_pNet = pNet;
+    LoadReviewList(); // 저장 즉시 서버에 요청
+}
+void CTabReviewDlg::SetReviewList(const nlohmann::json& reviewArray)
+{
+    m_listReview.DeleteAllItems();
+
+    auto toW = [](const std::string& s) -> CString {
+        return CA2W(s.c_str(), CP_UTF8);
+        };
+
+    for (int i = 0; i < (int)reviewArray.size(); i++)
+    {
+        const auto& rv = reviewArray[i];
+
+        CString userName = toW(rv.value("userId", ""));
+        int     rating = rv.value("rating", 0);
+        CString content = toW(rv.value("content", ""));
+        CString createdAt = toW(rv.value("createdAt", ""));
+        bool    hasReply = !rv.value("ownerReply", "").empty();
+
+        // 별점을 ★로 변환
+        CString strRating;
+        for (int r = 0; r < rating; r++)    strRating += L"★";
+        for (int r = rating; r < 5; r++)    strRating += L"☆";
+
+        int nIdx = m_listReview.InsertItem(i, userName);
+        m_listReview.SetItemText(nIdx, 1, strRating);
+        m_listReview.SetItemText(nIdx, 2, content);
+        m_listReview.SetItemText(nIdx, 3, hasReply ? L"완료" : L"없음");
+        m_listReview.SetItemText(nIdx, 4, createdAt);
+
+        // ✅ reviewId 저장 (답글 전송 시 필요)
+        m_listReview.SetItemData(nIdx, rv.value("reviewId", 0));
+    }
+}
+
+void CTabReviewDlg::LoadReviewList()
+{
+    if (!m_pNet) return;
+    json body;
+    body["storeId"] = m_storeId;
+    m_pNet->Send(CmdID::REQ_REVIEW_LIST, body);
+}
 int CTabReviewDlg::GetSelectedIndex()
 {
     return m_listReview.GetNextItem(-1, LVNI_SELECTED);
@@ -89,14 +123,15 @@ void CTabReviewDlg::OnLvnItemchangedListReview(NMHDR* pNMHDR, LRESULT* pResult)
 
     if (bSelected)
     {
-        // 답글 완료된 항목은 Edit에 기존 내용 표시
+        //  선택된 리뷰 ID 저장
+        m_selectedReviewId = (int)m_listReview.GetItemData(nIdx);
+
         CString strReplied = m_listReview.GetItemText(nIdx, 3);
         if (strReplied == L"완료")
             m_editReply.SetWindowText(L"이미 답글이 등록된 리뷰입니다.");
         else
             m_editReply.SetWindowText(L"");
     }
-
     *pResult = 0;
 }
 
@@ -108,16 +143,30 @@ void CTabReviewDlg::OnBnClickedBtnReplySubmit()
     int nIdx = GetSelectedIndex();
     if (nIdx == -1) return;
 
+    // 이미 답글 있는 리뷰는 중복 등록 방지
+    CString strReplied = m_listReview.GetItemText(nIdx, 3);
+    if (strReplied == L"완료") {
+        MessageBox(L"이미 답글이 등록된 리뷰입니다.", L"알림", MB_OK);
+        return;
+    }
+
     CString strReply;
     m_editReply.GetWindowText(strReply);
-
-    if (strReply.IsEmpty())
-    {
+    if (strReply.IsEmpty()) {
         MessageBox(L"답글 내용을 입력하세요.", L"알림", MB_OK);
         return;
     }
 
-    // TODO: REQ_REVIEW_REPLY 전송
+    if (!m_pNet) return;
+
+    //  실제 서버 전송
+    json body;
+    body["reviewId"] = m_selectedReviewId;
+    body["storeId"] = m_storeId;
+    body["ownerReply"] = CT2A(strReply, CP_UTF8).m_psz;
+    m_pNet->Send(CmdID::REQ_REVIEW_REPLY, body);
+
+    // UI 즉시 반영
     m_listReview.SetItemText(nIdx, 3, L"완료");
     m_editReply.SetWindowText(L"");
     MessageBox(L"답글이 등록되었습니다.", L"완료", MB_OK);
