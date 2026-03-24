@@ -86,7 +86,7 @@ BOOL CMainMenuDlg::OnInitDialog()
         m_ownerName, m_ownerPhone, m_accountNumber, m_approvalStatus
     );
     m_tabMenuDlg.SetMenuInfo(m_storeId, m_pNet);
-
+    m_tabReviewDlg.SetReviewInfo(m_storeId, m_pNet);
     m_tabReviewDlg.Create(IDD_TAB_REVIEW, &m_tabCtrl);
     m_tabReviewDlg.MoveWindow(&rcTab);
     m_tabReviewDlg.ShowWindow(SW_HIDE);
@@ -98,6 +98,7 @@ BOOL CMainMenuDlg::OnInitDialog()
     m_tabSettlementDlg.Create(IDD_TAB_SETTLEMENT, &m_tabCtrl);
     m_tabSettlementDlg.MoveWindow(&rcTab);
     m_tabSettlementDlg.ShowWindow(SW_HIDE);
+    m_tabOrderDlg.SetOrderInfo(m_storeId, m_pNet, _ttoi(m_cookTime));
 
     return TRUE;
 }
@@ -143,14 +144,72 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         else
             MessageBox(L"저장에 실패했습니다.", L"오류", MB_ICONERROR);
     }
-
+    else if (pkt->cmdId == CmdID::RES_STORE_STATUS_SET)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) != 200)
+            MessageBox(L"영업 상태 변경에 실패했습니다.", L"오류", MB_ICONERROR);
+    }
     else if (pkt->cmdId == CmdID::RES_MENU_LIST)
     {
         json resJson = json::parse(pkt->body);
         if (resJson.value("status", 0) == 200)
             m_tabMenuDlg.SetMenuList(resJson["menus"]);
     }
+    else if (pkt->cmdId == CmdID::RES_MENU_EDIT)
+    {
+        json res = json::parse(pkt->body);
+        if (res.value("status", 0) == 200)
+        {
+            m_tabMenuDlg.LoadMenuList();
+            MessageBox(L"메뉴가 변경되었습니다.", L"알림", MB_OK);
+        }
+        else
+            MessageBox(L"메뉴 변경에 실패했습니다.", L"오류", MB_ICONERROR);
+    }
+    else if (pkt->cmdId == CmdID::RES_MENU_SOLD_OUT)
+    {
+        json res = json::parse(pkt->body);
+        if (res.value("status", 0) != 200)
+            MessageBox(L"품절 상태 변경에 실패했습니다.", L"오류", MB_ICONERROR);
+    }
+    else if (pkt->cmdId == CmdID::RES_REVIEW_LIST)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) == 200)
+            m_tabReviewDlg.SetReviewList(resJson["reviews"]);
+    }
+    else if (pkt->cmdId == CmdID::RES_REVIEW_REPLY)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) != 200)
+            MessageBox(L"답글 등록에 실패했습니다.", L"오류", MB_ICONERROR);
+    }
+    else if (pkt->cmdId == CmdID::NOTIFY_NEW_ORDER)
+    {
+        json resJson = json::parse(pkt->body);
+        m_tabOrderDlg.AddNewOrder(resJson);
 
+        // 주문 관리 탭으로 자동 전환
+        m_tabCtrl.SetCurSel(0);
+        // 모든 탭 숨기고 주문 탭 표시
+        m_tabOrderDlg.ShowWindow(SW_SHOW);
+        m_tabMenuDlg.ShowWindow(SW_HIDE);
+        m_tabStoreDlg.ShowWindow(SW_HIDE);
+        m_tabReviewDlg.ShowWindow(SW_HIDE);
+        m_tabSalesDlg.ShowWindow(SW_HIDE);
+        m_tabSettlementDlg.ShowWindow(SW_HIDE);
+    }
+    else if (pkt->cmdId == CmdID::RES_ORDER_ACCEPT)
+    {
+        json resJson = json::parse(pkt->body);
+        m_tabOrderDlg.OnOrderAcceptResult(resJson);
+    }
+    else if (pkt->cmdId == CmdID::RES_ORDER_REJECT)
+    {
+        json resJson = json::parse(pkt->body);
+        m_tabOrderDlg.OnOrderRejectResult(resJson);
+    }
     delete pkt;
     return 0;
 }

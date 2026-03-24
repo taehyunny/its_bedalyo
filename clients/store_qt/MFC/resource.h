@@ -16,6 +16,9 @@
 #define IDD_TAB_SALES                   142
 #define IDD_TAB_SETTLEMENT              144
 #define IDD_TAB_MENU                    146
+#define IDD_DIALOG1                     150
+#define IDD_MENU_EDIT                   152
+#define IDD_MENU_OPTION                 154
 #define IDC_EDIT1                       1000
 #define IDC_EDIT2                       1001
 #define IDC_BUTTON1                     1002
@@ -46,7 +49,6 @@
 #define IDC_PWEdit                      1124
 #define IDC_CATEGORY                    1125
 #define IDC_COMBO_CATEGORY              1126
-#define IDC_EDIT_STORE                  1127
 #define IDC_EDIT_STOREADDRESS           1127
 #define IDC_STOREID_CHECK               1128
 #define IDC_REPWEdit                    1129
@@ -108,14 +110,31 @@
 #define IDC_BTN_MENU_DELETE             1191
 #define IDC_BTN_MENU_SOLDOUT            1192
 #define IDC_LIST_MENU                   1193
+#define IDC_BTN_MENU_OPTION             1194
+#define IDC_CHK_POPULAR                 1195
+#define IDC_EDIT_MENU_NAME              1196
+#define IDC_EDIT_MENU_PRICE             1197
+#define IDC_EDIT_MENU_CAT               1198
+#define IDC_EDIT_MENU_DESC              1199
+#define IDC_EDIT_OPT_GROUP_NAME         1211
+#define IDC_CHK_OPT_REQUIRED            1212
+#define IDC_BTN_OPT_GROUP_ADD           1213
+#define IDC_BTN_OPT_GROUP_DEL           1214
+#define IDC_LIST_OPT_GROUP              1215
+#define IDC_EDIT_OPT_ITEM_NAME          1216
+#define IDC_EDIT_OPT_ITEM_PRICE         1217
+#define IDC_BTN_OPT_ITEM_ADD            1218
+#define IDC_BTN_OPT_ITEM_DEL            1219
+#define IDC_LIST_OPT_ITEM               1220
+#define IDC_OPTION_EDIT                 1221
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        148
+#define _APS_NEXT_RESOURCE_VALUE        156
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1194
+#define _APS_NEXT_CONTROL_VALUE         1222
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

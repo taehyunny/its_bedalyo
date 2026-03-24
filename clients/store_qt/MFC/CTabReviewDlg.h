@@ -1,5 +1,9 @@
 ﻿#pragma once
 #include "afxdialogex.h"
+#include "NetworkHelper.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 class CTabReviewDlg : public CDialogEx
 {
@@ -9,6 +13,11 @@ public:
     CTabReviewDlg(CWnd* pParent = nullptr);
     virtual ~CTabReviewDlg();
 
+    // ✅ public - CMainMenuDlg에서 호출하는 함수들
+    void SetReviewInfo(int storeId, CNetworkHelper* pNet);
+    void SetReviewList(const nlohmann::json& reviewArray);
+    void LoadReviewList();
+
 #ifdef AFX_DESIGN_TIME
     enum { IDD = IDD_TAB_REVIEW };
 #endif
@@ -16,18 +25,19 @@ public:
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
-
-    afx_msg void OnBnClickedBtnReplySubmit();  // 답글 등록
+    afx_msg void OnBnClickedBtnReplySubmit();
     afx_msg void OnLvnItemchangedListReview(NMHDR* pNMHDR, LRESULT* pResult);
-
     DECLARE_MESSAGE_MAP()
 
 private:
     void InitListCtrl();
     int  GetSelectedIndex();
 
-    // ── 컨트롤 바인딩 ────────────────────────────────────────
-    CListCtrl   m_listReview;          // IDC_LIST_REVIEW
-    CEdit       m_editReply;           // IDC_EDIT_REPLY
-    CButton     m_btnReplySubmit;      // IDC_BTN_REPLY_SUBMIT
+    int             m_storeId = 0;
+    CNetworkHelper* m_pNet = nullptr;
+    int             m_selectedReviewId = -1;
+
+    CListCtrl   m_listReview;
+    CEdit       m_editReply;
+    CButton     m_btnReplySubmit;
 };
