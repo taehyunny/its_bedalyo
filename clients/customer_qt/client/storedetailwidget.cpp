@@ -1,6 +1,7 @@
 #include "storedetailwidget.h"
 #include "ui_storedetailwidget.h"
 #include "storeutils.h"
+#include "cartsession.h"
 #include <QFrame>
 #include <QDebug>
 #include <QMap>
@@ -76,6 +77,8 @@ void StoreDetailWidget::loadStoreData(int storeId)
 void StoreDetailWidget::onStoreDetailReceived(StoreDetailQt detail)
 {
     if (detail.storeId != m_currentStoreId) return;
+
+    m_currentStoreName = detail.storeName;
 
     // 1. 가게 이름 세팅
     ui->lblStoreName->setText(detail.storeName);
@@ -196,4 +199,22 @@ void StoreDetailWidget::on_btnStoreInfoBack_clicked() {
 void StoreDetailWidget::on_btnBackToMain_clicked() 
 {
     emit backRequested(); // "나 2페이지(가게목록)로 돌아갈래!" 하고 신호 발사!
+}
+
+void StoreDetailWidget::updateCartBar()
+{
+    // CartSession에 담긴 메뉴 개수를 가져옵니다.
+    // (CartSession.h가 include 되어 있어야 합니다)
+    int count = CartSession::instance().totalCount();
+
+    if (count > 0) {
+        // 장바구니에 물건이 있으면 하단 바를 보여줍니다.
+        // ui->cartBar는 .ui 파일에 만든 위젯 이름에 맞게 수정하세요.
+        // ui->cartBar->show();
+        // ui->lblTotalCount->setText(QString::number(count));
+        qDebug() << "[StoreDetailWidget] 현재 장바구니 아이템 개수:" << count;
+    } else {
+        // 비어있으면 숨깁니다.
+        // ui->cartBar->hide();
+    }
 }

@@ -19,6 +19,11 @@ public:
 
     // 가게 ID만 받고, 메뉴 정보는 서버에 직접 요청하도록 변경
     void loadStoreData(int storeId);
+    void updateCartBar();
+
+    // MainWindow에서 가게 ID/이름 가져오기 위해
+    int     currentStoreId()   const { return m_currentStoreId; }
+    QString currentStoreName() const { return m_currentStoreName; }
 
 signals:
     void backRequested();
@@ -40,6 +45,7 @@ private:
     NetworkManager *m_network;
     
     int m_currentStoreId; // 현재 보고 있는 가게 ID
+    QString m_currentStoreName;
 
     // void renderMenuList(const QList<MenuDTO>& menus);
     void clearLayout(QLayout* layout);

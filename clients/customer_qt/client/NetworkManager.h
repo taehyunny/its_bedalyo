@@ -85,16 +85,17 @@ struct StoreDetailQt {
     double  rating = 0.0;
     int     reviewCount = 0;
     QString imageUrl;
-    
+
     QList<MenuQt> menus;
     QList<ReviewQt> reviews;
 };
 
 // ── 결제 화면 정보용 Qt 구조체 ──
+// (NetworkManager 내부에서만 사용. 외부에는 개별 파라미터로 시그널 전달)
 struct CheckoutInfoQt {
-    QString customerGrade;   // "일반" or "와우"
-    QString cardNumber;      // 카드번호 마스킹
-    QString accountNumber;   // 계좌번호
+    QString customerGrade;
+    QString cardNumber;
+    QString accountNumber;
     int     userPoint      = 0;
     int     minOrderAmount = 0;
     int     deliveryFee    = 0;
@@ -188,7 +189,9 @@ signals:
     void onAddressDefaultReceived(int status);
 
     // ── 결제 화면 정보 응답 ──
-    void onCheckoutInfoReceived(CheckoutInfoQt info);
+    // CheckoutInfoQt의 개별 필드를 파라미터로 전달 (오버로딩 없음)
+    void onCheckoutInfoReceived(int status, QString customerGrade,
+                                int deliveryFee, int minOrderAmount);
 
     // ── 주문 생성 응답 ──
     void onOrderCreateReceived(int status, QString message, QString orderId);

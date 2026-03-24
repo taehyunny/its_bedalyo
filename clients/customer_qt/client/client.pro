@@ -20,7 +20,8 @@ SOURCES += \
     policywidget.cpp \
     settingswidget.cpp \
     addresswidget.cpp \
-    addressdetailwidget.cpp
+    addressdetailwidget.cpp \
+    cartwidget.cpp
 
 
 HEADERS += \
@@ -42,7 +43,8 @@ HEADERS += \
     policywidget.h \
     settingswidget.h \
     addresswidget.h \
-    addressdetailwidget.h
+    addressdetailwidget.h \
+    cartwidget.h
 
 
 FORMS += \
@@ -59,7 +61,9 @@ FORMS += \
     policywidget.ui \
     settingswidget.ui \
     addresswidget.ui \
-    addressdetailwidget.ui
+    addressdetailwidget.ui \
+    cartwidget.ui
+
 
 
 # Default rules for deployment.

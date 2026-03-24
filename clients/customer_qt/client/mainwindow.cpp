@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "UserSession.h"
 #include <QDebug>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -19,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_settingsWidget(new SettingsWidget(m_network, this))
     , m_addressWidget(new AddressWidget(m_network, this))
     , m_addressDetailWidget(new AddressDetailWidget(this))
+    , m_cartWidget(new CartWidget(m_network, this))
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -41,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_addressWidget);
     ui->stackedWidget->addWidget(m_addressDetailWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
+    ui->stackedWidget->addWidget(m_cartWidget);
+
 
     // ── 로그인 ──
     connect(m_loginWidget, &LoginWidget::loginSuccess,
@@ -145,6 +149,48 @@ MainWindow::MainWindow(QWidget *parent)
         // 일단 클릭이 잘 되는지 터미널에 로그만 찍어둡니다.
         qDebug() << "[MainWindow] 메뉴 선택됨! 4페이지 연결 대기중 -> ID:" << menuId << "이름:" << menuName << "가격:" << price;
     });
+
+    // ── 장바구니 ──
+    connect(m_homeWidget, &HomeWidget::cartRequested,
+            this, &MainWindow::onCartRequested);
+    connect(m_storeDetailWidget, &StoreDetailWidget::menuSelected,
+            this, [this](int menuId, QString menuName, int price) {
+                CartItemQt item;
+                item.menuId    = menuId;
+                item.menuName  = menuName;
+                item.unitPrice = price;
+                item.quantity  = 1;
+
+                // 다른 가게 메뉴면 경고 팝업
+                if (CartSession::instance().isFromDifferentStore(m_storeDetailWidget->currentStoreId())) {
+                    QMessageBox::StandardButton reply = QMessageBox::question(
+                        this, "장바구니 초기화",
+                        "다른 가게 메뉴가 담겨있습니다.\n장바구니를 비우고 담을까요?",
+                        QMessageBox::Yes | QMessageBox::No
+                        );
+                    if (reply != QMessageBox::Yes) return;
+                    CartSession::instance().clear();
+                }
+
+                if (CartSession::instance().storeId == -1) {
+                    CartSession::instance().storeId   = m_storeDetailWidget->currentStoreId();
+                    CartSession::instance().storeName = m_storeDetailWidget->currentStoreName();
+                }
+
+                CartSession::instance().addItem(item);
+                m_storeDetailWidget->updateCartBar();
+                qDebug() << "[MainWindow] 메뉴 담김:" << menuName << "총:" << CartSession::instance().totalCount();
+            });
+
+    connect(m_cartWidget, &CartWidget::closeRequested,
+            this, &MainWindow::onCartClose);
+    connect(m_cartWidget, &CartWidget::addMenuRequested,
+            this, [this]() { ui->stackedWidget->setCurrentWidget(m_storeDetailWidget); });
+    connect(m_cartWidget, &CartWidget::addressEditRequested,
+            this, &MainWindow::onAddressRequested);
+    connect(m_cartWidget, &CartWidget::orderSuccess,
+            this, &MainWindow::onOrderSuccess);
+
 
     // ── 서버 연결 ──
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
@@ -276,6 +322,25 @@ void MainWindow::onStoreSelected(int storeId)
     m_storeDetailWidget->loadStoreData(storeId);
     ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
 }
+
+void MainWindow::onCartRequested()
+{
+    m_cartWidget->open();
+    ui->stackedWidget->setCurrentWidget(m_cartWidget);
+}
+
+void MainWindow::onCartClose()
+{
+    // 장바구니에서 나갈 때 이전 화면으로 (가게 상세 or 홈)
+    ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
+}
+
+void MainWindow::onOrderSuccess()
+{
+    ui->stackedWidget->setCurrentWidget(m_homeWidget);
+    m_homeWidget->updateCartBar();
+}
+
 
 void MainWindow::showLogin() { ui->stackedWidget->setCurrentWidget(m_loginWidget); }
 void MainWindow::showHome()  { ui->stackedWidget->setCurrentWidget(m_homeWidget); }
