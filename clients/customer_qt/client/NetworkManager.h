@@ -8,6 +8,10 @@
 #include "AccountDTO.h"
 #include "StoreDTO.h"
 #include "ResearchDTO.h"
+#include "AddressDTO.h"
+#include "OrderDTO.h"
+#include "PaymentDTO.h"
+#include "StoreDetailDTO.h"
 
 // Qt용 변환 구조체
 struct CategoryInfoQt {
@@ -38,6 +42,16 @@ struct RecentSearchQt {
     int     historyId;
     QString keyword;
     QString searchDate;
+};
+
+// 주소 관리용 Qt 구조체
+struct AddressItemQt {
+    int     addressId   = -1;
+    QString address;
+    QString detail;
+    QString guide;
+    QString label       = "기타";
+    bool    isDefault   = false;
 };
 
 // --- 3페이지(가게 상세)용 Qt 구조체 ---
@@ -76,6 +90,16 @@ struct StoreDetailQt {
     QList<ReviewQt> reviews;
 };
 
+// ── 결제 화면 정보용 Qt 구조체 ──
+struct CheckoutInfoQt {
+    QString customerGrade;   // "일반" or "와우"
+    QString cardNumber;      // 카드번호 마스킹
+    QString accountNumber;   // 계좌번호
+    int     userPoint      = 0;
+    int     minOrderAmount = 0;
+    int     deliveryFee    = 0;
+};
+
 class NetworkManager : public QObject {
     Q_OBJECT
 
@@ -111,6 +135,21 @@ public:
     // 가게 상세 정보(메뉴, 리뷰 포함) 요청
     void sendStoreDetailRequest(int storeId);
 
+    // ── 주소 관리 ──
+    void sendAddressSave(const QString &userId, const QString &address,
+                         const QString &detail, const QString &guide, const QString &label);
+    void sendAddressList(const QString &userId);
+    void sendAddressDelete(const QString &userId, int addressId);
+    void sendAddressUpdate(const QString &userId, int addressId,
+                           const QString &detail, const QString &guide, const QString &label);
+    void sendAddressDefault(const QString &userId, int addressId);
+
+    // ── 결제 화면 정보 요청 (REQ_CHECKOUT_INFO = 2026) ──
+    void sendCheckoutInfo(const QString &userId, int storeId);
+
+    // ── 주문 생성 요청 (REQ_ORDER_CREATE = 2020) ──
+    void sendOrderCreate(const OrderCreateReqDTO &dto);
+
 signals:
     void onConnected();
 
@@ -140,6 +179,19 @@ signals:
 
     // 가게 상세 정보 수신 완료 신호
     void onStoreDetailReceived(StoreDetailQt detail);
+
+    // ── 주소 관리 응답 ──
+    void onAddressSaveReceived(int status, int addressId);
+    void onAddressListReceived(QList<AddressItemQt> addresses);
+    void onAddressDeleteReceived(int status);
+    void onAddressUpdateReceived(int status);
+    void onAddressDefaultReceived(int status);
+
+    // ── 결제 화면 정보 응답 ──
+    void onCheckoutInfoReceived(CheckoutInfoQt info);
+
+    // ── 주문 생성 응답 ──
+    void onOrderCreateReceived(int status, QString message, QString orderId);
 
 private slots:
     void handleConnected();

@@ -87,3 +87,31 @@ struct NotifyDeliveryCallDTO
     // (참고: 나중에 메뉴 요약 정보 "짜장면 외 1건" 같은 걸 추가해도 좋습니다!)
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(NotifyDeliveryCallDTO, orderId, pickupAddress, deliveryAddress, deliveryFee)
 };
+
+// 🚀 [2026] 결제 화면 정보 요청 DTO
+struct ReqCheckoutInfoDTO
+{
+    std::string userId;
+    int storeId;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqCheckoutInfoDTO, userId, storeId)
+};
+
+// 🚀 [2027] 결제 화면 정보 응답 DTO
+struct ResCheckoutInfoDTO
+{
+    int status;
+
+    // --- 유저 정보 (CUSTOMERS 테이블) ---
+    std::string customerGrade; // "일반" or "와우"
+    std::string cardNumber;    // "1234-5678-****-****" (없으면 빈 문자열)
+    std::string accountNumber; // "국민 123-456-789" (없으면 빈 문자열)
+    int userPoint;             // (보너스) 보유 포인트도 보여주면 좋겠죠?
+
+    // --- 매장 정보 (STORES 테이블) ---
+    int minOrderAmount; // 최소주문금액
+    int deliveryFee;    // 배달비 (와우회원이면 프론트에서 0원으로 처리 가능!)
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ResCheckoutInfoDTO,
+                                   status, customerGrade, cardNumber, accountNumber, userPoint, minOrderAmount, deliveryFee)
+};

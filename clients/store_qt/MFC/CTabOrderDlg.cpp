@@ -77,6 +77,43 @@ void CTabOrderDlg::InitListCtrl()
     m_listOrder.SetItemText(nIdx, 4, L"14:32:10");
 }
 
+void CTabOrderDlg::SetOrderInfo(int storeId, CNetworkHelper* pNet, int cookTime)
+{
+    m_storeId = storeId;
+    m_pNet = pNet;
+    m_cookTime = cookTime;
+}
+
+// =========================================================
+// 새 주문 수신 (NOTIFY_NEW_ORDER = 9000)
+// =========================================================
+void CTabOrderDlg::AddNewOrder(const json& orderJson)
+{
+    auto toW = [](const std::string& s) -> CString {
+        return CA2W(s.c_str(), CP_UTF8);
+        };
+
+    std::string orderId = orderJson.value("orderId", "");
+    std::string menuName = orderJson.value("menuSummary", ""); // 예: "떡볶이 외 1건"
+    int         price = orderJson.value("totalPrice", 0);
+    std::string time = orderJson.value("createdAt", "");
+
+    CString strPrice;
+    strPrice.Format(L"%d", price);
+
+    int nIdx = m_listOrder.InsertItem(0, toW(orderId)); // 최신 주문이 맨 위
+    m_listOrder.SetItemText(nIdx, 1, toW(menuName));
+    m_listOrder.SetItemText(nIdx, 2, strPrice);
+    m_listOrder.SetItemText(nIdx, 3, L"대기");
+    m_listOrder.SetItemText(nIdx, 4, toW(time));
+
+    // orderId를 나중에 수락/거절 시 사용하기 위해 저장
+    m_listOrder.SetItemData(nIdx, (DWORD_PTR)new std::string(orderId));
+
+    // 새 주문 알림음 (선택사항)
+    MessageBeep(MB_ICONEXCLAMATION);
+}
+
 // =========================================================================
 // 버튼 활성화/비활성화
 // =========================================================================
@@ -144,12 +181,27 @@ void CTabOrderDlg::OnBnClickedBtnOrderAccept()
 {
     int nIdx = GetSelectedIndex();
     if (nIdx == -1) return;
+    if (!m_pNet) return;
 
-    CString strOrderId = m_listOrder.GetItemText(nIdx, 0);
-    // TODO: REQ_ORDER_ACCEPT 전송
-    m_listOrder.SetItemText(nIdx, 3, L"수락");
-    MessageBox(strOrderId + L" 주문을 수락했습니다.", L"주문 수락", MB_OK);
+    // 이미 처리된 주문인지 확인
+    CString strStatus = m_listOrder.GetItemText(nIdx, 3);
+    if (strStatus != L"대기")
+    {
+        MessageBox(L"대기 중인 주문만 수락할 수 있습니다.", L"알림", MB_OK);
+        return;
+    }
+
+    // orderId 가져오기
+    auto* pOrderId = reinterpret_cast<std::string*>(m_listOrder.GetItemData(nIdx));
+    if (!pOrderId) return;
+
+    json body;
+    body["orderId"] = *pOrderId;
+    body["estimatedTime"] = m_cookTime; // 기본 30분 (추후 입력받는 UI 추가 가능)
+
+    m_pNet->Send(CmdID::REQ_ORDER_ACCEPT, body);
 }
+
 
 // =========================================================================
 // 거절 버튼
@@ -158,6 +210,14 @@ void CTabOrderDlg::OnBnClickedBtnOrderReject()
 {
     int nIdx = GetSelectedIndex();
     if (nIdx == -1) return;
+    if (!m_pNet) return;
+
+    CString strStatus = m_listOrder.GetItemText(nIdx, 3);
+    if (strStatus != L"대기")
+    {
+        MessageBox(L"대기 중인 주문만 거절할 수 있습니다.", L"알림", MB_OK);
+        return;
+    }
 
     // 거절 사유 수집
     CString strReason;
@@ -174,10 +234,45 @@ void CTabOrderDlg::OnBnClickedBtnOrderReject()
         }
     }
 
-    CString strOrderId = m_listOrder.GetItemText(nIdx, 0);
-    // TODO: REQ_ORDER_REJECT 전송 (rejectReason: strReason)
-    m_listOrder.SetItemText(nIdx, 3, L"거절");
-    MessageBox(strOrderId + L" 주문을 거절했습니다.\n사유: " + strReason, L"주문 거절", MB_OK);
+    auto* pOrderId = reinterpret_cast<std::string*>(m_listOrder.GetItemData(nIdx));
+    if (!pOrderId) return;
+
+    json body;
+    body["orderId"] = *pOrderId;
+    body["rejectReason"] = (const char*)CT2A(strReason, CP_UTF8);
+
+    m_pNet->Send(CmdID::REQ_ORDER_REJECT, body);
+}
+
+// =========================================================
+// 수락 응답 처리 (RES_ORDER_ACCEPT = 3001)
+// =========================================================
+void CTabOrderDlg::OnOrderAcceptResult(const json& resJson)
+{
+    if (resJson.value("status", 0) == 200)
+    {
+        int nIdx = GetSelectedIndex();
+        if (nIdx != -1)
+            m_listOrder.SetItemText(nIdx, 3, L"수락");
+        MessageBox(L"주문을 수락했습니다.", L"완료", MB_OK);
+    }
+    else
+        MessageBox(L"주문 수락에 실패했습니다.", L"오류", MB_ICONERROR);
+}
+// =========================================================
+// 거절 응답 처리 (RES_ORDER_REJECT = 3011)
+// =========================================================
+void CTabOrderDlg::OnOrderRejectResult(const json& resJson)
+{
+    if (resJson.value("status", 0) == 200)
+    {
+        int nIdx = GetSelectedIndex();
+        if (nIdx != -1)
+            m_listOrder.SetItemText(nIdx, 3, L"거절");
+        MessageBox(L"주문을 거절했습니다.", L"완료", MB_OK);
+    }
+    else
+        MessageBox(L"주문 거절에 실패했습니다.", L"오류", MB_ICONERROR);
 }
 
 BEGIN_MESSAGE_MAP(CTabOrderDlg, CDialogEx)

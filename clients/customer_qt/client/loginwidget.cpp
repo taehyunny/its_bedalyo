@@ -97,6 +97,7 @@ void LoginWidget::on_loginButton_clicked()
     LoginReqDTO dto;
     dto.userId   = ui->idEdit->text().toStdString();
     dto.password = ui->pwEdit->text().toStdString();
+    dto.role     = 0;
     m_network->sendLogin(dto);
 }
 
@@ -272,6 +273,11 @@ void LoginWidget::on_signupButton_clicked()
 // ============================================================
 void LoginWidget::onLoginResponse(int status, QString message, QString userName, QString address, QString phoneNumber)
 {
+    qDebug() << "[LoginResponse] status:" << status
+             << "userName:" << userName
+             << "address:" << address        // ← 이게 뭐가 오는지 확인
+             << "phoneNumber:" << phoneNumber;
+
     if (status == 200) {
         UserSession::instance().set(userName, address, ui->idEdit->text(), phoneNumber);
         emit loginSuccess();
