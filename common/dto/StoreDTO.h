@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <vector>
 #include "json.hpp" // 경로 확인 필수!
@@ -7,6 +7,8 @@
 using json = nlohmann::json;
 
 // 0. CategoryItem 정의 (누락되었던 부분 추가)
+
+
 
 // 1. 순서 교정: 하위 항목부터 정의
 struct OptionItem

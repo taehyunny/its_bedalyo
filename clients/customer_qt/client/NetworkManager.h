@@ -67,15 +67,8 @@ struct CheckoutInfoQt {
     int     userPoint      = 0;
     int     minOrderAmount = 0;
     int     deliveryFee    = 0;
-
-struct ReviewQt { int reviewId; QString userId; int rating; QString comment; QString createdAt; };
-struct StoreDetailQt {
-    int storeId; QString storeName; QString storeAddress; QString operatingHours;
-    QString deliveryFees; QString deliveryTimeRange; int minOrderAmount = 0;
-    double rating = 0.0; int reviewCount = 0; QString imageUrl;
-    QList<MenuQt> menus; QList<ReviewQt> reviews;
-
 };
+
 
 class NetworkManager : public QObject {
     Q_OBJECT
