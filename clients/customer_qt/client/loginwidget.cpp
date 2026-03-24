@@ -339,6 +339,16 @@ void LoginWidget::onPhoneCheckResponse(int status, QString message, bool isAvail
     updateSignupButtonState();
 }
 
+// 로그아웃 시 id, pw 입력창 비우기
+void LoginWidget::clearInputFields()
+{
+    ui->idEdit->clear(); // 아이디 입력란 비우기
+    ui->pwEdit->clear(); // 비밀번호 입력란 비우기
+
+    // 로그아웃 후 다시 로그인할 때 편하도록 아이디 칸에 포커스 주기
+    ui->idEdit->setFocus();
+}
+
 // ── 메시지 라벨 스타일 헬퍼 ──
 void LoginWidget::setMsgSuccess(QLabel *label, const QString &msg) {
     label->setText(msg);

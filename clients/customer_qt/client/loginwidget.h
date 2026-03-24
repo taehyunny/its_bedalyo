@@ -22,6 +22,7 @@ class LoginWidget : public QWidget
 
 public:
     explicit LoginWidget(NetworkManager *network, QWidget *parent = nullptr);
+    void clearInputFields(); // 입력란을 비우는 함수 추가
     ~LoginWidget();
 
 signals:

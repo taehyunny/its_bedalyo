@@ -33,7 +33,13 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="tabBarLayout">
+    <widget class="QWidget" name="tabBarWidget">
+     <property name="minimumHeight"><number>56</number></property>
+     <property name="maximumHeight"><number>56</number></property>
+     <property name="styleSheet">
+      <string notr="true">background:#ffffff; border-bottom:1px solid #eeeeee;</string>
+     </property>
+     <layout class="QHBoxLayout" name="tabBarLayout">
      <property name="spacing">
       <number>0</number>
      </property>
@@ -51,12 +57,14 @@
      </property>
      <item>
       <widget class="QPushButton" name="tabHistory">
+       <property name="minimumHeight"><number>48</number></property>
+       <property name="maximumHeight"><number>48</number></property>
        <property name="styleSheet">
         <string notr="true">
           QPushButton {
            background:transparent; border:none;
-           border-bottom:2.5px solid transparent;
-           font-size:15px; font-weight:bold; color:#aaaaaa;
+           border-bottom:2.5px solid #111111;
+           font-size:15px; font-weight:bold; color:#111111;
            padding:0; margin:0;
           }
          </string>
@@ -71,12 +79,14 @@
      </item>
      <item>
       <widget class="QPushButton" name="tabPending">
+       <property name="minimumHeight"><number>48</number></property>
+       <property name="maximumHeight"><number>48</number></property>
        <property name="styleSheet">
         <string notr="true">
           QPushButton {
            background:transparent; border:none;
-           border-bottom:2.5px solid #111111;
-           font-size:15px; font-weight:bold; color:#111111;
+           border-bottom:2.5px solid transparent;
+           font-size:15px; font-weight:bold; color:#aaaaaa;
            padding:0; margin:0;
           }
          </string>
@@ -87,6 +97,7 @@
       </widget>
      </item>
     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QStackedWidget" name="tabStack">
@@ -94,7 +105,7 @@
       <string notr="true">QStackedWidget { background:#ffffff; }</string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="pageHistory">
       <property name="styleSheet">
@@ -310,78 +321,95 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="navLayout">
-     <property name="spacing">
-      <number>0</number>
+    <widget class="QWidget" name="navBar">
+     <property name="minimumHeight"><number>60</number></property>
+     <property name="maximumHeight"><number>60</number></property>
+     <property name="styleSheet">
+      <string notr="true">background:#ffffff; border-top:1px solid #eeeeee;</string>
      </property>
-     <property name="leftMargin">
-      <number>0</number>
-     </property>
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <property name="rightMargin">
-      <number>0</number>
-     </property>
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="navHome">
-       <property name="styleSheet">
-        <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
-       </property>
-       <property name="text">
-        <string>🏠
+     <layout class="QHBoxLayout" name="navLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="navHome">
+        <property name="minimumHeight"><number>60</number></property>
+        <property name="maximumHeight"><number>60</number></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+        </property>
+        <property name="text">
+         <string>🏠
 홈</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="navSearch">
-       <property name="styleSheet">
-        <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
-       </property>
-       <property name="text">
-        <string>🔍
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navSearch">
+        <property name="minimumHeight"><number>60</number></property>
+        <property name="maximumHeight"><number>60</number></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+        </property>
+        <property name="text">
+         <string>🔍
 검색</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="navFavorite">
-       <property name="styleSheet">
-        <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
-       </property>
-       <property name="text">
-        <string>🤍
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navFavorite">
+        <property name="minimumHeight"><number>60</number></property>
+        <property name="maximumHeight"><number>60</number></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+        </property>
+        <property name="text">
+         <string>🤍
 즐겨찾기</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="navOrder">
-       <property name="styleSheet">
-        <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#1565c0;font-weight:bold;padding:6px 0;}</string>
-       </property>
-       <property name="text">
-        <string>📋
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navOrder">
+        <property name="minimumHeight"><number>60</number></property>
+        <property name="maximumHeight"><number>60</number></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#1565c0;font-weight:bold;padding:6px 0;}</string>
+        </property>
+        <property name="text">
+         <string>📋
 주문내역</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="navMy">
-       <property name="styleSheet">
-        <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
-       </property>
-       <property name="text">
-        <string>👤
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navMy">
+        <property name="minimumHeight"><number>60</number></property>
+        <property name="maximumHeight"><number>60</number></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:10px;color:#aaaaaa;padding:6px 0;}QPushButton:hover{color:#1565c0;}</string>
+        </property>
+        <property name="text">
+         <string>👤
 마이이츠</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>

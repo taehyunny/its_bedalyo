@@ -209,7 +209,13 @@ void MainWindow::onLoginSuccess()
 
 void MainWindow::onLogoutRequested()
 {
+    // 1. 세션 데이터 삭제
     UserSession::instance().clear();
+
+    // 2. 로그인 위젯의 입력 필드 초기화 (추가된 부분)
+    m_loginWidget->clearInputFields();
+
+    // 3. 로그인 화면으로 전환
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
 }
 
@@ -291,7 +297,8 @@ void MainWindow::onAddressDetailCompleted(const AddressItem &item)
 {
     m_addressWidget->onAddressDetailCompleted(item);
 
-    if (item.isDefault) {
+    bool isNewAddress = (item.addressId <= 0);
+    if (isNewAddress || item.isDefault) {
         UserSession::instance().address = item.address;
         m_homeWidget->setAddress(item.address);
     }
