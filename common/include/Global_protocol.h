@@ -122,6 +122,10 @@ enum class CmdID : uint16_t
     RES_CHAT_CONNECT = 2091, // 채팅방 입장 응답
     REQ_CHAT_SEND = 2092,    // 메시지 전송 요청 (WebSocket 방식 검토 필요)
     RES_CHAT_SEND = 2093,    // 메시지 전송 응답
+    REQ_UPGRADE_NAME = 2094,   // 등급 변경 요청
+    RES_UPGRADE_NAME = 2095,   // 등급 변경 응답
+    REQ_DOWNGRADE_NAME = 2096, // 등급 하락 요청
+    RES_DOWNGRADE_NAME = 2097, // 등급 하락 응답
 
     // 마이페이지 (2100 ~ 2109)
     REQ_MY_INFO = 2100, // 마이페이지 통합 정보 요청 (리뷰수, 주문수, 즐겨찾기수, 좋아요수)
