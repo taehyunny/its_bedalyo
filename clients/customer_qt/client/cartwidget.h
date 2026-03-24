@@ -4,24 +4,10 @@
 #include "NetworkManager.h"
 #include "cartsession.h"
 
-// uic가 cartwidget.ui로부터 자동 생성하는 헤더
 QT_BEGIN_NAMESPACE
 namespace Ui { class CartWidget; }
 QT_END_NAMESPACE
 
-// ============================================================
-// CartWidget - 장바구니 / 결제 화면
-//
-// [ UI 구조 ]
-// - cartwidget.ui : 정적 뼈대 (주소, 배달방법 섹션, 가격 라벨, 요청사항 등)
-// - 코드           : 동적 생성 (배달 옵션 카드, 메뉴 카드)
-//
-// [ 흐름 ]
-// 1. open() 호출 → UI 초기화 + REQ_CHECKOUT_INFO(2026) 전송
-// 2. 서버에서 customerGrade, deliveryFee, minOrderAmount 수신
-// 3. 배달방법 카드 동적 생성, 금액 라벨 업데이트
-// 4. 결제하기 버튼 → REQ_ORDER_CREATE(2020) 전송
-// ============================================================
 class CartWidget : public QWidget
 {
     Q_OBJECT
@@ -30,53 +16,76 @@ public:
     explicit CartWidget(NetworkManager *network, QWidget *parent = nullptr);
     ~CartWidget();
 
-    // MainWindow에서 장바구니 열 때 호출
     void open();
 
 signals:
-    void closeRequested();       // X 버튼 → 이전 화면으로
-    void addMenuRequested();     // + 메뉴 추가 → 가게 상세로 복귀
-    void addressEditRequested(); // 주소 수정 → 주소 관리 화면으로
-    void orderSuccess();         // 주문 완료 → 홈으로
+    void closeRequested();
+    void addMenuRequested();
+    void addressEditRequested();
+    void orderSuccess();
 
 private slots:
-    // [오류 수정] const QString& 로 통일 (헤더↔구현부 일치)
     void onCheckoutInfoReceived(int status, const QString &customerGrade,
                                 int deliveryFee, int minOrderAmount);
     void onOrderCreateReceived(int status, const QString &message,
                                const QString &orderId);
 
+    // ── 탭 ──
+    void on_btnTabDelivery_clicked();
+    void on_btnTabPickup_clicked();
+
+    // ── 배달 버튼 ──
     void on_btnClose_clicked();
     void on_btnAddMenu_clicked();
     void on_btnAddressEdit_clicked();
     void on_btnPay_clicked();
     void on_btnRequestToggle_clicked();
 
+    // ── 포장 버튼 ──
+    void on_btnPickupAddMenu_clicked();
+    void on_btnPickupRequestToggle_clicked();
+    void on_btnPickupPay_clicked();
+    void on_btnPickupCopyAddress_clicked();
+
 private:
-    Ui::CartWidget *ui;        // .ui 파일로 생성된 위젯들 접근용
+    Ui::CartWidget *ui;
     NetworkManager *m_network;
 
-    // ── 서버에서 받은 데이터 ──
+    // ── 서버 데이터 ──
     QString m_customerGrade;
     int     m_deliveryFee    = 0;
     int     m_minOrderAmount = 0;
 
-    // ── 요청사항 펼침 여부 ──
-    bool m_requestExpanded = true;
+    // ── 포장 서버 데이터 (추후 checkout DTO 확장 시 채워짐) ──
+    QString m_pickupTime         = "15~25분";  // TODO: 서버에서 받아오기
+    QString m_pickupStoreAddress = "";         // TODO: 서버에서 받아오기
 
-    // ── UI 업데이트 헬퍼 ──
-    void updateAddress();           // 주소 라벨 갱신
-    void updateDeliverySection();   // 배달 옵션 카드 동적 생성
-    void rebuildMenuList();         // 메뉴 카드 목록 재빌드
-    void updatePriceSection();      // 금액 라벨 갱신
-    void updateBottomBar();         // 하단 바 갱신
+    // ── 모드 ──
+    bool m_isPickupMode          = false;
+    bool m_requestExpanded       = true;
+    bool m_pickupRequestExpanded = true;
 
-    // ── 메뉴 카드 동적 생성 ──
-    QWidget* makeMenuCard(const CartItemQt &item);
+    // ── 배달 UI 업데이트 ──
+    void updateAddress();
+    void updateDeliverySection();
+    void rebuildMenuList();
+    void updatePriceSection();
+
+    // ── 포장 UI 업데이트 ──
+    void updatePickupInfo();
+    void rebuildPickupMenuList();
+    void updatePickupPriceSection();
+
+    // ── 공통 하단 바 ──
+    void updateBottomBar();
+
+    // ── 메뉴 카드 (배달/포장 공용, isPickup으로 람다 콜백 구분) ──
+    QWidget* makeMenuCard(const CartItemQt &item, bool isPickup = false);
 
     // ── 계산 헬퍼 ──
-    int  calcDeliveryFee() const;  // 와우면 0, 일반이면 m_deliveryFee
-    int  calcDiscount()    const;  // 와우면 m_deliveryFee, 일반이면 0
+    int  calcDeliveryFee() const;
+    int  calcDiscount()    const;
     int  calcTotal()       const;
+    int  calcPickupTotal() const;
     bool isMinOrderMet()   const;
 };
