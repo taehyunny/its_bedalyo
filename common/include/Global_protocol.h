@@ -72,6 +72,8 @@ enum class CmdID : uint16_t
     RES_ORDER_CREATE = 2021, // 주문 생성 응답
     REQ_COUPON_CHECK = 2022, // 쿠폰 유효성 확인 요청
     RES_COUPON_CHECK = 2023, // 쿠폰 유효성 확인 응답
+    REQ_CHECKOUT_INFO = 2026, // 결제 화면 정보 요청 (배달비, 최소주문금액, grade)
+    RES_CHECKOUT_INFO = 2027, // 결제 화면 정보 응답
 
     // 리뷰 작성 (2030 ~ 2035)
     REQ_REVIEW_WRITE = 2030, // 사진 첨부 리뷰 작성 요청 (음식별점, 배달별점, 좋아요/싫어요)
@@ -96,8 +98,12 @@ enum class CmdID : uint16_t
     RES_ADDRESS_SAVE = 2071,   // 주소 저장 응답
     REQ_ADDRESS_LIST = 2072,   // 주소 목록 조회 요청
     RES_ADDRESS_LIST = 2073,   // 주소 목록 조회 응답
-    REQ_ADDRESS_DELETE = 2074, // 주소 삭제 요청
-    RES_ADDRESS_DELETE = 2075, // 주소 삭제 응답
+    REQ_ADDRESS_DELETE  = 2074, // 주소 삭제 요청
+    RES_ADDRESS_DELETE  = 2075, // 주소 삭제 응답
+    REQ_ADDRESS_UPDATE  = 2076, // 주소 수정 요청 (상세주소, 길안내, 라벨)
+    RES_ADDRESS_UPDATE  = 2077, // 주소 수정 응답
+    REQ_ADDRESS_DEFAULT = 2078, // 기본 주소 변경 요청
+    RES_ADDRESS_DEFAULT = 2079, // 기본 주소 변경 응답
 
     // 과거 주문 내역 (2080 ~ 2089)
     REQ_ORDER_HISTORY = 2080,        // 과거 주문 내역 목록 요청 (최근 주문 순 추천 포함)
