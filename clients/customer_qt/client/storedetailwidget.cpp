@@ -11,13 +11,16 @@ StoreDetailWidget::StoreDetailWidget(NetworkManager *network, QWidget *parent)
     , m_network(network)
 {
     ui->setupUi(this);
-
+    
     // UI 파일에 만들어둔 메인 뒤로가기 버튼(btnBackToMain) 연결
     connect(ui->btnBackToMain, &QPushButton::clicked, this, &StoreDetailWidget::on_btnBackToMain_clicked);
     
     // 기존 리뷰/정보 페이지용 뒤로가기 버튼 연결
     connect(ui->btnBack, &QPushButton::clicked, this, &StoreDetailWidget::on_btnBack_clicked);
-
+    
+    // 메인 뒤로가기 버튼 클릭 시, 기존 뒤로가기 슬롯(on_btnBack_clicked) 실행
+    connect(ui->btnBackToMain, &QPushButton::clicked, this, &StoreDetailWidget::on_btnBack_clicked);
+    
     // 서버 응답 신호 연결
     connect(m_network, &NetworkManager::onStoreDetailReceived,
             this, &StoreDetailWidget::onStoreDetailReceived);
@@ -105,12 +108,22 @@ void StoreDetailWidget::onStoreDetailReceived(StoreDetailQt detail)
 // ============================================================
 // 개별 메뉴 카드 만들기
 // ============================================================
-// 🚀 [수정됨] 매개변수가 MenuDTO에서 MenuQt로 바뀌었습니다!
 QWidget* StoreDetailWidget::makeMenuCard(const MenuQt& menu) 
 {
-    QWidget* card = new QWidget();
-    card->setStyleSheet("QWidget { background-color: #ffffff; border-bottom: 1px solid #eeeeee; }");
+    // 1. 껍데기를 QWidget이 아니라 '거대한 버튼(QPushButton)'으로 아예 만듭니다
+    QPushButton* card = new QPushButton();
     card->setMinimumHeight(100);
+    card->setCursor(Qt::PointingHandCursor);
+    
+    // 품절 여부에 따른 스타일
+    if (menu.isSoldOut) {
+        card->setStyleSheet("QPushButton { background-color: #fafafa; border: none; border-bottom: 1px solid #eeeeee; }");
+    } else {
+        card->setStyleSheet(
+            "QPushButton { background-color: #ffffff; border: none; border-bottom: 1px solid #eeeeee; }"
+            "QPushButton:pressed { background-color: #f5f5f5; }"
+        );
+    }
 
     QHBoxLayout* mainLayout = new QHBoxLayout(card);
     mainLayout->setContentsMargins(15, 15, 15, 15);
@@ -119,16 +132,19 @@ QWidget* StoreDetailWidget::makeMenuCard(const MenuQt& menu)
     QVBoxLayout* textLayout = new QVBoxLayout();
     textLayout->setSpacing(5);
 
-    // 🚀 [수정됨] QString::fromStdString(...) 부분이 없어지고 그냥 menu.menuName을 씁니다.
     QLabel* nameLabel = new QLabel(menu.menuName);
-    nameLabel->setStyleSheet("font-size: 16px; font-weight: bold; color: #111111; border: none;");
+    nameLabel->setStyleSheet("font-size: 16px; font-weight: bold; color: #111111;");
+    nameLabel->setAttribute(Qt::WA_TransparentForMouseEvents); // 마우스 클릭 통과
 
     QLabel* descLabel = new QLabel(menu.description);
-    descLabel->setStyleSheet("font-size: 13px; color: #888888; border: none;");
+    descLabel->setStyleSheet("font-size: 13px; color: #888888;");
     descLabel->setWordWrap(true);
+    descLabel->setAttribute(Qt::WA_TransparentForMouseEvents); 
 
-    QLabel* priceLabel = new QLabel(StoreUtils::formatWon(menu.basePrice));
-    priceLabel->setStyleSheet("font-size: 15px; font-weight: bold; color: #111111; border: none;");
+    QString priceText = menu.isSoldOut ? "품절" : StoreUtils::formatWon(menu.basePrice);
+    QLabel* priceLabel = new QLabel(priceText);
+    priceLabel->setStyleSheet(menu.isSoldOut ? "font-size: 15px; font-weight: bold; color: #d32f2f;" : "font-size: 15px; font-weight: bold; color: #111111;");
+    priceLabel->setAttribute(Qt::WA_TransparentForMouseEvents); 
 
     textLayout->addWidget(nameLabel);
     textLayout->addWidget(descLabel);
@@ -137,30 +153,19 @@ QWidget* StoreDetailWidget::makeMenuCard(const MenuQt& menu)
 
     mainLayout->addLayout(textLayout);
 
-    QLabel* imgLabel = new QLabel();
+    QLabel* imgLabel = new QLabel("사진");
     imgLabel->setFixedSize(80, 80);
-    imgLabel->setStyleSheet("background-color: #f0f0f0; border-radius: 8px; border: none;");
+    imgLabel->setStyleSheet("background-color: #f0f0f0; border-radius: 8px; color:#999;");
+    imgLabel->setAlignment(Qt::AlignCenter);
+    imgLabel->setAttribute(Qt::WA_TransparentForMouseEvents); 
     mainLayout->addWidget(imgLabel);
 
-    QPushButton *clickOverlay = new QPushButton(card);
-    clickOverlay->setStyleSheet(
-        "QPushButton { background: transparent; border: none; }"
-        "QPushButton:hover { background: rgba(0,0,0,0.03); }"
-        "QPushButton:pressed { background: rgba(0,0,0,0.07); }"
-        );
-    clickOverlay->setCursor(Qt::PointingHandCursor);
-
-    QVBoxLayout* overlayLayout = new QVBoxLayout(card);
-    overlayLayout->setContentsMargins(0,0,0,0);
-    overlayLayout->addWidget(clickOverlay);
-    clickOverlay->raise();
-
-    connect(clickOverlay, &QPushButton::clicked, this, [this, menu]() {
+    // 카드 전체(버튼)를 누르면 신호가 발사되도록 직접 연결!
+    connect(card, &QPushButton::clicked, this, [this, menu]() {
         if (menu.isSoldOut) {
             qDebug() << "품절된 메뉴입니다:" << menu.menuName;
             return;
         }
-        // 🚀 [수정됨] 여기도 그냥 menu.menuName 사용
         emit menuSelected(menu.menuId, menu.menuName, menu.basePrice);
     });
 

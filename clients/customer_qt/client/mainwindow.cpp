@@ -134,6 +134,18 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &MainWindow::onMainHomeReceived);
 
+    // ── 가게 상세 화면에서 뒤로가기 ──
+    connect(m_storeDetailWidget, &StoreDetailWidget::backRequested,
+            this, &MainWindow::onBackToHome);
+
+    // ── 3페이지에서 메뉴 클릭 시 -> 4페이지(주문 옵션)로 이동할 준비 ──
+    connect(m_storeDetailWidget, &StoreDetailWidget::menuSelected, 
+            this, [this](int menuId, QString menuName, int price) {
+                
+        // 일단 클릭이 잘 되는지 터미널에 로그만 찍어둡니다.
+        qDebug() << "[MainWindow] 메뉴 선택됨! 4페이지 연결 대기중 -> ID:" << menuId << "이름:" << menuName << "가격:" << price;
+    });
+
     // ── 서버 연결 ──
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
 
