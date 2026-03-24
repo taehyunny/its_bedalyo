@@ -8,6 +8,7 @@
 // =========================================================
 
 // ── 1. 상점 상세 정보 ──
+// ── 1. 상점 상세 정보 ──
 struct StoreDataDTO
 {
     int storeId;
@@ -21,6 +22,11 @@ struct StoreDataDTO
     double rating;
     int reviewCount;
     std::string deliveryTimeRange;
+
+    // 🚀 [추가] 프론트엔드 요청 데이터 3종 세트
+    std::string phoneNumber;
+    std::string representativeName;
+    std::string businessNumber;
 
     // 🚀 서버 -> 클라이언트 (전송용)
     friend void to_json(nlohmann::json &j, const StoreDataDTO &dto)
@@ -36,7 +42,11 @@ struct StoreDataDTO
             {"minOrderAmount", dto.minOrderAmount},
             {"rating", dto.rating},
             {"reviewCount", dto.reviewCount},
-            {"deliveryTimeRange", dto.deliveryTimeRange}};
+            {"deliveryTimeRange", dto.deliveryTimeRange},
+            // 🚀 [추가] JSON 응답에 포함
+            {"phoneNumber", dto.phoneNumber},
+            {"representativeName", dto.representativeName},
+            {"businessNumber", dto.businessNumber}};
     }
 
     // 🚀 클라이언트 -> 서버 (수신용 - 만능 방패)
@@ -53,6 +63,11 @@ struct StoreDataDTO
         dto.rating = j.value("rating", 0.0);
         dto.reviewCount = j.value("reviewCount", j.value("review_count", 0));
         dto.deliveryTimeRange = j.value("deliveryTimeRange", j.value("delivery_time_range", ""));
+
+        // 🚀 [추가] 역직렬화 방패
+        dto.phoneNumber = j.value("phoneNumber", j.value("phone_number", "정보 없음"));
+        dto.representativeName = j.value("representativeName", j.value("representative_name", "정보 없음"));
+        dto.businessNumber = j.value("businessNumber", j.value("business_number", "정보 없음"));
     }
 };
 
