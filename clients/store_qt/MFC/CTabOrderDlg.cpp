@@ -88,29 +88,28 @@ void CTabOrderDlg::SetOrderInfo(int storeId, CNetworkHelper* pNet, int cookTime)
 // 새 주문 수신 (NOTIFY_NEW_ORDER = 9000)
 // =========================================================
 void CTabOrderDlg::AddNewOrder(const json& orderJson)
-{
+{   
     auto toW = [](const std::string& s) -> CString {
         return CA2W(s.c_str(), CP_UTF8);
         };
 
     std::string orderId = orderJson.value("orderId", "");
-    std::string menuName = orderJson.value("menuSummary", ""); // 예: "떡볶이 외 1건"
+    std::string menuSum = orderJson.value("menuSummary", "");
     int         price = orderJson.value("totalPrice", 0);
     std::string time = orderJson.value("createdAt", "");
 
     CString strPrice;
-    strPrice.Format(L"%d", price);
+    strPrice.Format(L"%d원", price);
 
-    int nIdx = m_listOrder.InsertItem(0, toW(orderId)); // 최신 주문이 맨 위
-    m_listOrder.SetItemText(nIdx, 1, toW(menuName));
+    int nIdx = m_listOrder.InsertItem(0, toW(orderId));
+    m_listOrder.SetItemText(nIdx, 1, toW(menuSum));
     m_listOrder.SetItemText(nIdx, 2, strPrice);
     m_listOrder.SetItemText(nIdx, 3, L"대기");
     m_listOrder.SetItemText(nIdx, 4, toW(time));
 
-    // orderId를 나중에 수락/거절 시 사용하기 위해 저장
+    // orderId 저장
     m_listOrder.SetItemData(nIdx, (DWORD_PTR)new std::string(orderId));
 
-    // 새 주문 알림음 (선택사항)
     MessageBeep(MB_ICONEXCLAMATION);
 }
 
