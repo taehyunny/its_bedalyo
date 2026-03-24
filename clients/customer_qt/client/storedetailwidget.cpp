@@ -37,8 +37,31 @@ void StoreDetailWidget::loadStoreData(int storeId)
     clearLayout(ui->menuListLayout);
     ui->lblStoreName->setText("메뉴를 불러오는 중...");
 
-    // 2. 서버에 진짜로 상세 정보(메뉴+리뷰+가게) 요청 발사!
-    m_network->sendStoreDetailRequest(storeId);
+    // 원래 코드: 서버에 요청 (잠시 주석 처리)
+    // m_network->sendStoreDetailRequest(storeId);
+
+    // 더미 코드: 가짜 데이터 직접 만들어서 UI 함수 강제 실행(테스트용)
+    StoreDetailQt fakeData;
+    fakeData.storeId = storeId;
+    fakeData.storeName = "🔥 테스트용 불향 쭈꾸미 (가짜데이터)";
+    
+    MenuQt menu1;
+    menu1.menuName = "쭈꾸미 삼겹살 2인분";
+    menu1.description = "매콤달콤 끝판왕!";
+    menu1.basePrice = 28000;
+    menu1.menuCategory = "메인 메뉴";
+    
+    MenuQt menu2;
+    menu2.menuName = "날치알 볶음밥";
+    menu2.description = "K-디저트는 못 참지";
+    menu2.basePrice = 4000;
+    menu2.menuCategory = "사이드 메뉴";
+    
+    fakeData.menus.append(menu1);
+    fakeData.menus.append(menu2);
+
+    // 가짜 데이터를 넣어서 화면 그리는 함수를 직접 호출!
+    onStoreDetailReceived(fakeData);
 }
 
 // ============================================================
@@ -144,4 +167,12 @@ void StoreDetailWidget::clearLayout(QLayout* layout)
         if (child->widget()) delete child->widget();
         delete child;
     }
+}
+
+void StoreDetailWidget::on_btnStoreInfo_clicked() {
+    ui->stackedWidget->setCurrentIndex(1); 
+}
+
+void StoreDetailWidget::on_btnStoreInfoBack_clicked() {
+    ui->stackedWidget->setCurrentIndex(0); 
 }

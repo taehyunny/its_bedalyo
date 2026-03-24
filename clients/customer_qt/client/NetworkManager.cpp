@@ -128,6 +128,8 @@ void NetworkManager::sendStoreDetailRequest(int storeId)
     sendPacket(CmdID::REQ_STORE_DETAIL, j); 
 }
 
+
+
 // ============================================================
 // TopStoreInfo(C++ DTO) → TopStoreInfoQt(Qt 타입) 변환 헬퍼
 // ============================================================

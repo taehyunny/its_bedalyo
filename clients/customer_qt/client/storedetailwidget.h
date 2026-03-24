@@ -28,6 +28,9 @@ private slots:
     void on_btnBack_clicked();
     void onStoreDetailReceived(StoreDetailQt detail);
 
+    void on_btnStoreInfo_clicked();
+    void on_btnStoreInfoBack_clicked();
+    
 private:
     Ui::StoreDetailWidget *ui;
     NetworkManager *m_network;
