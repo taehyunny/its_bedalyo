@@ -302,8 +302,11 @@ void CTabStoreDlg::OnBnClickedBtnStoreOpen()
     body["status"] = 1;
     m_pNet->Send(CmdID::REQ_STORE_STATUS_SET, body);
 
-    //  즉시 피드백 - 저장 버튼 불필요함을 알림
-    MessageBox(L"영업 상태 변경 요청을 전송했습니다.\n(저장 버튼과 무관하게 즉시 적용됩니다.)",
+    // 부모(CMainMenuDlg)에 상태 변경 알림
+    GetParent()->GetParent()->GetDlgItem(IDC_STATIC_STATUS)
+        ->SetWindowText(L"영업중");
+
+    MessageBox(L"영업 상태 변경 요청 전송 완료\n(저장 버튼과 무관하게 즉시 적용됩니다.)",
         L"영업 상태", MB_OK);
 }
 
@@ -316,7 +319,11 @@ void CTabStoreDlg::OnBnClickedBtnStoreClose()
     body["status"] = 0;
     m_pNet->Send(CmdID::REQ_STORE_STATUS_SET, body);
 
-    MessageBox(L"영업 종료 요청을 전송했습니다.\n(저장 버튼과 무관하게 즉시 적용됩니다.)",
+    // 부모(CMainMenuDlg)에 상태 변경 알림
+    GetParent()->GetParent()->GetDlgItem(IDC_STATIC_STATUS)
+        ->SetWindowText(L"영업 종료");
+
+    MessageBox(L"영업 종료 요청 전송 완료\n(저장 버튼과 무관하게 즉시 적용됩니다.)",
         L"영업 상태", MB_OK);
 }
 

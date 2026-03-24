@@ -21,6 +21,7 @@ public:
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
+    virtual void OnCancel() {} // ESC 키 무시
 
     // ── 버튼 핸들러 ──────────────────────────────────────────
     afx_msg void OnBnClickedBtnMenuAdd();       // 메뉴 추가

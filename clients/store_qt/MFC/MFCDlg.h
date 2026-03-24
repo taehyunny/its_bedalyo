@@ -55,7 +55,7 @@ private:
     CString m_approvalStatus;
 
     std::string     m_serverIp  = "10.10.10.123";
-    int             m_serverPort = 8013;
+    int             m_serverPort = 8000;
 
 
     bool            m_waitingResponse = false;

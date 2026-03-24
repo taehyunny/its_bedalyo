@@ -1,6 +1,7 @@
 #pragma once
 #include "afxdialogex.h"
 #include "json.hpp"
+#include "CMenuOptionDlg.h"
 
 using json = nlohmann::json;
 
@@ -9,7 +10,6 @@ class CMenuEditDlg : public CDialogEx
     DECLARE_DYNAMIC(CMenuEditDlg)
 
 public:
-    // 추가(add): menuId = -1, 수정(edit): menuId = 실제 ID
     CMenuEditDlg(int storeId, int menuId = -1, CWnd* pParent = nullptr);
     virtual ~CMenuEditDlg();
 
@@ -17,7 +17,6 @@ public:
     enum { IDD = IDD_MENU_EDIT };
 #endif
 
-    // 외부에서 결과 읽기용
     json GetResultBody() const { return m_resultBody; }
     bool IsEditMode()    const { return m_menuId != -1; }
 
@@ -25,12 +24,15 @@ protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
     afx_msg void OnBnClickedOk();
+    afx_msg void OnBnClickedOptionEdit();  // ✅ 추가
+
     DECLARE_MESSAGE_MAP()
 
 private:
     int  m_storeId;
-    int  m_menuId;   // -1이면 추가, 실제값이면 수정
+    int  m_menuId;
     json m_resultBody;
+    json m_optionsJson = json::array();  // ✅ 빈 배열로 초기화
 
     CEdit      m_editMenuName;
     CEdit      m_editPrice;

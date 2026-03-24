@@ -167,11 +167,6 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     {
         MessageBox(CA2W(pkt->body.c_str(), CP_UTF8), L"body 전체", MB_OK);
 
-        MessageBox(
-            CA2W(pkt->body.c_str(), CP_UTF8),
-            L"body 전체",
-            MB_OK
-        );
         try
         {
             json resJson = json::parse(pkt->body);

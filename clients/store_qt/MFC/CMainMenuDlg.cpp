@@ -98,6 +98,7 @@ BOOL CMainMenuDlg::OnInitDialog()
     m_tabSettlementDlg.Create(IDD_TAB_SETTLEMENT, &m_tabCtrl);
     m_tabSettlementDlg.MoveWindow(&rcTab);
     m_tabSettlementDlg.ShowWindow(SW_HIDE);
+    m_tabOrderDlg.SetOrderInfo(m_storeId, m_pNet, _ttoi(m_cookTime));
 
     return TRUE;
 }
@@ -184,7 +185,31 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         if (resJson.value("status", 0) != 200)
             MessageBox(L"답글 등록에 실패했습니다.", L"오류", MB_ICONERROR);
     }
+    else if (pkt->cmdId == CmdID::NOTIFY_NEW_ORDER)
+    {
+        json resJson = json::parse(pkt->body);
+        m_tabOrderDlg.AddNewOrder(resJson);
 
+        // 주문 관리 탭으로 자동 전환
+        m_tabCtrl.SetCurSel(0);
+        // 모든 탭 숨기고 주문 탭 표시
+        m_tabOrderDlg.ShowWindow(SW_SHOW);
+        m_tabMenuDlg.ShowWindow(SW_HIDE);
+        m_tabStoreDlg.ShowWindow(SW_HIDE);
+        m_tabReviewDlg.ShowWindow(SW_HIDE);
+        m_tabSalesDlg.ShowWindow(SW_HIDE);
+        m_tabSettlementDlg.ShowWindow(SW_HIDE);
+    }
+    else if (pkt->cmdId == CmdID::RES_ORDER_ACCEPT)
+    {
+        json resJson = json::parse(pkt->body);
+        m_tabOrderDlg.OnOrderAcceptResult(resJson);
+    }
+    else if (pkt->cmdId == CmdID::RES_ORDER_REJECT)
+    {
+        json resJson = json::parse(pkt->body);
+        m_tabOrderDlg.OnOrderRejectResult(resJson);
+    }
     delete pkt;
     return 0;
 }

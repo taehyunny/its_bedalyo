@@ -39,29 +39,44 @@ void CMenuEditDlg::OnBnClickedOk()
     m_editCategory.GetWindowText(strCat);
     m_editDescription.GetWindowText(strDesc);
 
+    OutputDebugStringA(("[DEBUG] strPrice: " +
+        std::string(CT2A(strPrice, CP_UTF8)) + "\n").c_str());
+    OutputDebugStringA(("[DEBUG] _ttoi result: " +
+        std::to_string(_ttoi(strPrice)) + "\n").c_str());
+
     if (strName.IsEmpty() || strPrice.IsEmpty())
     {
         MessageBox(L"메뉴명과 가격은 필수입니다.", L"알림", MB_OK);
         return;
     }
 
-    // ✅ MenuUpdateReqDTO 구조에 맞게 body 생성
     m_resultBody["storeId"] = m_storeId;
-    m_resultBody["actionType"] = (m_menuId == -1) ? 0 : 1; // 0:추가, 1:수정
+    m_resultBody["actionType"] = (m_menuId == -1) ? 0 : 1;
 
-    m_resultBody["menuData"]["menuName"] = CT2A(strName, CP_UTF8).m_psz;
-    m_resultBody["menuData"]["basePrice"] = _ttoi(strPrice);
-    m_resultBody["menuData"]["menuCategory"] = CT2A(strCat, CP_UTF8).m_psz;
-    m_resultBody["menuData"]["description"] = CT2A(strDesc, CP_UTF8).m_psz;
+    m_resultBody["menuData"]["menuName"] = (const char*)CT2A(strName, CP_UTF8);
+    m_resultBody["menuData"]["basePrice"] = _ttoi(strPrice);  // ✅ 추가
+    m_resultBody["menuData"]["menuCategory"] = (const char*)CT2A(strCat, CP_UTF8);  // ✅ 하나만
+    m_resultBody["menuData"]["description"] = (const char*)CT2A(strDesc, CP_UTF8);
     m_resultBody["menuData"]["isPopular"] = (m_chkPopular.GetCheck() == BST_CHECKED);
     m_resultBody["menuData"]["isSoldOut"] = false;
+    m_resultBody["menuData"]["menuOptions"] = m_optionsJson;  // ✅ 옵션 포함
 
     if (m_menuId != -1)
-        m_resultBody["menuData"]["menuId"] = m_menuId; // 수정 시에만 포함
+        m_resultBody["menuData"]["menuId"] = m_menuId;
 
     EndDialog(IDOK);
 }
 
+void CMenuEditDlg::OnBnClickedOptionEdit()
+{
+    CMenuOptionDlg dlg(m_optionsJson, this);
+    if (dlg.DoModal() == IDOK)
+    {
+        m_optionsJson = dlg.GetResultOptions();
+    }
+}
+
 BEGIN_MESSAGE_MAP(CMenuEditDlg, CDialogEx)
     ON_BN_CLICKED(IDOK, &CMenuEditDlg::OnBnClickedOk)
+    ON_BN_CLICKED(IDC_OPTION_EDIT, &CMenuEditDlg::OnBnClickedOptionEdit)
 END_MESSAGE_MAP()

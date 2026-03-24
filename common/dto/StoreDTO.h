@@ -1,25 +1,71 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "json.hpp"
+#include <nlohmann/json.hpp> // 경로 확인 필수!
 
-// 1. 순서 교정: MenuDTO가 먼저 와야 다른 곳에서 쓸 수 있습니다.
+using json = nlohmann::json;
+
+// 0. CategoryItem 정의 (누락되었던 부분 추가)
+
+// 1. 순서 교정: 하위 항목부터 정의
+struct OptionItem
+{
+    int optionId;
+    std::string optionName;
+    int additionalPrice;
+    int displayOrder;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(OptionItem, optionId, optionName, additionalPrice, displayOrder)
+};
+
+// 2. 옵션 카테고리 (큰 틀)
+struct OptionGroup
+{
+    int groupId;
+    std::string groupName;
+    bool isRequired;
+    int maxCount;
+    int displayOrder;
+    std::vector<OptionItem> options;
+
+    // 🚀 [해결책] to_json 추가 (서버 -> 클라이언트로 보낼 때 필요)
+    friend void to_json(nlohmann::json &j, const OptionGroup &dto)
+    {
+        j = nlohmann::json{
+            {"groupId", dto.groupId},
+            {"groupName", dto.groupName},
+            {"isRequired", dto.isRequired},
+            {"maxCount", dto.maxCount},
+            {"displayOrder", dto.displayOrder},
+            {"options", dto.options}};
+    }
+
+    // 🚀 from_json 커스텀 구현 (클라이언트 -> 서버로 받을 때 필요)
+    friend void from_json(const nlohmann::json &j, OptionGroup &dto)
+    {
+        j.at("groupId").get_to(dto.groupId);
+        j.at("groupName").get_to(dto.groupName);
+        dto.isRequired = j.value("isRequired", false);
+        dto.maxCount = j.value("maxCount", 1);
+        dto.displayOrder = j.value("displayOrder", 99);
+        j.at("options").get_to(dto.options);
+    }
+};
+
+// 3. 메뉴 DTO
 struct MenuDTO
 {
     int menuId;
     std::string menuName;
     int basePrice;
-
-    // 🚀 int 대신 bool로 통일! (클라이언트에서도 true/false로 받는 게 편합니다)
     bool isSoldOut;
-
-    nlohmann::json menuOptions;
     std::string description;
     std::string imageUrl;
     std::string menuCategory;
     bool isPopular;
+    std::vector<OptionGroup> optionGroups;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(MenuDTO, menuId, menuName, basePrice, isSoldOut, menuOptions, description, imageUrl, menuCategory, isPopular)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(MenuDTO, menuId, menuName, basePrice, isSoldOut, description, imageUrl, menuCategory, isPopular, optionGroups)
 };
 
 struct MenuListReqDTO // 클라이언트 -> 서버: "이 가게 메뉴 다 주세요!" 요청 DTO
@@ -149,53 +195,4 @@ struct BizNumCheckResDTO
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(BizNumCheckResDTO, status, isAvailable, message)
 };
 
-// ==========================================================
-// 🚀 3서버 응답 DTO 설계도 추가
-// ==========================================================
-
-struct StoreDataDTO {
-    int store_id;
-    std::string store_name;
-    std::string store_address;
-    std::string operating_hours;
-    std::string delivery_fees;
-    bool is_open;
-    std::string image_url;
-    int min_order_amount;
-    double rating;
-    int review_count;
-    std::string delivery_time_range;
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(StoreDataDTO, store_id, store_name, store_address, operating_hours, delivery_fees, is_open, image_url, min_order_amount, rating, review_count, delivery_time_range)
-
-struct MenuDataDTO {
-    int menu_id;
-    int store_id;
-    std::string menu_name;
-    int base_price;
-    bool is_sold_out;
-    std::string description;
-    std::string image_url;
-    std::string menu_category;
-    bool is_popular;
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MenuDataDTO, menu_id, store_id, menu_name, base_price, is_sold_out, description, image_url, menu_category, is_popular)
-
-struct ReviewDataDTO {
-    int review_id;
-    int store_id;
-    std::string user_id;
-    int order_id;
-    int rating;
-    std::string comment;
-    std::string created_at;
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ReviewDataDTO, review_id, store_id, user_id, order_id, rating, comment, created_at)
-
-struct ResStoreDetailDTO {
-    int status;
-    StoreDataDTO storeData;
-    std::vector<MenuDataDTO> menuList;
-    std::vector<ReviewDataDTO> reviewList;
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ResStoreDetailDTO, status, storeData, menuList, reviewList)
+// 1. 개별 옵션 항목 (작은 틀)
