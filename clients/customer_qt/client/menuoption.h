@@ -2,21 +2,45 @@
 #define MENUOPTION_H
 
 #include <QWidget>
+#include <QButtonGroup>
+#include <QFrame>
+#include "StoreDTO.h"    // OptionGroup, OptionItem 사용
+#include "cartsession.h" // CartItemQt 사용
 
-namespace Ui {
-class menuoption;
-}
+class NetworkManager;
+namespace Ui { class menuoption; }
 
-class menuoption : public QWidget
-{
+class menuoption : public QWidget {
     Q_OBJECT
-
 public:
-    explicit menuoption(QWidget *parent = nullptr);
+    explicit menuoption(NetworkManager *network, QWidget *parent = nullptr);
     ~menuoption();
+    
+    void loadMenuOption(int menuId, const QString &menuName, int basePrice);
+
+signals:
+    void backRequested();
+    void selectedMenuFinished(CartItemQt item);
+
+private slots:
+    void onMenuOptionDataReceived(int menuId, QList<OptionGroup> groups);
+    void onIncreaseQty();
+    void onDecreaseQty();
+    void onAddToCart();
+    void onBackClicked();
 
 private:
-    Ui::menuoption *ui;
-};
+    void buildOptionUI(const QList<OptionGroup> &groups);
+    void clearOptionUI();
+    void recalculatePrice();
+    bool validateRequiredOptions();
 
-#endif // MENUOPTION_H
+    Ui::menuoption *ui;
+    NetworkManager *m_network;
+
+    int     m_menuId = 0;
+    QString m_menuName;
+    int     m_basePrice = 0;
+    int     m_quantity = 1;
+};
+#endif

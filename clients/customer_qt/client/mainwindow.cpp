@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_settingsWidget(new SettingsWidget(m_network, this))
     , m_addressWidget(new AddressWidget(m_network, this))
     , m_addressDetailWidget(new AddressDetailWidget(this))
+    , m_menuOptionWidget(new menuoption(m_network, this)) // [추가] 객체 생성
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -41,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_addressWidget);
     ui->stackedWidget->addWidget(m_addressDetailWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
+    ui->stackedWidget->addWidget(m_menuOptionWidget); // [추가] 메뉴 옵션 화면 등록
 
     // ── 로그인 ──
     connect(m_loginWidget, &LoginWidget::loginSuccess,
@@ -144,6 +146,26 @@ MainWindow::MainWindow(QWidget *parent)
                 
         // 일단 클릭이 잘 되는지 터미널에 로그만 찍어둡니다.
         qDebug() << "[MainWindow] 메뉴 선택됨! 4페이지 연결 대기중 -> ID:" << menuId << "이름:" << menuName << "가격:" << price;
+    });
+
+
+    // ── 가게 상세 화면에서 메뉴 클릭 시 로직 수정 ──
+    connect(m_storeDetailWidget, &StoreDetailWidget::menuSelected, 
+            this, [this](int menuId, QString menuName, int price) {
+        
+        qDebug() << "[MainWindow] 메뉴 상세 페이지로 이동 -> " << menuName;
+
+        // 1. 데이터를 menuoption 위젯에 로드
+        m_menuOptionWidget->loadMenuOption(menuId, menuName, price);
+
+        // 2. 화면을 menuoption 위젯으로 전환
+        ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);
+    });
+
+    // ── 메뉴 상세에서 뒤로가기 클릭 시 로직 추가 ──
+    connect(m_menuOptionWidget, &menuoption::backRequested, this, [this]() {
+        // 다시 가게 상세 화면(m_storeDetailWidget)으로 복귀
+        ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
     });
 
     // ── 서버 연결 ──
