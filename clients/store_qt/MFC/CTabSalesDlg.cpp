@@ -78,7 +78,7 @@ void CTabSalesDlg::UpdateSalesDisplay(int totalSales)
     str.Format(L"%d 원", totalSales);
     m_staticTotalSales.SetWindowText(str);
 
-    // 주문 건수는 서버에서 안 주므로 하드코딩 숨김
+    // 주문 건수는 서버에서 안 주므로 숨김 처리
     m_staticTotalOrder.SetWindowText(L"- 건");
 
     str.Format(L"%d 원 (12.8%%)", commission);
@@ -95,7 +95,7 @@ void CTabSalesDlg::OnBnClickedBtnSalesSearch()
 {
     if (!m_pNet) return;
 
-    // ✅ storeId만 담아서 전송 (total_sales 조회)
+    // storeId만 담아서 전송 (total_sales 조회)
     json body;
     body["storeId"] = m_storeId;
     m_pNet->Send(CmdID::REQ_SALES_STAT, body);

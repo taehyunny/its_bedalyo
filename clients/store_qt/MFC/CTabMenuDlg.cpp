@@ -67,7 +67,7 @@ void CTabMenuDlg::LoadMenuList()
     if (!m_pNet) return;
 
     json body;
-    body["storeId"] = m_storeId;  // ✅ 멤버변수 사용
+    body["storeId"] = m_storeId;  // 멤버변수 사용
     m_pNet->Send(CmdID::REQ_MENU_LIST, body);
 }
 

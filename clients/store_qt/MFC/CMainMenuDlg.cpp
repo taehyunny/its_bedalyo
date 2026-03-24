@@ -35,6 +35,7 @@ void CMainMenuDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_STATIC_NAMEBAR, m_staticNameBar);
     DDX_Control(pDX, IDC_STATIC_STATUS, m_staticStatus);
     DDX_Control(pDX, IDC_TAB_STATUS_SET, m_tabCtrl);
+    DDX_Control(pDX, IDC_BTN_CHAT_REQUEST, m_btnChatRequest);
 }
 
 BOOL CMainMenuDlg::OnInitDialog()
@@ -152,6 +153,7 @@ void CMainMenuDlg::OnClose()
 
 LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 {
+    (void)wParam;
     auto* pkt = reinterpret_cast<ReceivedPacket*>(lParam);
     if (!pkt) return 0;
 
@@ -241,12 +243,51 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         else
             MessageBox(L"매출 조회에 실패했습니다.", L"오류", MB_ICONERROR);
     }
+    else if (pkt->cmdId == CmdID::RES_CHAT_CONNECT)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) == 200)
+        {
+            MessageBox(
+                L"관리자와 연결되었습니다.\n잠시 후 답변이 도착합니다.",
+                L"고객센터", MB_OK | MB_ICONINFORMATION);
+        }
+        else
+        {
+            MessageBox(
+                L"현재 관리자가 없습니다.\n잠시 후 다시 시도해주세요.",
+                L"고객센터", MB_OK | MB_ICONWARNING);
+
+            // 실패 시 버튼 다시 활성화
+            m_btnChatRequest.EnableWindow(TRUE);
+            m_btnChatRequest.SetWindowText(L"고객센터");
+        }
+    }
     delete pkt;
     return 0;
 }
+void CMainMenuDlg::OnBnClickedBtnChatRequest()
+{
+    if (MessageBox(
+        L"관리자에게 1:1 문의를 요청하시겠습니까?",
+        L"고객센터",
+        MB_YESNO | MB_ICONQUESTION) == IDYES)
+    {
+        if (!m_pNet) return;
 
+        json body;
+        body["storeId"] = m_storeId;
+        body["userId"] = (const char*)CT2A(m_ownerName, CP_UTF8);
+        m_pNet->Send(CmdID::REQ_CHAT_CONNECT, body);
+
+        // 버튼 비활성화 (중복 요청 방지)
+        m_btnChatRequest.EnableWindow(FALSE);
+        m_btnChatRequest.SetWindowText(L"문의중...");
+    }
+}
 BEGIN_MESSAGE_MAP(CMainMenuDlg, CDialogEx)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_STATUS_SET, &CMainMenuDlg::OnTcnSelchangeTabStatusSet)
     ON_MESSAGE(WM_PACKET_RECEIVED, &CMainMenuDlg::OnPacketReceived)
     ON_WM_CLOSE()
+    ON_BN_CLICKED(IDC_BTN_CHAT_REQUEST, &CMainMenuDlg::OnBnClickedBtnChatRequest)
 END_MESSAGE_MAP()

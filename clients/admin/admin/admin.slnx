@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="admin_mfc.vcxproj" />
+  <Project Path="admin.vcxproj" />
 </Solution>

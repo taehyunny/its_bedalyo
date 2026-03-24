@@ -1,20 +1,20 @@
 ﻿
-// admin_mfcDlg.h: 헤더 파일
+// adminDlg.h: 헤더 파일
 //
 
 #pragma once
 
 
-// CadminmfcDlg 대화 상자
-class CadminmfcDlg : public CDialogEx
+// CadminDlg 대화 상자
+class CadminDlg : public CDialogEx
 {
 // 생성입니다.
 public:
-	CadminmfcDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
+	CadminDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_ADMIN_MFC_DIALOG };
+	enum { IDD = IDD_ADMIN_DIALOG };
 #endif
 
 	protected:
@@ -24,7 +24,6 @@ public:
 // 구현입니다.
 protected:
 	HICON m_hIcon;
-	CTabCtrl m_tabCtrl;
 
 	// 생성된 메시지 맵 함수
 	virtual BOOL OnInitDialog();

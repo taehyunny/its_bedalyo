@@ -1,27 +1,27 @@
 ﻿
-// admin_mfc.cpp: 애플리케이션에 대한 클래스 동작을 정의합니다.
+// admin.cpp: 애플리케이션에 대한 클래스 동작을 정의합니다.
 //
 
 #include "pch.h"
 #include "framework.h"
-#include "admin_mfc.h"
-#include "admin_mfcDlg.h"
+#include "admin.h"
+#include "adminDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-// CadminmfcApp
+// CadminApp
 
-BEGIN_MESSAGE_MAP(CadminmfcApp, CWinApp)
+BEGIN_MESSAGE_MAP(CadminApp, CWinApp)
 	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 
-// CadminmfcApp 생성
+// CadminApp 생성
 
-CadminmfcApp::CadminmfcApp()
+CadminApp::CadminApp()
 {
 	// 다시 시작 관리자 지원
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
@@ -31,14 +31,14 @@ CadminmfcApp::CadminmfcApp()
 }
 
 
-// 유일한 CadminmfcApp 개체입니다.
+// 유일한 CadminApp 개체입니다.
 
-CadminmfcApp theApp;
+CadminApp theApp;
 
 
-// CadminmfcApp 초기화
+// CadminApp 초기화
 
-BOOL CadminmfcApp::InitInstance()
+BOOL CadminApp::InitInstance()
 {
 	// Windows XP에서는 InitCommonControlsEx()를 필요로 합니다.
 	// 사용하도록 지정하는 경우, Windows XP 상에서 반드시 InitCommonControlsEx()가 필요합니다.
@@ -71,7 +71,7 @@ BOOL CadminmfcApp::InitInstance()
 	// 적절한 내용으로 수정해야 합니다.
 	SetRegistryKey(_T("로컬 애플리케이션 마법사에서 생성된 애플리케이션"));
 
-	CadminmfcDlg dlg;
+	CadminDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)

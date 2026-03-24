@@ -1,11 +1,11 @@
 ﻿
-// admin_mfcDlg.cpp: 구현 파일
+// adminDlg.cpp: 구현 파일
 //
 
 #include "pch.h"
 #include "framework.h"
-#include "admin_mfc.h"
-#include "admin_mfcDlg.h"
+#include "admin.h"
+#include "adminDlg.h"
 #include "afxdialogex.h"
 
 #ifdef _DEBUG
@@ -46,31 +46,31 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
 
 
-// CadminmfcDlg 대화 상자
+// CadminDlg 대화 상자
 
 
 
-CadminmfcDlg::CadminmfcDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_ADMIN_MFC_DIALOG, pParent)
+CadminDlg::CadminDlg(CWnd* pParent /*=nullptr*/)
+	: CDialogEx(IDD_ADMIN_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
-void CadminmfcDlg::DoDataExchange(CDataExchange* pDX)
+void CadminDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CadminmfcDlg, CDialogEx)
+BEGIN_MESSAGE_MAP(CadminDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 END_MESSAGE_MAP()
 
 
-// CadminmfcDlg 메시지 처리기
+// CadminDlg 메시지 처리기
 
-BOOL CadminmfcDlg::OnInitDialog()
+BOOL CadminDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
@@ -80,39 +80,31 @@ BOOL CadminmfcDlg::OnInitDialog()
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 
-	//CMenu* pSysMenu = GetSystemMenu(FALSE);
-	//if (pSysMenu != nullptr)
-	//{
-	//	BOOL bNameValid;
-	//	CString strAboutMenu;
-	//	bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
-	//	ASSERT(bNameValid);
-	//	if (!strAboutMenu.IsEmpty())
-	//	{
-	//		pSysMenu->AppendMenu(MF_SEPARATOR);
-	//		pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
-	//	}
-	//}
+	CMenu* pSysMenu = GetSystemMenu(FALSE);
+	if (pSysMenu != nullptr)
+	{
+		BOOL bNameValid;
+		CString strAboutMenu;
+		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+		ASSERT(bNameValid);
+		if (!strAboutMenu.IsEmpty())
+		{
+			pSysMenu->AppendMenu(MF_SEPARATOR);
+			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+		}
+	}
 
 	// 이 대화 상자의 아이콘을 설정합니다.  응용 프로그램의 주 창이 대화 상자가 아닐 경우에는
 	//  프레임워크가 이 작업을 자동으로 수행합니다.
 	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
-	// 탭 컨트롤 멤버 변수 연결
-	m_tabCtrl.SubclassDlgItem(IDC_TAB_MAIN, this);
-
-	// 탭 이름 설정
-	m_tabCtrl.InsertItem(0, _T("고객 응대"));
-	m_tabCtrl.InsertItem(1, _T("환불/취소"));
-	m_tabCtrl.InsertItem(2, _T("라이더 현황"));
-	m_tabCtrl.InsertItem(3, _T("공지/할증"));
-	m_tabCtrl.InsertItem(4, _T("리뷰 관리"));
+	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
-void CadminmfcDlg::OnSysCommand(UINT nID, LPARAM lParam)
+void CadminDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
 	{
@@ -129,7 +121,7 @@ void CadminmfcDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //  아래 코드가 필요합니다.  문서/뷰 모델을 사용하는 MFC 애플리케이션의 경우에는
 //  프레임워크에서 이 작업을 자동으로 수행합니다.
 
-void CadminmfcDlg::OnPaint()
+void CadminDlg::OnPaint()
 {
 	if (IsIconic())
 	{
@@ -156,7 +148,7 @@ void CadminmfcDlg::OnPaint()
 
 // 사용자가 최소화된 창을 끄는 동안에 커서가 표시되도록 시스템에서
 //  이 함수를 호출합니다.
-HCURSOR CadminmfcDlg::OnQueryDragIcon()
+HCURSOR CadminDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }

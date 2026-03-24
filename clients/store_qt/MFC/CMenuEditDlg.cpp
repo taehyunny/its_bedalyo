@@ -59,7 +59,7 @@ void CMenuEditDlg::OnBnClickedOk()
     m_resultBody["menuData"]["description"] = (const char*)CT2A(strDesc, CP_UTF8);
     m_resultBody["menuData"]["isPopular"] = (m_chkPopular.GetCheck() == BST_CHECKED);
     m_resultBody["menuData"]["isSoldOut"] = false;
-    m_resultBody["menuData"]["optionGroups"] = m_optionsJson;  //  menuOptions → optionGroups
+    m_resultBody["menuData"]["optionGroups"] = m_optionsJson;
 
     if (m_menuId != -1)
         m_resultBody["menuData"]["menuId"] = m_menuId;

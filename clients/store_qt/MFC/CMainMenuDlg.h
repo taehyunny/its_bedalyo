@@ -36,6 +36,7 @@ protected:
     afx_msg void OnTcnSelchangeTabStatusSet(NMHDR* pNMHDR, LRESULT* pResult);
     afx_msg LRESULT OnPacketReceived(WPARAM wParam, LPARAM lParam);
     afx_msg void OnClose();
+    afx_msg void OnBnClickedBtnChatRequest();
     DECLARE_MESSAGE_MAP()
 
 private:
@@ -61,12 +62,11 @@ private:
     CTabReviewDlg     m_tabReviewDlg;     // 3: 리뷰 관리
     CTabSalesDlg      m_tabSalesDlg;      // 4: 매출 통계
     CTabSettlementDlg m_tabSettlementDlg; // 5: 정산 관리
-
+    CButton m_btnChatRequest;
     // ── 컨트롤 바인딩 ───────────────────────────────────────
     CStatic     m_staticNameBar;   // IDC_STATIC_NAMEBAR
     CStatic     m_staticStatus;    // IDC_STATIC_STATUS
     CTabCtrl    m_tabCtrl;         // IDC_TAB_STATUS_SET
     CNetworkHelper* m_pNet = nullptr;
-public:
 
 };
