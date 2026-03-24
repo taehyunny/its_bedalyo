@@ -3,247 +3,471 @@
  <class>menuoption</class>
  <widget class="QWidget" name="menuoption">
   <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>360</width>
-    <height>800</height>
-   </rect>
+   <rect><x>0</x><y>0</y><width>390</width><height>844</height></rect>
   </property>
-  <property name="windowTitle">
-   <string>메뉴 상세</string>
-  </property>
+  <property name="windowTitle"><string>메뉴 상세</string></property>
   <property name="styleSheet">
-   <string notr="true">background-color: white;</string>
+   <string notr="true">QWidget#menuoption { background-color: #ffffff; }</string>
   </property>
+
   <layout class="QVBoxLayout" name="mainLayout">
-   <property name="spacing">
-    <number>0</number>
-   </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
+   <property name="spacing"><number>0</number></property>
+   <property name="leftMargin"><number>0</number></property>
+   <property name="topMargin"><number>0</number></property>
+   <property name="rightMargin"><number>0</number></property>
+   <property name="bottomMargin"><number>0</number></property>
+
+   <!-- ══════════════════════════════════════════════════════
+        [1] 상단 헤더 — 고정 (스크롤 밖)
+        ← 뒤로가기 | 공유 버튼
+        ══════════════════════════════════════════════════════ -->
+   <item>
+    <widget class="QWidget" name="headerWidget">
+     <property name="minimumHeight"><number>52</number></property>
+     <property name="maximumHeight"><number>52</number></property>
+     <property name="styleSheet">
+      <string notr="true">
+       QWidget#headerWidget { background: #ffffff; border-bottom: 1px solid #eeeeee; }
+      </string>
+     </property>
+     <layout class="QHBoxLayout" name="headerLayout">
+      <property name="leftMargin"><number>8</number></property>
+      <property name="topMargin"><number>6</number></property>
+      <property name="rightMargin"><number>8</number></property>
+      <property name="bottomMargin"><number>6</number></property>
+      <property name="spacing"><number>4</number></property>
+      <!-- 뒤로가기 [정적] -->
+      <item>
+       <widget class="QPushButton" name="btn_back">
+        <property name="text"><string>←</string></property>
+        <property name="minimumSize"><size><width>40</width><height>40</height></size></property>
+        <property name="maximumSize"><size><width>40</width><height>40</height></size></property>
+        <property name="styleSheet">
+         <string notr="true">
+          QPushButton { background: transparent; border: none; font-size: 20px; color: #111111; }
+          QPushButton:hover { background: #f5f5f5; border-radius: 20px; }
+         </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="headerSpacer">
+        <property name="orientation"><enum>Qt::Horizontal</enum></property>
+       </spacer>
+      </item>
+      <!-- 공유 [정적] -->
+      <item>
+       <widget class="QPushButton" name="btn_share">
+        <property name="text"><string>공유</string></property>
+        <property name="minimumSize"><size><width>40</width><height>40</height></size></property>
+        <property name="maximumSize"><size><width>40</width><height>40</height></size></property>
+        <property name="styleSheet">
+         <string notr="true">
+          QPushButton { background: transparent; border: none; font-size: 13px; color: #555555; }
+          QPushButton:hover { background: #f5f5f5; border-radius: 20px; }
+         </string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- ══════════════════════════════════════════════════════
+        [2] 스크롤 영역
+        ══════════════════════════════════════════════════════ -->
    <item>
     <widget class="QScrollArea" name="scrollArea">
-     <property name="styleSheet">
-      <string notr="true">border: none;</string>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
+     <property name="styleSheet"><string notr="true">QScrollArea { border: none; }</string></property>
+     <property name="widgetResizable"><bool>true</bool></property>
+     <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+
      <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>360</width>
-        <height>1000</height>
-       </rect>
+       <rect><x>0</x><y>0</y><width>390</width><height>1400</height></rect>
       </property>
+
       <layout class="QVBoxLayout" name="scrollAreaLayout">
-       <property name="spacing">
-        <number>15</number>
-       </property>
-       <property name="leftMargin">
-        <number>15</number>
-       </property>
-       <property name="topMargin">
-        <number>10</number>
-       </property>
-       <property name="rightMargin">
-        <number>15</number>
-       </property>
-       <property name="bottomMargin">
-        <number>15</number>
-       </property>
+       <property name="spacing"><number>0</number></property>
+       <property name="leftMargin"><number>0</number></property>
+       <property name="topMargin"><number>0</number></property>
+       <property name="rightMargin"><number>0</number></property>
+       <property name="bottomMargin"><number>0</number></property>
 
-       <item>
-        <layout class="QHBoxLayout" name="headerLayout">
-         <item>
-          <widget class="QPushButton" name="btn_back">
-           <property name="text">
-            <string>&lt;</string>
-           </property>
-           <property name="maximumSize">
-            <size><width>40</width><height>40</height></size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="headerSpacer">
-           <property name="orientation"><enum>Qt::Horizontal</enum></property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_share">
-           <property name="text">
-            <string>공유</string>
-           </property>
-           <property name="maximumSize">
-            <size><width>40</width><height>40</height></size>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-
+       <!-- ── 메뉴 이미지 — 전체 너비 [동적: setMenuData() → setPixmap()] ── -->
        <item>
         <widget class="QLabel" name="img_product_placeholder">
-         <property name="minimumSize">
-          <size><width>0</width><height>220</height></size>
-         </property>
+         <property name="minimumSize"><size><width>0</width><height>220</height></size></property>
+         <property name="maximumSize"><size><width>16777215</width><height>220</height></size></property>
          <property name="styleSheet">
-          <string notr="true">background-color: #e0e0e0; color: #888888;</string>
+          <string notr="true">background-color: #e0e0e0; color: #888888; font-size: 13px;</string>
          </property>
-         <property name="text">
-          <string>[ 햄버거 이미지 영역 ]</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
+         <!-- [동적] DB 이미지 URL → QPixmap 로드 후 setPixmap() — 연결 미구현 -->
+         <property name="text"><string>[ 메뉴 이미지 영역 ]</string></property>
+         <property name="alignment"><set>Qt::AlignCenter</set></property>
+         <property name="scaledContents"><bool>true</bool></property>
         </widget>
        </item>
 
+       <!-- ── 메뉴 정보 컨테이너 (좌우 여백 16px) ── -->
        <item>
-        <widget class="QLabel" name="lbl_title">
-         <property name="font">
-          <font><pointsize>16</pointsize><bold>true</bold></font>
-         </property>
-         <property name="text">
-          <string>메뉴 이름 영역</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="lbl_subtitle">
-         <property name="styleSheet">
-          <string notr="true">color: #666666;</string>
-         </property>
-         <property name="text">
-          <string>메뉴 설명이 들어가는 영역입니다.</string>
-         </property>
-        </widget>
-       </item>
+        <widget class="QWidget" name="menuInfoWidget">
+         <property name="styleSheet"><string notr="true">background: #ffffff;</string></property>
+         <layout class="QVBoxLayout" name="menuInfoLayout">
+          <property name="spacing"><number>6</number></property>
+          <property name="leftMargin"><number>16</number></property>
+          <property name="topMargin"><number>16</number></property>
+          <property name="rightMargin"><number>16</number></property>
+          <property name="bottomMargin"><number>14</number></property>
 
-       <item>
-        <widget class="Line" name="line_1">
-         <property name="orientation"><enum>Qt::Horizontal</enum></property>
-        </widget>
-       </item>
+          <!-- 메뉴 이름 [동적: setMenuData() → setText()] -->
+          <item>
+           <widget class="QLabel" name="lbl_title">
+            <property name="font"><font><pointsize>17</pointsize><bold>true</bold></font></property>
+            <property name="styleSheet"><string notr="true">color: #111111;</string></property>
+            <property name="text"><string>메뉴 이름</string></property>
+            <property name="wordWrap"><bool>true</bool></property>
+           </widget>
+          </item>
 
-       <item>
-        <layout class="QHBoxLayout" name="priceLayout">
-         <item>
-          <widget class="QLabel" name="lbl_price_title">
-           <property name="font"><font><pointsize>12</pointsize><bold>true</bold></font></property>
-           <property name="text"><string>가격</string></property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="priceSpacer">
-           <property name="orientation"><enum>Qt::Horizontal</enum></property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbl_price_value">
-           <property name="font"><font><pointsize>12</pointsize><bold>true</bold></font></property>
-           <property name="text"><string>0원</string></property>
-          </widget>
-         </item>
-        </layout>
-       </item>
+          <!-- 메뉴 설명 [동적: setMenuData() → setText()] -->
+          <item>
+           <widget class="QLabel" name="lbl_subtitle">
+            <property name="styleSheet"><string notr="true">color: #666666; font-size: 13px;</string></property>
+            <property name="text"><string>메뉴 설명이 여기에 표시됩니다.</string></property>
+            <property name="wordWrap"><bool>true</bool></property>
+           </widget>
+          </item>
 
-       <item>
-        <layout class="QHBoxLayout" name="quantityLayout">
-         <item>
-          <widget class="QLabel" name="lbl_quantity_title">
-           <property name="font"><font><pointsize>12</pointsize><bold>true</bold></font></property>
-           <property name="text"><string>수량</string></property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="quantitySpacer">
-           <property name="orientation"><enum>Qt::Horizontal</enum></property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_minus">
-           <property name="maximumSize"><size><width>30</width><height>30</height></size></property>
-           <property name="text"><string>-</string></property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbl_quantity_value">
-           <property name="minimumSize"><size><width>30</width><height>0</height></size></property>
-           <property name="alignment"><set>Qt::AlignCenter</set></property>
-           <property name="text"><string>1</string></property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_plus">
-           <property name="maximumSize"><size><width>30</width><height>30</height></size></property>
-           <property name="text"><string>+</string></property>
-          </widget>
-         </item>
-        </layout>
-       </item>
+          <!-- 원산지·알레르기·영양성분 [정적] -->
+          <item>
+           <widget class="QLabel" name="lbl_allergen">
+            <property name="styleSheet">
+             <string notr="true">
+              color: #888888; font-size: 11px;
+              background-color: #f2f2f2;
+              padding: 4px 10px;
+              border-radius: 4px;
+             </string>
+            </property>
+            <property name="text"><string>원산지 · 알레르기 · 영양성분 정보 보기</string></property>
+            <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+           </widget>
+          </item>
 
-       <item>
-        <widget class="Line" name="line_2">
-         <property name="orientation"><enum>Qt::Horizontal</enum></property>
+          <!-- 리뷰 요약 행 [동적: setReviewSummary() → setText()] — 연결 미구현 -->
+          <item>
+           <layout class="QHBoxLayout" name="reviewSummaryLayout">
+            <item>
+             <widget class="QLabel" name="lbl_review_summary">
+              <property name="styleSheet">
+               <string notr="true">color: #555555; font-size: 13px;</string>
+              </property>
+              <!-- [동적] setReviewSummary(likePercent, reviewCount) 호출 시 갱신 -->
+              <property name="text"><string>👍 —%  ·  리뷰 —개 &gt;</string></property>
+              <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="reviewSummarySpacer">
+              <property name="orientation"><enum>Qt::Horizontal</enum></property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+
+         </layout>
         </widget>
        </item>
 
+       <!-- ══ 굵은 구분선 ══ -->
+       <item>
+        <widget class="QWidget" name="divThick1">
+         <property name="minimumHeight"><number>8</number></property>
+         <property name="maximumHeight"><number>8</number></property>
+         <property name="styleSheet"><string notr="true">background-color: #f5f5f5;</string></property>
+        </widget>
+       </item>
+
+       <!-- ══════════════════════════════════════════════════════
+            가격 행
+            "가격" [정적] | 값 [동적: updateTotalPrice() → setText()]
+            ══════════════════════════════════════════════════════ -->
+       <item>
+        <widget class="QWidget" name="priceWidget">
+         <property name="styleSheet"><string notr="true">background: #ffffff;</string></property>
+         <layout class="QHBoxLayout" name="priceLayout">
+          <property name="leftMargin"><number>16</number></property>
+          <property name="topMargin"><number>18</number></property>
+          <property name="rightMargin"><number>16</number></property>
+          <property name="bottomMargin"><number>18</number></property>
+          <!-- [정적] "가격" 글자 -->
+          <item>
+           <widget class="QLabel" name="lbl_price_title">
+            <property name="font"><font><pointsize>14</pointsize><bold>true</bold></font></property>
+            <property name="styleSheet"><string notr="true">color: #111111;</string></property>
+            <property name="text"><string>가격</string></property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="priceSpacer">
+            <property name="orientation"><enum>Qt::Horizontal</enum></property>
+           </spacer>
+          </item>
+          <!-- [동적] updateTotalPrice() 에서 갱신 -->
+          <item>
+           <widget class="QLabel" name="lbl_price_value">
+            <property name="font"><font><pointsize>14</pointsize><bold>true</bold></font></property>
+            <property name="styleSheet"><string notr="true">color: #111111;</string></property>
+            <property name="text"><string>0원</string></property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+
+       <!-- ── 얇은 구분선 ── -->
+       <item>
+        <widget class="QFrame" name="line_price_qty">
+         <property name="styleSheet"><string notr="true">color: #eeeeee;</string></property>
+         <property name="frameShape"><enum>QFrame::HLine</enum></property>
+        </widget>
+       </item>
+
+       <!-- ══════════════════════════════════════════════════════
+            수량 행
+            "수량" [정적] | [동적: btn_plus/minus → lbl_quantity_value]
+            ══════════════════════════════════════════════════════ -->
+       <item>
+        <widget class="QWidget" name="quantityWidget">
+         <property name="styleSheet"><string notr="true">background: #ffffff;</string></property>
+         <layout class="QHBoxLayout" name="quantityLayout">
+          <property name="leftMargin"><number>16</number></property>
+          <property name="topMargin"><number>14</number></property>
+          <property name="rightMargin"><number>16</number></property>
+          <property name="bottomMargin"><number>14</number></property>
+          <!-- [정적] "수량" 글자 -->
+          <item>
+           <widget class="QLabel" name="lbl_quantity_title">
+            <property name="font"><font><pointsize>14</pointsize><bold>true</bold></font></property>
+            <property name="styleSheet"><string notr="true">color: #111111;</string></property>
+            <property name="text"><string>수량</string></property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="quantitySpacer">
+            <property name="orientation"><enum>Qt::Horizontal</enum></property>
+           </spacer>
+          </item>
+          <!-- - 버튼 [동적] -->
+          <item>
+           <widget class="QPushButton" name="btn_minus">
+            <property name="fixedWidth"><number>36</number></property>
+            <property name="fixedHeight"><number>36</number></property>
+            <property name="text"><string>-</string></property>
+            <property name="styleSheet">
+             <string notr="true">
+              QPushButton {
+                border: 1px solid #cccccc; border-radius: 18px;
+                font-size: 18px; color: #333333; background: #ffffff;
+              }
+              QPushButton:hover { background: #f5f5f5; }
+             </string>
+            </property>
+           </widget>
+          </item>
+          <!-- 수량 값 [동적] -->
+          <item>
+           <widget class="QLabel" name="lbl_quantity_value">
+            <property name="minimumSize"><size><width>36</width><height>0</height></size></property>
+            <property name="alignment"><set>Qt::AlignCenter</set></property>
+            <property name="font"><font><pointsize>14</pointsize></font></property>
+            <property name="styleSheet"><string notr="true">color: #111111;</string></property>
+            <property name="text"><string>1</string></property>
+           </widget>
+          </item>
+          <!-- + 버튼 [동적] -->
+          <item>
+           <widget class="QPushButton" name="btn_plus">
+            <property name="fixedWidth"><number>36</number></property>
+            <property name="fixedHeight"><number>36</number></property>
+            <property name="text"><string>+</string></property>
+            <property name="styleSheet">
+             <string notr="true">
+              QPushButton {
+                border: 1px solid #cccccc; border-radius: 18px;
+                font-size: 18px; color: #333333; background: #ffffff;
+              }
+              QPushButton:hover { background: #f5f5f5; }
+             </string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+
+       <!-- ══ 굵은 구분선 ══ -->
+       <item>
+        <widget class="QWidget" name="divThick2">
+         <property name="minimumHeight"><number>8</number></property>
+         <property name="maximumHeight"><number>8</number></property>
+         <property name="styleSheet"><string notr="true">background-color: #f5f5f5;</string></property>
+        </widget>
+       </item>
+
+       <!-- ══════════════════════════════════════════════════════
+            [3] 동적 옵션 컨테이너
+            addOptionGroup(OptionGroup) 호출마다 아래 구조가 추가됩니다:
+
+            ┌─────────────────────────────────────────────┐  ← gray 헤더
+            │ [정적] 카테고리명(bold)    필수 선택(빨강) │
+            └─────────────────────────────────────────────┘
+            ┌─────────────────────────────────────────────┐  ← white 옵션 목록
+            │  ○ 옵션1                                    │
+            │  ─────────────────────────────────────────  │
+            │  ○ 옵션2 (+500원)                           │
+            └─────────────────────────────────────────────┘
+
+            [필수선택] → QRadioButton  (QButtonGroup, exclusive)
+            [선택]     → QCheckBox
+
+            btn_add_cart 클릭 → validateRequiredOptions() 검사
+            미선택 시 scrollToUnselectedRequired() + 경고
+            ══════════════════════════════════════════════════════ -->
        <item>
         <layout class="QVBoxLayout" name="dynamicOptionLayout">
+         <property name="spacing"><number>0</number></property>
+         <!-- DB 연동 전 플레이스홀더 (addOptionGroup 첫 호출 시 숨김) -->
          <item>
           <widget class="QLabel" name="lbl_option_placeholder">
            <property name="styleSheet">
-            <string notr="true">background-color: #f8f8f8; padding: 10px; color: #888888;</string>
+            <string notr="true">
+             background-color: #f8f8f8;
+             padding: 20px;
+             color: #aaaaaa;
+             font-size: 13px;
+            </string>
            </property>
            <property name="text">
-            <string>[ 이 아래로 동적 옵션 리스트가 생성됩니다 ]</string>
+            <string>[ DB 연동 후 옵션 그룹이 여기에 생성됩니다 ]</string>
            </property>
+           <property name="alignment"><set>Qt::AlignCenter</set></property>
           </widget>
          </item>
         </layout>
        </item>
 
+       <!-- ══ 굵은 구분선 ══ -->
+       <item>
+        <widget class="QWidget" name="divThick3">
+         <property name="minimumHeight"><number>8</number></property>
+         <property name="maximumHeight"><number>8</number></property>
+         <property name="styleSheet"><string notr="true">background-color: #f5f5f5;</string></property>
+        </widget>
+       </item>
+
+       <!-- ══════════════════════════════════════════════════════
+            [4] 리뷰 섹션 — 뼈대 (기능 미구현, 연결 미완료)
+            ══════════════════════════════════════════════════════ -->
+       <item>
+        <widget class="QWidget" name="reviewSectionWidget">
+         <property name="styleSheet"><string notr="true">background: #ffffff;</string></property>
+         <layout class="QVBoxLayout" name="reviewSectionLayout">
+          <property name="spacing"><number>0</number></property>
+          <property name="leftMargin"><number>16</number></property>
+          <property name="topMargin"><number>14</number></property>
+          <property name="rightMargin"><number>16</number></property>
+          <property name="bottomMargin"><number>0</number></property>
+
+          <!-- 리뷰 헤더 행: "리뷰" [정적] | "전체보기 >" [뼈대] -->
+          <item>
+           <layout class="QHBoxLayout" name="reviewHeaderLayout">
+            <item>
+             <widget class="QLabel" name="lbl_review_header">
+              <property name="font"><font><pointsize>14</pointsize><bold>true</bold></font></property>
+              <property name="styleSheet"><string notr="true">color: #111111;</string></property>
+              <property name="text"><string>리뷰</string></property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="reviewHeaderSpacer">
+              <property name="orientation"><enum>Qt::Horizontal</enum></property>
+             </spacer>
+            </item>
+            <item>
+             <!-- [뼈대] 리뷰 전체보기 — 기능 미구현 -->
+             <widget class="QPushButton" name="btn_review_all">
+              <property name="text"><string>전체보기 &gt;</string></property>
+              <property name="styleSheet">
+               <string notr="true">
+                QPushButton { border: none; color: #888888; font-size: 12px; background: transparent; }
+                QPushButton:hover { color: #333333; }
+               </string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+
+          <!-- 리뷰 목록 컨테이너 [동적 뼈대 — DB 연동 후 리뷰 카드 추가 예정] -->
+          <item>
+           <layout class="QVBoxLayout" name="reviewListLayout">
+            <property name="spacing"><number>8</number></property>
+            <property name="topMargin"><number>10</number></property>
+            <item>
+             <widget class="QLabel" name="lbl_review_placeholder">
+              <property name="styleSheet">
+               <string notr="true">
+                background: #f8f8f8; padding: 20px;
+                color: #aaaaaa; font-size: 13px;
+               </string>
+              </property>
+              <!-- [동적 뼈대] 리뷰 파일 연결 후 리뷰 카드 위젯으로 교체 -->
+              <property name="text"><string>[ 리뷰 목록 — DB 연동 후 동적 추가 ]</string></property>
+              <property name="alignment"><set>Qt::AlignCenter</set></property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+
+         </layout>
+        </widget>
+       </item>
+
+       <!-- 하단 여백 -->
        <item>
         <spacer name="verticalSpacer">
          <property name="orientation"><enum>Qt::Vertical</enum></property>
+         <property name="sizeHint" stdset="0">
+          <size><width>20</width><height>20</height></size>
+         </property>
         </spacer>
        </item>
+
       </layout>
      </widget>
     </widget>
    </item>
 
+   <!-- ══════════════════════════════════════════════════════
+        [5] 하단 고정 — 배달 카트에 담기
+        검증 실패 시 scrollToUnselectedRequired() 호출
+        ══════════════════════════════════════════════════════ -->
    <item>
     <widget class="QPushButton" name="btn_add_cart">
-     <property name="minimumSize">
-      <size><width>0</width><height>50</height></size>
-     </property>
-     <property name="font">
-      <font><pointsize>14</pointsize><bold>true</bold></font>
-     </property>
+     <property name="minimumSize"><size><width>0</width><height>54</height></size></property>
+     <property name="font"><font><pointsize>15</pointsize><bold>true</bold></font></property>
      <property name="styleSheet">
-      <string notr="true">background-color: #00A1E9; color: white; border: none;</string>
+      <string notr="true">
+       QPushButton { background-color: #00A1E9; color: white; border: none; }
+       QPushButton:hover { background-color: #0090d0; }
+      </string>
      </property>
-     <property name="text">
-      <string>배달 카트에 담기</string>
-     </property>
+     <property name="text"><string>배달 카트에 담기</string></property>
     </widget>
    </item>
+
   </layout>
  </widget>
  <resources/>
