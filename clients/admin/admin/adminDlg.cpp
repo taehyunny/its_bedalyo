@@ -17,7 +17,7 @@
 
 class CAboutDlg : public CDialogEx
 {
-public:
+public:	
 	CAboutDlg();
 
 // 대화 상자 데이터입니다.
@@ -33,9 +33,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
-{
-}
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -68,58 +65,31 @@ BEGIN_MESSAGE_MAP(CadminDlg, CDialogEx)
 END_MESSAGE_MAP()
 
 
-// CadminDlg 메시지 처리기
-
+// 대화 상자에 최소화 단추를 추가할 경우 아이콘을 그리려면
+//  아래 코드가 필요합니다.  문서/뷰 모델을 사용하는 MFC 애플리케이션의 경우에는
+//  프레임워크에서 이 작업을 자동으로 수행합니다.
+// 1. 대화 상자가 처음 나타날 때 실행되는 초기화 함수
+// 1. OnInitDialog: 대화 상자 초기화 (아이콘 설정 및 기본 초기화만 남김)
 BOOL CadminDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	// 시스템 메뉴에 "정보..." 메뉴 항목을 추가합니다.
-
-	// IDM_ABOUTBOX는 시스템 명령 범위에 있어야 합니다.
-	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
-	ASSERT(IDM_ABOUTBOX < 0xF000);
-
-	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != nullptr)
-	{
-		BOOL bNameValid;
-		CString strAboutMenu;
-		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
-		ASSERT(bNameValid);
-		if (!strAboutMenu.IsEmpty())
-		{
-			pSysMenu->AppendMenu(MF_SEPARATOR);
-			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
-		}
-	}
-
-	// 이 대화 상자의 아이콘을 설정합니다.  응용 프로그램의 주 창이 대화 상자가 아닐 경우에는
-	//  프레임워크가 이 작업을 자동으로 수행합니다.
-	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
-	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
+	// 이 대화 상자의 아이콘을 설정합니다.
+	SetIcon(m_hIcon, TRUE);			// 큰 아이콘 설정
+	SetIcon(m_hIcon, FALSE);		// 작은 아이콘 설정
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	// (예: 탭 컨트롤에 IDD_TAB_CHAT 등을 연결하는 코드)
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
+// 2. OnSysCommand: 시스템 명령 처리 (부모 클래스의 기본 동작만 수행)
 void CadminDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
-	}
-	else
-	{
-		CDialogEx::OnSysCommand(nID, lParam);
-	}
+	// AboutBox 관련 if문은 삭제하고 기본 동작만 남깁니다.
+	CDialogEx::OnSysCommand(nID, lParam);
 }
-
-// 대화 상자에 최소화 단추를 추가할 경우 아이콘을 그리려면
-//  아래 코드가 필요합니다.  문서/뷰 모델을 사용하는 MFC 애플리케이션의 경우에는
-//  프레임워크에서 이 작업을 자동으로 수행합니다.
 
 void CadminDlg::OnPaint()
 {

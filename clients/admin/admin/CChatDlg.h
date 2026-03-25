@@ -25,7 +25,8 @@ public:
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
-
+    virtual void OnOK() override {}    // Enter 키 → 탭 닫힘 방지
+    virtual void OnCancel() override {} // ESC 키 → 탭 닫힘 방지
     afx_msg void OnBnClickedBtnChatSend();
     afx_msg void OnLvnItemchangedListChatUsers(NMHDR* pNMHDR, LRESULT* pResult);
 

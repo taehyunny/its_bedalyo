@@ -185,8 +185,15 @@
   <ItemGroup>
     <ClInclude Include="admin.h" />
     <ClInclude Include="adminDlg.h" />
+    <ClInclude Include="CAdminDlg.h" />
+    <ClInclude Include="CBlacklistDlg.h" />
     <ClInclude Include="CChatDlg.h" />
+    <ClInclude Include="CRefundDlg.h" />
+    <ClInclude Include="CReviewMgrDlg.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Global_protocol.h" />
+    <ClInclude Include="json.hpp" />
+    <ClInclude Include="NetworkHelper.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -194,7 +201,11 @@
   <ItemGroup>
     <ClCompile Include="admin.cpp" />
     <ClCompile Include="adminDlg.cpp" />
+    <ClCompile Include="CAdminDlg.cpp" />
+    <ClCompile Include="CBlacklistDlg.cpp" />
     <ClCompile Include="CChatDlg.cpp" />
+    <ClCompile Include="CRefundDlg.cpp" />
+    <ClCompile Include="CReviewMgrDlg.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
