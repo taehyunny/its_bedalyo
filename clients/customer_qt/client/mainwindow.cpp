@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_homeWidget, &HomeWidget::categorySelected, this, &MainWindow::onCategorySelected);
     connect(m_menuWidget, &menucategori::backRequested, this, &MainWindow::onBackToHome);
     connect(m_homeWidget, &HomeWidget::searchRequested, this, &MainWindow::onSearchRequested);
+    connect(m_menuWidget, &menucategori::storeSelected, this, &MainWindow::onStoreSelected);
     connect(m_searchWidget, &SearchWidget::backRequested, this, &MainWindow::onBackToHome);
     connect(m_searchWidget, &SearchWidget::searchRequested, this, &MainWindow::onSearchExecuted);
     connect(m_searchResultWidget, &SearchResultWidget::backRequested, this, &MainWindow::onSearchRequested);
@@ -81,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_addressDetailWidget, &AddressDetailWidget::completed, this, &MainWindow::onAddressDetailCompleted);
     connect(m_addressDetailWidget, &AddressDetailWidget::deleteRequested, this, &MainWindow::onAddressDeleteRequested);
     connect(m_homeWidget, &HomeWidget::storeSelected, this, &MainWindow::onStoreSelected);
-    connect(m_storeDetailWidget, &StoreDetailWidget::backRequested, this, &MainWindow::onBackToHome);
+    connect(m_storeDetailWidget, &StoreDetailWidget::backRequested, this, &MainWindow::onStoreDetailBack);
     connect(m_network, &NetworkManager::onMainHomeReceived, this, &MainWindow::onMainHomeReceived);
 
     // 메뉴 옵션 선택 → 장바구니 담기
@@ -233,9 +234,22 @@ void MainWindow::onFavoriteRequested() { /* TODO */ }
 
 void MainWindow::onStoreSelected(int storeId)
 {
+    m_previousWidget = ui->stackedWidget->currentWidget();
     m_storeDetailWidget->loadStoreData(storeId);
     m_storeDetailWidget->updateCartBar();
     ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
+}
+
+void MainWindow::onStoreDetailBack()
+{
+    // 장바구니 바 갱신
+    if (m_previousWidget == m_homeWidget)
+        m_homeWidget->updateCartBar();
+    else if (m_previousWidget == m_menuWidget)
+        m_storeDetailWidget->updateCartBar(); // 카테고리에서 왔으면 cartBar 유지
+
+    QWidget *target = m_previousWidget ? m_previousWidget : m_homeWidget;
+    ui->stackedWidget->setCurrentWidget(target);
 }
 
 void MainWindow::onCartRequested()

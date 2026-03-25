@@ -16,6 +16,7 @@
 #include "addressdetailwidget.h"
 #include "cartwidget.h"
 #include "menuoption.h"
+#include "cartbarwidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -55,6 +56,7 @@ private slots:
                             QList<TopStoreInfoQt> topStores);
     void onCartRequested();
     void onCartClose();
+    void onStoreDetailBack();
     void onOrderSuccess();
 
 private:
@@ -74,6 +76,13 @@ private:
     AddressDetailWidget   *m_addressDetailWidget;
     CartWidget            *m_cartWidget;
     menuoption            *m_menuOptionWidget;
+    CartBarWidget         *m_cartBar = nullptr; // MainWindow가 직접 소유
 
     QList<CategoryInfoQt> m_cachedCategories;
+    QWidget              *m_previousWidget = nullptr;
+
+    // CartBar 위치 관련 헬퍼
+    void repositionCartBar();
+    void showCartBarForHome();  // 홈 화면용 (navBar 위에 배치)
+    void showCartBarForStore(); // 가게상세용 (맨 아래 배치, navBar 없음)
 };

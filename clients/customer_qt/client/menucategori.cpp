@@ -396,12 +396,32 @@ QWidget* menucategori::makeStoreCard(const TopStoreInfoQt &store)
     divider->setFixedHeight(1);
     vl->addWidget(divider);
 
+    // eventFilter 방식으로 클릭 감지 (스크롤 필터와 충돌 없음)
+    card->setProperty("storeId", store.storeId);
+    card->setCursor(Qt::PointingHandCursor);
+    card->installEventFilter(this);
+
     return card;
 }
 
 // ============================================================
 // 헬퍼
 // ============================================================
+bool menucategori::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::MouseButtonRelease) {
+        QWidget *w = qobject_cast<QWidget*>(obj);
+        if (w) {
+            QVariant v = w->property("storeId");
+            if (v.isValid()) {
+                qDebug() << "[menucategori] 가게 클릭! storeId:" << v.toInt();
+                emit storeSelected(v.toInt());
+            }
+        }
+    }
+    return QWidget::eventFilter(obj, event);
+}
+
 void menucategori::clearLayout(QLayout *layout)
 {
     if (!layout) return;

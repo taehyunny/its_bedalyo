@@ -46,4 +46,6 @@ private:
     void clearLayout(QLayout *layout);
     QWidget* makeStoreCard(const TopStoreInfoQt &store);
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 };
