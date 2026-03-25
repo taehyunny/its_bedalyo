@@ -191,6 +191,7 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
                 CString minOrder = toW(resJson.value("minOrderAmount", ""));
                 CString openTime = toW(resJson.value("openTime", ""));
                 CString closeTime = toW(resJson.value("closeTime", ""));
+                int deliveryFee = resJson.value("deliveryFee", 0);
 
                 // 1 사업자번호 = 1 매장 → storeId를 문자열로 변환해서 bizNum으로 사용
                 CString bizNum = toW(resJson.value("businessNumber", ""));
@@ -207,15 +208,17 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
                 ShowWindow(SW_HIDE);
 
                 CMainMenuDlg mainDlg(
-                    storeId, &m_net,           
+                    storeId, & m_net,
                     storeName, category, storeAddress,
                     bizNum, cookTime, minOrder, openTime,
                     closeTime, ownerName, ownerPhone, accountNumber,
-                    approvalStatus, this
-                );
-                mainDlg.DoModal();
+                    approvalStatus,
+                    deliveryFee,
+                    this
+                    );
+                    mainDlg.DoModal();
 
-                ShowWindow(SW_SHOW);
+                    ShowWindow(SW_SHOW);
             }
             else
             {

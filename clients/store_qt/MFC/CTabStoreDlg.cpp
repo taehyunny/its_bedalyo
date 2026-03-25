@@ -71,6 +71,8 @@ void CTabStoreDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_OWNER_PHONE, m_editOwnerPhone);
     DDX_Control(pDX, IDC_EDIT_ACCOUNT, m_editAccount);
     DDX_Control(pDX, IDC_STATIC_APPROVAL, m_staticApproval);
+    DDX_Control(pDX, IDC_EDIT_DELIVERY_FEE, m_editDeliveryFee);
+    DDX_Control(pDX, IDC_BTN_EDIT_DELIVERY, m_btnEditDelivery);
 
     DDX_Control(pDX, IDC_BTN_EDIT_NAME, m_btnEditName);
     DDX_Control(pDX, IDC_BTN_EDIT_CATEGORY, m_btnEditCategory);
@@ -137,7 +139,8 @@ void CTabStoreDlg::SetStoreInfo(
     const CString& cookTime, const CString& minOrder,
     const CString& openTime, const CString& closeTime,
     const CString& ownerName, const CString& ownerPhone,
-    const CString& accountNumber, const CString& approvalStatus)
+    const CString& accountNumber, const CString& approvalStatus,
+    const CString& deliveryFee)
 {
     m_storeId = storeId;
     m_pNet = pNet;  
@@ -151,6 +154,7 @@ void CTabStoreDlg::SetStoreInfo(
     m_editOwnerName.SetWindowText(ownerName);
     m_editOwnerPhone.SetWindowText(ownerPhone);
     m_editAccount.SetWindowText(accountNumber);
+    m_editDeliveryFee.SetWindowText(deliveryFee);
     m_staticApproval.SetWindowText(approvalStatus);
 
     // 카테고리 콤보박스 선택
@@ -230,6 +234,7 @@ void CTabStoreDlg::BackupValues()
     m_editOwnerPhone.GetWindowText(m_bakOwnerPhone);
     m_editAccount.GetWindowText(m_bakAccount);
     m_bakCategory = m_comboCategory.GetCurSel();
+    m_editDeliveryFee.GetWindowText(m_bakDeliveryFee);
 }
 
 void CTabStoreDlg::RestoreValues()
@@ -244,6 +249,7 @@ void CTabStoreDlg::RestoreValues()
     m_editOwnerPhone.SetWindowText(m_bakOwnerPhone);
     m_editAccount.SetWindowText(m_bakAccount);
     m_comboCategory.SetCurSel(m_bakCategory);
+    m_editDeliveryFee.SetWindowText(m_bakDeliveryFee);
 
     m_editStoreName.SetReadOnly(TRUE);
     m_editStoreAddress.SetReadOnly(TRUE);
@@ -259,6 +265,11 @@ void CTabStoreDlg::OnBnClickedBtnEditName()
 {
     m_editStoreName.SetReadOnly(FALSE);
     m_editStoreName.SetFocus();
+}
+void CTabStoreDlg::OnBnClickedBtnEditDelivery()
+{
+    m_editDeliveryFee.SetReadOnly(FALSE);
+    m_editDeliveryFee.SetFocus();
 }
 
 void CTabStoreDlg::OnBnClickedBtnEditCategory()
@@ -381,6 +392,10 @@ void CTabStoreDlg::OnBnClickedBtnSave()
     if (currentVal != m_bakAccount)
         updateBody["accountNumber"] = CT2A(currentVal, CP_UTF8).m_psz;
 
+    m_editDeliveryFee.GetWindowText(currentVal);
+    if (currentVal != m_bakDeliveryFee)
+        updateBody["deliveryFee"] = _ttoi(currentVal);
+
     //  서버 전송
     if (!updateBody.empty())
     {
@@ -421,4 +436,5 @@ BEGIN_MESSAGE_MAP(CTabStoreDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_CANCEL, &CTabStoreDlg::OnBnClickedBtnCancel)
     ON_WM_VSCROLL()
     ON_WM_MOUSEWHEEL()
+    ON_BN_CLICKED(IDC_BTN_EDIT_DELIVERY, &CTabStoreDlg::OnBnClickedBtnEditDelivery)
 END_MESSAGE_MAP()

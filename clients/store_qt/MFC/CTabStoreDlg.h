@@ -28,7 +28,8 @@ public:
         const CString& cookTime, const CString& minOrder,
         const CString& openTime, const CString& closeTime,
         const CString& ownerName, const CString& ownerPhone,
-        const CString& accountNumber, const CString& approvalStatus);
+        const CString& accountNumber, const CString& approvalStatus,
+        const CString& deliveryFee);
    void CTabStoreDlg::OnStoreUpdateSuccess();
 protected:
     afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
@@ -43,6 +44,7 @@ protected:
     afx_msg void OnBnClickedBtnEditOwnerName();
     afx_msg void OnBnClickedBtnEditOwnerPhone();
     afx_msg void OnBnClickedBtnEditAccount();
+    afx_msg void OnBnClickedBtnEditDelivery();
     // ── 영업 상태 버튼 핸들러 ────────────────────────────────
     afx_msg void OnBnClickedBtnStoreOpen();
     afx_msg void OnBnClickedBtnStoreClose();
@@ -68,7 +70,7 @@ private:
     CEdit       m_editMinOrder;        // IDC_EDIT_MIN_ORDER
     CEdit       m_editOpenTime;        // IDC_EDIT_OPEN_TIME
     CEdit       m_editCloseTime;       // IDC_EDIT_CLOSE_TIME
-
+	CEdit       m_editDeliveryFee;     // IDC_EDIT_DELIVERY_FEE
     // ── 사장님 정보 컨트롤 ───────────────────────────────────
     CEdit       m_editOwnerName;       // IDC_EDIT_OWNER_NAME
     CEdit       m_editOwnerPhone;      // IDC_EDIT_OWNER_PHONE
@@ -84,7 +86,7 @@ private:
     CButton     m_btnEditAccount;
     CButton     m_btnStoreOpen;
     CButton     m_btnStoreClose;
-
+    CButton     m_btnEditDelivery;
     // ── 원본값 백업용 변수 ────────────────────────────────────
     CString     m_bakStoreName;
     CString     m_bakStoreAddress;
@@ -95,6 +97,7 @@ private:
     CString     m_bakOwnerName;
     CString     m_bakOwnerPhone;
     CString     m_bakAccount;
+    CString     m_bakDeliveryFee;
     int         m_bakCategory = 0;
 public:
     afx_msg void OnCbnSelchangeComboCategory();

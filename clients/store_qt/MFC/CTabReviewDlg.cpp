@@ -25,6 +25,7 @@ void CTabReviewDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_REVIEW, m_listReview);
     DDX_Control(pDX, IDC_EDIT_REPLY, m_editReply);
     DDX_Control(pDX, IDC_BTN_REPLY_SUBMIT, m_btnReplySubmit);
+    DDX_Control(pDX, IDC_BTN_REVIEW_REFRESH, m_btnReviewRefresh);
 }
 
 // =========================================================================
@@ -68,7 +69,7 @@ void CTabReviewDlg::SetReviewInfo(int storeId, CNetworkHelper* pNet)
 void CTabReviewDlg::SetReviewList(const nlohmann::json& reviewArray)
 {
     m_listReview.DeleteAllItems();
-
+    m_ownerReplies.clear();
     auto toW = [](const std::string& s) -> CString {
         return CA2W(s.c_str(), CP_UTF8);
         };
@@ -96,9 +97,15 @@ void CTabReviewDlg::SetReviewList(const nlohmann::json& reviewArray)
 
         // ✅ reviewId 저장 (답글 전송 시 필요)
         m_listReview.SetItemData(nIdx, rv.value("reviewId", 0));
+        CString strReply = toW(rv.value("ownerReply", ""));
+        m_ownerReplies.push_back(strReply);
     }
 }
 
+void CTabReviewDlg::OnBnClickedBtnReviewRefresh()
+{
+    LoadReviewList();  // REQ_REVIEW_LIST 재요청
+}
 void CTabReviewDlg::LoadReviewList()
 {
     if (!m_pNet) return;
@@ -123,14 +130,25 @@ void CTabReviewDlg::OnLvnItemchangedListReview(NMHDR* pNMHDR, LRESULT* pResult)
 
     if (bSelected)
     {
-        //  선택된 리뷰 ID 저장
         m_selectedReviewId = (int)m_listReview.GetItemData(nIdx);
 
         CString strReplied = m_listReview.GetItemText(nIdx, 3);
         if (strReplied == L"완료")
-            m_editReply.SetWindowText(L"이미 답글이 등록된 리뷰입니다.");
+        {
+            //  실제 답글 내용 표시
+            if (nIdx < (int)m_ownerReplies.size())
+                m_editReply.SetWindowText(m_ownerReplies[nIdx]);
+
+            // 수정 못하게 읽기 전용
+            m_editReply.SetReadOnly(TRUE);
+            m_btnReplySubmit.EnableWindow(FALSE);
+        }
         else
+        {
             m_editReply.SetWindowText(L"");
+            m_editReply.SetReadOnly(FALSE); // 쓸 수 있게
+            m_btnReplySubmit.EnableWindow(TRUE);
+        }
     }
     *pResult = 0;
 }
@@ -175,4 +193,5 @@ void CTabReviewDlg::OnBnClickedBtnReplySubmit()
 BEGIN_MESSAGE_MAP(CTabReviewDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_REPLY_SUBMIT, &CTabReviewDlg::OnBnClickedBtnReplySubmit)
     ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_REVIEW, &CTabReviewDlg::OnLvnItemchangedListReview)
+    ON_BN_CLICKED(IDC_BTN_REVIEW_REFRESH, &CTabReviewDlg::OnBnClickedBtnReviewRefresh)
 END_MESSAGE_MAP()

@@ -70,9 +70,9 @@ void CChatDlg::AddChatMessage(const json& msgJson)
     std::string message = msgJson.value("message", "");
 
     CString strLine;
-    strLine.Format(L"[%s] %s",
-        CA2W(senderId.c_str(), CP_UTF8),
-        CA2W(message.c_str(), CP_UTF8));
+    CString strSender = CA2W(senderId.c_str(), CP_UTF8);
+    CString strMsg = CA2W(message.c_str(), CP_UTF8);
+    strLine.Format(L"[%s] %s", (LPCTSTR)strSender, (LPCTSTR)strMsg);
 
     m_listChatLog.AddString(strLine);
     // 최신 메시지로 스크롤

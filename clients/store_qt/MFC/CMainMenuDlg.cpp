@@ -7,13 +7,16 @@
 
 IMPLEMENT_DYNAMIC(CMainMenuDlg, CDialogEx)
 
-CMainMenuDlg::CMainMenuDlg(int storeId, CNetworkHelper* pNet,const CString& storeName,
+CMainMenuDlg::CMainMenuDlg(int storeId, CNetworkHelper* pNet,
+    const CString& storeName,
     const CString& category, const CString& storeAddress,
     const CString& bizNum, const CString& cookTime,
     const CString& minOrder, const CString& openTime,
     const CString& closeTime, const CString& ownerName,
     const CString& ownerPhone, const CString& accountNumber,
-    const CString& approvalStatus, CWnd* pParent)
+    const CString& approvalStatus,
+    int deliveryFee,        //  CString → int
+    CWnd* pParent)
     : CDialogEx(IDD_MAIN_MENU, pParent)
     , m_storeId(storeId), m_pNet(pNet), m_storeName(storeName)
     , m_category(category), m_storeAddress(storeAddress)
@@ -22,6 +25,7 @@ CMainMenuDlg::CMainMenuDlg(int storeId, CNetworkHelper* pNet,const CString& stor
     , m_closeTime(closeTime), m_ownerName(ownerName)
     , m_ownerPhone(ownerPhone), m_accountNumber(accountNumber)
     , m_approvalStatus(approvalStatus)
+    , m_deliveryFee(deliveryFee)
 {
 }
 
@@ -42,6 +46,7 @@ BOOL CMainMenuDlg::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
     m_pNet->SetNotifyHwnd(GetSafeHwnd());
+
     // 상단 매장명 / 영업상태 표시
     if (m_storeId == 0 || m_storeName.IsEmpty())
     {
@@ -51,7 +56,7 @@ BOOL CMainMenuDlg::OnInitDialog()
     else
     {
         m_staticNameBar.SetWindowText(m_storeName);
-        m_staticStatus.SetWindowText(L"영업중"); // 추후 서버 status 값으로 변경
+        m_staticStatus.SetWindowText(L"영업중");
     }
 
     // 탭 항목 추가
@@ -70,7 +75,7 @@ BOOL CMainMenuDlg::OnInitDialog()
     // ── 탭 다이얼로그 생성 및 배치 ───────────────────────────
     m_tabOrderDlg.Create(IDD_TAB_ORDER, &m_tabCtrl);
     m_tabOrderDlg.MoveWindow(&rcTab);
-    m_tabOrderDlg.ShowWindow(SW_SHOW); // 0번 탭 기본 표시
+    m_tabOrderDlg.ShowWindow(SW_SHOW);
 
     m_tabMenuDlg.Create(IDD_TAB_MENU, &m_tabCtrl);
     m_tabMenuDlg.MoveWindow(&rcTab);
@@ -80,41 +85,47 @@ BOOL CMainMenuDlg::OnInitDialog()
     m_tabStoreDlg.MoveWindow(&rcTab);
     m_tabStoreDlg.ShowWindow(SW_HIDE);
 
-    // ✅ 서버에서 받은 매장/사장님 정보 전달
+    // ✅ int → CString 변환 후 SetStoreInfo 전달
+    CString strDeliveryFee;
+    strDeliveryFee.Format(L"%d", m_deliveryFee);
+
     m_tabStoreDlg.SetStoreInfo(
         m_storeId, m_pNet,
         m_storeName, m_category, m_storeAddress, m_bizNum,
         m_cookTime, m_minOrder, m_openTime, m_closeTime,
-        m_ownerName, m_ownerPhone, m_accountNumber, m_approvalStatus
+        m_ownerName, m_ownerPhone, m_accountNumber,
+        m_approvalStatus, strDeliveryFee
     );
+
     m_tabMenuDlg.SetMenuInfo(m_storeId, m_pNet);
-    m_tabReviewDlg.SetReviewInfo(m_storeId, m_pNet);
+
+    // ✅ Create 먼저, SetReviewInfo 나중에
     m_tabReviewDlg.Create(IDD_TAB_REVIEW, &m_tabCtrl);
     m_tabReviewDlg.MoveWindow(&rcTab);
     m_tabReviewDlg.ShowWindow(SW_HIDE);
+    m_tabReviewDlg.SetReviewInfo(m_storeId, m_pNet);
 
     m_tabSalesDlg.Create(IDD_TAB_SALES, &m_tabCtrl);
     m_tabSalesDlg.MoveWindow(&rcTab);
     m_tabSalesDlg.ShowWindow(SW_HIDE);
     m_tabSalesDlg.SetSalesInfo(m_storeId, m_pNet);
-    m_tabSettlementDlg.SetSettlementInfo(m_storeId, m_pNet);
 
+    // ✅ Create 먼저, SetSettlementInfo 나중에
     m_tabSettlementDlg.Create(IDD_TAB_SETTLEMENT, &m_tabCtrl);
     m_tabSettlementDlg.MoveWindow(&rcTab);
     m_tabSettlementDlg.ShowWindow(SW_HIDE);
-    m_tabOrderDlg.SetOrderInfo(m_storeId, m_pNet, _ttoi(m_cookTime));
+    m_tabSettlementDlg.SetSettlementInfo(m_storeId, m_pNet);
 
+    m_tabOrderDlg.SetOrderInfo(m_storeId, m_pNet, _ttoi(m_cookTime));
 
     return TRUE;
 }
-
 
 void CMainMenuDlg::OnTcnSelchangeTabStatusSet(NMHDR* pNMHDR, LRESULT* pResult)
 {
     (void)pNMHDR;
     int nSel = m_tabCtrl.GetCurSel();
 
-    // 모든 탭 숨김 후 선택된 탭만 표시
     m_tabOrderDlg.ShowWindow(SW_HIDE);
     m_tabMenuDlg.ShowWindow(SW_HIDE);
     m_tabStoreDlg.ShowWindow(SW_HIDE);
@@ -134,22 +145,20 @@ void CMainMenuDlg::OnTcnSelchangeTabStatusSet(NMHDR* pNMHDR, LRESULT* pResult)
 
     *pResult = 0;
 }
+
 void CMainMenuDlg::OnClose()
 {
     if (MessageBox(L"종료하시겠습니까?", L"종료", MB_YESNO | MB_ICONQUESTION) == IDYES)
     {
-        //  로그아웃 신호 전송 후 완전 종료
         if (m_pNet)
         {
             json body;
             m_pNet->Send(CmdID::REQ_LOGOUT, body);
         }
         CDialogEx::OnClose();
-        AfxGetMainWnd()->PostMessage(WM_QUIT); // 앱 완전 종료
+        AfxGetMainWnd()->PostMessage(WM_QUIT);
     }
-    // 취소 시 아무것도 안 함 → 창 유지
 }
-
 
 LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 {
@@ -211,9 +220,7 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         json resJson = json::parse(pkt->body);
         m_tabOrderDlg.AddNewOrder(resJson);
 
-        // 주문 관리 탭으로 자동 전환
         m_tabCtrl.SetCurSel(0);
-        // 모든 탭 숨기고 주문 탭 표시
         m_tabOrderDlg.ShowWindow(SW_SHOW);
         m_tabMenuDlg.ShowWindow(SW_HIDE);
         m_tabStoreDlg.ShowWindow(SW_HIDE);
@@ -257,15 +264,21 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
             MessageBox(
                 L"현재 관리자가 없습니다.\n잠시 후 다시 시도해주세요.",
                 L"고객센터", MB_OK | MB_ICONWARNING);
-
-            // 실패 시 버튼 다시 활성화
             m_btnChatRequest.EnableWindow(TRUE);
             m_btnChatRequest.SetWindowText(L"고객센터");
         }
     }
+    else if (pkt->cmdId == CmdID::RES_ORDER_LIST)
+    {
+        json resJson = json::parse(pkt->body);
+        if (resJson.value("status", 0) == 200)
+            m_tabOrderDlg.SetOrderList(resJson["orders"]);
+    }
+
     delete pkt;
     return 0;
 }
+
 void CMainMenuDlg::OnBnClickedBtnChatRequest()
 {
     if (MessageBox(
@@ -280,11 +293,11 @@ void CMainMenuDlg::OnBnClickedBtnChatRequest()
         body["userId"] = (const char*)CT2A(m_ownerName, CP_UTF8);
         m_pNet->Send(CmdID::REQ_CHAT_CONNECT, body);
 
-        // 버튼 비활성화 (중복 요청 방지)
         m_btnChatRequest.EnableWindow(FALSE);
         m_btnChatRequest.SetWindowText(L"문의중...");
     }
 }
+
 BEGIN_MESSAGE_MAP(CMainMenuDlg, CDialogEx)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_STATUS_SET, &CMainMenuDlg::OnTcnSelchangeTabStatusSet)
     ON_MESSAGE(WM_PACKET_RECEIVED, &CMainMenuDlg::OnPacketReceived)

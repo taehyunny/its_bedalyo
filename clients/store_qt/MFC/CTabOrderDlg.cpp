@@ -27,8 +27,99 @@ void CTabOrderDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_BTN_ORDER_REJECT, m_btnOrderReject);
     DDX_Control(pDX, IDC_COMBO_REJECT_REASON, m_comboRejectReason);
     DDX_Control(pDX, IDC_EDIT_REJECT_REASON, m_editRejectReason);
+    DDX_Control(pDX, IDC_BTN_DELETE, m_btnOrderDelete);
+    DDX_Control(pDX, IDC_BTN_REFRESH, m_btnOrderRefresh);
+}
+void CTabOrderDlg::OnBnClickedBtnOrderRefresh()
+{
+    if (!m_pNet) return;
+
+    // 리스트 초기화
+    m_listOrder.DeleteAllItems();
+    m_orderDetails.clear();
+
+    json body;
+    body["storeId"] = m_storeId;
+    m_pNet->Send(CmdID::REQ_ORDER_LIST, body);
 }
 
+void CTabOrderDlg::OnBnClickedBtnOrderDelete()
+{
+    int nIdx = GetSelectedIndex();
+    if (nIdx == -1)
+    {
+        MessageBox(L"삭제할 주문을 선택하세요.", L"알림", MB_OK);
+        return;
+    }
+
+    CString strStatus = m_listOrder.GetItemText(nIdx, 3);
+    if (strStatus == L"대기")
+    {
+        MessageBox(L"대기 중인 주문은 삭제할 수 없습니다.", L"알림", MB_OK);
+        return;
+    }
+
+    // orderId 메모리 해제
+    auto* pOrderId = reinterpret_cast<std::string*>(
+        m_listOrder.GetItemData(nIdx));
+    if (pOrderId) delete pOrderId;
+
+    // 상세 데이터 제거
+    if (nIdx < (int)m_orderDetails.size())
+        m_orderDetails.erase(m_orderDetails.begin() + nIdx);
+
+    m_listOrder.DeleteItem(nIdx);
+    UpdateButtonState();
+}
+
+// 서버 응답으로 주문 목록 채우기
+void CTabOrderDlg::SetOrderList(const json& orderArray)
+{
+    m_listOrder.DeleteAllItems();
+    m_orderDetails.clear();
+
+    auto toW = [](const std::string& s) -> CString {
+        return CA2W(s.c_str(), CP_UTF8);
+        };
+
+    for (int i = 0; i < (int)orderArray.size(); i++)
+    {
+        const auto& order = orderArray[i];
+
+        std::string orderId = order.value("orderId", "");
+        std::string menuSummary = order.value("menuSummary", "");
+        int         totalPrice = order.value("totalPrice", 0);
+        std::string createdAt = order.value("createdAt", "");
+        int         status = order.value("orderStatus", 0);
+
+        // 상태 텍스트 변환
+        CString strStatus;
+        switch (status)
+        {
+        case 0: strStatus = L"대기";   break;
+        case 1: strStatus = L"수락";   break;
+        case 2: strStatus = L"조리중"; break;
+        case 3: strStatus = L"배달중"; break;
+        case 4: strStatus = L"완료";   break;
+        case 9: strStatus = L"거절";   break;
+        default: strStatus = L"알 수 없음"; break;
+        }
+
+        CString strPrice;
+        strPrice.Format(L"%d원", totalPrice);
+
+        int nIdx = m_listOrder.InsertItem(i, toW(orderId));
+        m_listOrder.SetItemText(nIdx, 1, toW(menuSummary));
+        m_listOrder.SetItemText(nIdx, 2, strPrice);
+        m_listOrder.SetItemText(nIdx, 3, strStatus);
+        m_listOrder.SetItemText(nIdx, 4, toW(createdAt));
+
+        m_listOrder.SetItemData(nIdx, (DWORD_PTR)new std::string(orderId));
+        m_orderDetails.push_back(order);
+    }
+
+    UpdateButtonState();
+}
 // =========================================================================
 // 초기화
 // =========================================================================
@@ -67,14 +158,6 @@ void CTabOrderDlg::InitListCtrl()
     m_listOrder.InsertColumn(2, L"금액", LVCFMT_RIGHT, 80);
     m_listOrder.InsertColumn(3, L"상태", LVCFMT_CENTER, 80);
     m_listOrder.InsertColumn(4, L"주문 시각", LVCFMT_LEFT, 120);
-
-    // TODO: 서버에서 NOTIFY_NEW_ORDER 수신 시 항목 추가
-    // 현재는 임시 더미 데이터
-    int nIdx = m_listOrder.InsertItem(0, L"ORD-20260320-001");
-    m_listOrder.SetItemText(nIdx, 1, L"떡볶이 2인세트");
-    m_listOrder.SetItemText(nIdx, 2, L"18,000");
-    m_listOrder.SetItemText(nIdx, 3, L"대기");
-    m_listOrder.SetItemText(nIdx, 4, L"14:32:10");
 }
 
 void CTabOrderDlg::SetOrderInfo(int storeId, CNetworkHelper* pNet, int cookTime)
@@ -88,29 +171,35 @@ void CTabOrderDlg::SetOrderInfo(int storeId, CNetworkHelper* pNet, int cookTime)
 // 새 주문 수신 (NOTIFY_NEW_ORDER = 9000)
 // =========================================================
 void CTabOrderDlg::AddNewOrder(const json& orderJson)
-{   
+{
     auto toW = [](const std::string& s) -> CString {
         return CA2W(s.c_str(), CP_UTF8);
         };
 
     std::string orderId = orderJson.value("orderId", "");
-    std::string menuSum = orderJson.value("menuSummary", "");
-    int         price = orderJson.value("totalPrice", 0);
-    std::string time = orderJson.value("createdAt", "");
+    std::string menuSummary = orderJson.value("menuSummary", "");
+    int         totalPrice = orderJson.value("totalPrice", 0);
+    std::string createdAt = orderJson.value("createdAt", "");
 
     CString strPrice;
-    strPrice.Format(L"%d원", price);
+    strPrice.Format(L"%d원", totalPrice);
 
+    // 리스트에 추가 (맨 위에 최신 주문)
     int nIdx = m_listOrder.InsertItem(0, toW(orderId));
-    m_listOrder.SetItemText(nIdx, 1, toW(menuSum));
+    m_listOrder.SetItemText(nIdx, 1, toW(menuSummary));
     m_listOrder.SetItemText(nIdx, 2, strPrice);
     m_listOrder.SetItemText(nIdx, 3, L"대기");
-    m_listOrder.SetItemText(nIdx, 4, toW(time));
+    m_listOrder.SetItemText(nIdx, 4, toW(createdAt));
 
-    // orderId 저장
+    // orderId 저장 (수락/거절 시 사용)
     m_listOrder.SetItemData(nIdx, (DWORD_PTR)new std::string(orderId));
 
+    // 상세 데이터 저장 (더블클릭 시 팝업에 전달)
+    m_orderDetails.insert(m_orderDetails.begin(), orderJson);
+
+    // 새 주문 알림음
     MessageBeep(MB_ICONEXCLAMATION);
+    UpdateButtonState();
 }
 
 // =========================================================================
@@ -147,9 +236,12 @@ void CTabOrderDlg::OnNMDblclkListOrder(NMHDR* pNMHDR, LRESULT* pResult)
     int nIdx = GetSelectedIndex();
     if (nIdx == -1) { *pResult = 0; return; }
 
-    // TODO: 선택된 주문 데이터를 COrderDetailDlg에 전달
-    COrderDetailDlg detailDlg(this);
-    detailDlg.DoModal();
+    //  저장된 상세 데이터를 팝업에 전달
+    if (nIdx < (int)m_orderDetails.size())
+    {
+        COrderDetailDlg detailDlg(m_orderDetails[nIdx], this);
+        detailDlg.DoModal();
+    }
 
     *pResult = 0;
 }
@@ -250,9 +342,27 @@ void CTabOrderDlg::OnOrderAcceptResult(const json& resJson)
 {
     if (resJson.value("status", 0) == 200)
     {
-        int nIdx = GetSelectedIndex();
-        if (nIdx != -1)
-            m_listOrder.SetItemText(nIdx, 3, L"수락");
+        std::string orderId = resJson.value("orderId", "");
+        if (!orderId.empty())
+        {
+            for (int i = 0; i < m_listOrder.GetItemCount(); i++)
+            {
+                auto* pId = reinterpret_cast<std::string*>(
+                    m_listOrder.GetItemData(i));
+                if (pId && *pId == orderId)
+                {
+                    m_listOrder.SetItemText(i, 3, L"조리중");
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // orderId 없을 때 fallback
+            int nIdx = GetSelectedIndex();
+            if (nIdx != -1)
+                m_listOrder.SetItemText(nIdx, 3, L"조리중");
+        }
         MessageBox(L"주문을 수락했습니다.", L"완료", MB_OK);
     }
     else
@@ -265,9 +375,27 @@ void CTabOrderDlg::OnOrderRejectResult(const json& resJson)
 {
     if (resJson.value("status", 0) == 200)
     {
-        int nIdx = GetSelectedIndex();
-        if (nIdx != -1)
-            m_listOrder.SetItemText(nIdx, 3, L"거절");
+        std::string orderId = resJson.value("orderId", "");
+        if (!orderId.empty())
+        {
+            for (int i = 0; i < m_listOrder.GetItemCount(); i++)
+            {
+                auto* pId = reinterpret_cast<std::string*>(
+                    m_listOrder.GetItemData(i));
+                if (pId && *pId == orderId)
+                {
+                    m_listOrder.SetItemText(i, 3, L"거절"); // orderId로 찾아서 변경
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // orderId 없을 때 fallback
+            int nIdx = GetSelectedIndex();
+            if (nIdx != -1)
+                m_listOrder.SetItemText(nIdx, 3, L"거절");
+        }
         MessageBox(L"주문을 거절했습니다.", L"완료", MB_OK);
     }
     else
@@ -280,4 +408,6 @@ BEGIN_MESSAGE_MAP(CTabOrderDlg, CDialogEx)
     ON_CBN_SELCHANGE(IDC_COMBO_REJECT_REASON, &CTabOrderDlg::OnCbnSelchangeComboRejectReason)
     ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_ORDER, &CTabOrderDlg::OnLvnItemchangedListOrder)
     ON_NOTIFY(NM_DBLCLK, IDC_LIST_ORDER, &CTabOrderDlg::OnNMDblclkListOrder)
+    ON_BN_CLICKED(IDC_BTN_DELETE, &CTabOrderDlg::OnBnClickedBtnOrderDelete)
+    ON_BN_CLICKED(IDC_BTN_REFRESH, &CTabOrderDlg::OnBnClickedBtnOrderRefresh)
 END_MESSAGE_MAP()

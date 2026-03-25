@@ -1,12 +1,16 @@
 ﻿#pragma once
 #include "afxdialogex.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 class COrderDetailDlg : public CDialogEx
 {
     DECLARE_DYNAMIC(COrderDetailDlg)
 
 public:
-    COrderDetailDlg(CWnd* pParent = nullptr);
+    // ✅ 기본 생성자 제거, json 받는 생성자만 유지
+    COrderDetailDlg(const json& orderJson, CWnd* pParent = nullptr);
     virtual ~COrderDetailDlg();
 
 #ifdef AFX_DESIGN_TIME
@@ -17,14 +21,17 @@ protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
 
-    afx_msg void OnBnClickedBtnPrintReceipt(); // 영수증 재출력
-    afx_msg void OnBnClickedBtnDetailClose();  // 닫기
+    afx_msg void OnBnClickedBtnPrintReceipt();
+    afx_msg void OnBnClickedBtnDetailClose();
 
     DECLARE_MESSAGE_MAP()
 
 private:
     void InitListCtrl();
-    void PrintReceipt();  // VS 출력창에 영수증 출력
+    void PrintReceipt();
+
+    // ✅ 주문 데이터 저장
+    json m_orderJson;
 
     // ── 컨트롤 바인딩 ────────────────────────────────────────
     CStatic     m_staticOrderId;       // IDC_STATIC_ORDER_ID
