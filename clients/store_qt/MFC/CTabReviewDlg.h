@@ -27,16 +27,17 @@ protected:
     virtual BOOL OnInitDialog();
     afx_msg void OnBnClickedBtnReplySubmit();
     afx_msg void OnLvnItemchangedListReview(NMHDR* pNMHDR, LRESULT* pResult);
-    DECLARE_MESSAGE_MAP()
+    afx_msg void OnBnClickedBtnReviewRefresh();
 
+    DECLARE_MESSAGE_MAP()
 private:
     void InitListCtrl();
     int  GetSelectedIndex();
-
+    std::vector<CString> m_ownerReplies;
     int             m_storeId = 0;
     CNetworkHelper* m_pNet = nullptr;
     int             m_selectedReviewId = -1;
-
+    CButton m_btnReviewRefresh;
     CListCtrl   m_listReview;
     CEdit       m_editReply;
     CButton     m_btnReplySubmit;

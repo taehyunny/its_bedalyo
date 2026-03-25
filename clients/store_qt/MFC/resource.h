@@ -127,7 +127,11 @@
 #define IDC_BTN_OPT_ITEM_DEL            1219
 #define IDC_LIST_OPT_ITEM               1220
 #define IDC_OPTION_EDIT                 1221
-#define IDC_BTN_CHAT_REQUEST			1222
+#define IDC_BTN_CHAT_REQUEST            1222
+#define IDC_BTN_EDIT_DELIVERY           1223
+#define IDC_BTN_REVIEW_REFRESH          1224
+#define IDC_BTN_REFRESH                 1225
+#define IDC_BTN_DELETE                  1226
 
 // Next default values for new objects
 // 
@@ -135,7 +139,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        156
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1223
+#define _APS_NEXT_CONTROL_VALUE         1228
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

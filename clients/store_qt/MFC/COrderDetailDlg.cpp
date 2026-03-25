@@ -8,8 +8,9 @@
 
 IMPLEMENT_DYNAMIC(COrderDetailDlg, CDialogEx)
 
-COrderDetailDlg::COrderDetailDlg(CWnd* pParent)
+COrderDetailDlg::COrderDetailDlg(const json& orderJson, CWnd* pParent)
     : CDialogEx(IDD_ORDER_DETAIL, pParent)
+    , m_orderJson(orderJson)
 {
 }
 
@@ -40,37 +41,57 @@ BOOL COrderDetailDlg::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
 
-    InitListCtrl();
+    auto toW = [](const std::string& s) -> CString {
+        return CA2W(s.c_str(), CP_UTF8);
+        };
 
-    // TODO: 선택된 주문 데이터를 받아서 채우기
-    // 현재는 임시 더미 데이터
-    m_staticOrderId.SetWindowText(L"ORD-20260320-001");
-    m_staticOrderAddress.SetWindowText(L"서울시 광산구 ···");
+    // 주문 기본 정보 표시
+    m_staticOrderId.SetWindowText(toW(m_orderJson.value("orderId", "")));
+    m_staticOrderAddress.SetWindowText(toW(m_orderJson.value("deliveryAddress", "")));
+
+    CString strPrice;
+    strPrice.Format(L"%d원", m_orderJson.value("totalPrice", 0));
+    m_staticOrderPrice.SetWindowText(strPrice);
+    m_staticOrderTime.SetWindowText(toW(m_orderJson.value("createdAt", "")));
     m_staticOrderStatus.SetWindowText(L"대기");
-    m_staticOrderTime.SetWindowText(L"2026-03-20 14:32:10");
-    m_staticOrderPrice.SetWindowText(L"18,000 원");
 
-    int nIdx = m_listOrderItems.InsertItem(0, L"떡볶이 2인세트");
-    m_listOrderItems.SetItemText(nIdx, 1, L"1");
-    m_listOrderItems.SetItemText(nIdx, 2, L"18,000원");
-    m_listOrderItems.SetItemText(nIdx, 3, L"맵기 보통");
+    // items 배열로 메뉴 목록 표시
+    if (m_orderJson.contains("items") && m_orderJson["items"].is_array())
+    {
+        InitListCtrl();
+        for (const auto& item : m_orderJson["items"])
+        {
+            int menuId = item.value("menuId", 0);
+            int quantity = item.value("quantity", 0);
+            int unitPrice = item.value("unitPrice", 0);
+
+            CString strMenuId, strQty, strPrice2, strTotal;
+            strMenuId.Format(L"메뉴 #%d", menuId);
+            strQty.Format(L"%d개", quantity);
+            strPrice2.Format(L"%d원", unitPrice);
+            strTotal.Format(L"%d원", quantity * unitPrice);
+
+            int nIdx = m_listOrderItems.InsertItem(
+                m_listOrderItems.GetItemCount(), strMenuId);
+            m_listOrderItems.SetItemText(nIdx, 1, strQty);
+            m_listOrderItems.SetItemText(nIdx, 2, strPrice2);
+            m_listOrderItems.SetItemText(nIdx, 3, strTotal);
+        }
+    }
 
     return TRUE;
 }
-
 // =========================================================================
 // List Control 컬럼 초기화
 // =========================================================================
 void COrderDetailDlg::InitListCtrl()
 {
     m_listOrderItems.SetExtendedStyle(
-        m_listOrderItems.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES
-    );
-
-    m_listOrderItems.InsertColumn(0, L"메뉴명", LVCFMT_LEFT, 180);
+        m_listOrderItems.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+    m_listOrderItems.InsertColumn(0, L"메뉴", LVCFMT_LEFT, 120);
     m_listOrderItems.InsertColumn(1, L"수량", LVCFMT_CENTER, 50);
-    m_listOrderItems.InsertColumn(2, L"단가", LVCFMT_RIGHT, 90);
-    m_listOrderItems.InsertColumn(3, L"옵션", LVCFMT_LEFT, 150);
+    m_listOrderItems.InsertColumn(2, L"단가", LVCFMT_RIGHT, 80);
+    m_listOrderItems.InsertColumn(3, L"소계", LVCFMT_RIGHT, 80);
 }
 
 // =========================================================================

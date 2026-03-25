@@ -115,13 +115,14 @@ struct AuthResDTO
     std::string openTime;   // 영업 시작 시간
     std::string closeTime;  // 영업 종료 시간
     std::string accountNumber;  // 계좌 번호
+    int deliveryFee = 0;
     int approvalStatus = 0; // 0: 대기, 1: 승인
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(AuthResDTO,
                                    status, message, userId, address, userName, phoneNumber, role, errorType,
                                    storeId, storeName, category, storeAddress,
                                    cookTime, minOrderAmount, openTime, closeTime,
-                                   accountNumber, approvalStatus, businessNumber)
+                                   accountNumber, approvalStatus, businessNumber, deliveryFee)
 };
 // ---------------------------------------------------------
 // [5] 중복 확인 DTO (1040 ~ 1043)

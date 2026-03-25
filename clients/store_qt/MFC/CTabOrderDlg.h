@@ -17,16 +17,18 @@ public:
 #ifdef AFX_DESIGN_TIME
     enum { IDD = IDD_TAB_ORDER };
 #endif
-
-    // ✅ 추가
-    void SetOrderInfo(int storeId, CNetworkHelper* pNet);
-    void AddNewOrder(const json& orderJson);       // NOTIFY_NEW_ORDER 수신 시
-    void OnOrderAcceptResult(const json& resJson); // RES_ORDER_ACCEPT 수신 시
-    void OnOrderRejectResult(const json& resJson); // RES_ORDER_REJECT 수신 시
+    void SetOrderList(const json& orderArray);
     void SetOrderInfo(int storeId, CNetworkHelper* pNet, int cookTime);
+    void AddNewOrder(const json& orderJson);
+    void OnOrderAcceptResult(const json& resJson);
+    void OnOrderRejectResult(const json& resJson);
+
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
+
+    afx_msg void OnBnClickedBtnOrderDelete();
+    afx_msg void OnBnClickedBtnOrderRefresh();
 
     afx_msg void OnBnClickedBtnOrderAccept();
     afx_msg void OnBnClickedBtnOrderReject();
@@ -40,11 +42,16 @@ private:
     void InitListCtrl();
     void UpdateButtonState();
     int  GetSelectedIndex();
-    int m_cookTime = 30;
 
     int             m_storeId = 0;
     CNetworkHelper* m_pNet = nullptr;
+    int             m_cookTime = 30;
 
+    // 주문 상세 데이터 저장 (더블클릭 시 팝업에 전달)
+    std::vector<json> m_orderDetails;
+
+    CButton m_btnOrderDelete;   // IDC_BTN_DELETE
+    CButton m_btnOrderRefresh;  // IDC_BTN_REFRESH
     CListCtrl   m_listOrder;
     CButton     m_btnOrderAccept;
     CButton     m_btnOrderReject;
