@@ -37,6 +37,8 @@ void CChatDlg::InitListCtrl()
         m_listChatUsers.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
     m_listChatUsers.InsertColumn(0, L"유저ID", LVCFMT_LEFT, 90);
     m_listChatUsers.InsertColumn(1, L"상태", LVCFMT_CENTER, 40);
+    m_listChatUsers.InsertColumn(1, L"매장ID", LVCFMT_CENTER, 60);
+    m_listChatUsers.InsertColumn(2, L"상태", LVCFMT_CENTER, 50);
 }
 
 void CChatDlg::SetNetworkHelper(CNetworkHelper* pNet)
@@ -50,15 +52,23 @@ void CChatDlg::SetNetworkHelper(CNetworkHelper* pNet)
 void CChatDlg::AddChatRequest(const json& reqJson)
 {
     std::string userId = reqJson.value("userId", "");
+    int  storeId = reqJson.value("storeId", 0);
+
     CString strUser = CA2W(userId.c_str(), CP_UTF8);
+    CString strStoreId;
+    strStoreId.Format(L"%d", storeId);
 
     int nIdx = m_listChatUsers.InsertItem(
         m_listChatUsers.GetItemCount(), strUser);
+    m_listChatUsers.SetItemText(nIdx, 1, strStoreId); 
     m_listChatUsers.SetItemText(nIdx, 1, L"대기");
 
-    // userId 저장
-    m_listChatUsers.SetItemData(nIdx,
-        (DWORD_PTR)new std::string(userId));
+    // userId, storeId 함께 저장
+    struct ChatUserData {
+        std::string userId;
+        int         storeId;
+    };
+    m_listChatUsers.SetItemData(nIdx,(DWORD_PTR)new ChatUserData{ userId, storeId });
 }
 
 // =========================================================
@@ -88,23 +98,22 @@ void CChatDlg::OnLvnItemchangedListChatUsers(NMHDR* pNMHDR, LRESULT* pResult)
     int nIdx = GetSelectedUserIndex();
     if (nIdx != -1)
     {
-        // 선택된 유저 ID 저장
-        auto* pUserId = reinterpret_cast<std::string*>(
+        struct ChatUserData { std::string userId; int storeId; };
+        auto* pData = reinterpret_cast<ChatUserData*>(
             m_listChatUsers.GetItemData(nIdx));
-        if (pUserId)
-            m_selectedUserId = *pUserId;
+        if (pData)
+        {
+            m_selectedUserId = pData->userId;
+            m_selectedStoreId = pData->storeId;  // ← 추가
+        }
 
-        // 상태 → 상담중으로 변경
-        m_listChatUsers.SetItemText(nIdx, 1, L"상담중");
-
-        // 전송 버튼 활성화
+        m_listChatUsers.SetItemText(nIdx, 2, L"상담중");  // ← 1→2
         m_btnChatSend.EnableWindow(TRUE);
-
-        // 채팅 로그 초기화 (다른 유저 선택 시)
         m_listChatLog.ResetContent();
     }
     *pResult = 0;
 }
+
 
 // =========================================================
 // 전송 버튼

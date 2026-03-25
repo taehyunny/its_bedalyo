@@ -132,6 +132,8 @@
 #define IDC_BTN_REVIEW_REFRESH          1224
 #define IDC_BTN_REFRESH                 1225
 #define IDC_BTN_DELETE                  1226
+#define IDC_STORE_REQUEST               1228
+#define IDC_RIDER_REQUEST               1229
 
 // Next default values for new objects
 // 
@@ -139,7 +141,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        156
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1228
+#define _APS_NEXT_CONTROL_VALUE         1230
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
