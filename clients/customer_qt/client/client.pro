@@ -13,6 +13,7 @@ SOURCES += \
     homewidget.cpp \
     menucategori.cpp \
     menuoption.cpp \
+    ordercompletewidget.cpp \
     searchwidget.cpp \
     searchresultwidget.cpp \
     orderhistorywidget.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     homewidget.h \
     menucategori.h \
     menuoption.h \
+    ordercompletewidget.h \
     searchwidget.h \
     searchresultwidget.h \
     orderhistorywidget.h \
@@ -56,6 +58,7 @@ FORMS += \
     homewidget.ui \
     menucategori.ui \
     menuoption.ui \
+    ordercompletewidget.ui \
     searchwidget.ui \
     searchresultwidget.ui \
     orderhistorywidget.ui \

@@ -17,6 +17,7 @@
 #include "cartwidget.h"
 #include "menuoption.h"
 #include "cartbarwidget.h"
+#include "ordercompletewidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -58,6 +59,9 @@ private slots:
     void onCartClose();
     void onStoreDetailBack();
     void onOrderSuccess();
+    
+    // CartWidget이 데이터를 비우기 전에 가로챌 함수
+    void onNetworkOrderCreated(int status, QString message, QString orderId);
 
 private:
     Ui::MainWindow        *ui;
@@ -77,6 +81,7 @@ private:
     CartWidget            *m_cartWidget;
     menuoption            *m_menuOptionWidget;
     CartBarWidget         *m_cartBar = nullptr; // MainWindow가 직접 소유
+    OrderCompleteWidget   *m_orderCompleteWidget;
 
     QList<CategoryInfoQt> m_cachedCategories;
     QWidget              *m_previousWidget = nullptr;

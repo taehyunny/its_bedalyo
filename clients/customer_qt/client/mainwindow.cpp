@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_addressDetailWidget(new AddressDetailWidget(this))
     , m_cartWidget(new CartWidget(m_network, this))
     , m_menuOptionWidget(new menuoption(m_network, this))
+    , m_orderCompleteWidget(new OrderCompleteWidget(m_network, this))
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -44,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_addressDetailWidget);
     ui->stackedWidget->addWidget(m_menuOptionWidget);
     ui->stackedWidget->addWidget(m_cartWidget);
+    ui->stackedWidget->addWidget(m_orderCompleteWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
 
     connect(m_loginWidget, &LoginWidget::loginSuccess, this, &MainWindow::onLoginSuccess);
@@ -124,6 +126,18 @@ MainWindow::MainWindow(QWidget *parent)
             this, [this]() { ui->stackedWidget->setCurrentWidget(m_storeDetailWidget); });
     connect(m_cartWidget, &CartWidget::addressEditRequested, this, &MainWindow::onAddressRequested);
     connect(m_cartWidget, &CartWidget::orderSuccess, this, &MainWindow::onOrderSuccess);
+
+    // 기존 연결을 끊습니다 (Qt 매크로 방식을 사용하여 private 접근 제한을 우회합니다)
+    disconnect(m_network, SIGNAL(onOrderCreateReceived(int,QString,QString)), 
+               m_cartWidget, SLOT(onOrderCreateReceived(int,QString,QString)));
+
+    // 메인 화면이 신호를 가장 먼저 가로채도록 연결합니다
+    connect(m_network, &NetworkManager::onOrderCreateReceived, 
+            this, &MainWindow::onNetworkOrderCreated);
+
+    // 장바구니 화면이 그다음으로 신호를 받도록 다시 연결해 줍니다 (private 접근 제한 우회)
+    connect(m_network, SIGNAL(onOrderCreateReceived(int,QString,QString)), 
+            m_cartWidget, SLOT(onOrderCreateReceived(int,QString,QString)));
 
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
 }
@@ -265,11 +279,34 @@ void MainWindow::onCartClose()
     ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
 }
 
+// 신규 슬롯: CartWidget이 세션을 비우기 전에 실행되어 데이터를 안전하게 보존합니다.
+void MainWindow::onNetworkOrderCreated(int status, QString message, QString orderId)
+{
+    Q_UNUSED(message)
+
+    if (status == 200) {
+        // 기존 뷰 초기화
+        m_orderCompleteWidget->clearMenuItems();
+
+        // 세션이 삭제되기 직전이므로, 모든 데이터를 정상적으로 가져올 수 있습니다.
+        m_orderCompleteWidget->setOrderData(
+            orderId,
+            CartSession::instance().storeName,
+            UserSession::instance().address
+        );
+
+        // 장바구니 메뉴 내역 복사
+        for (const CartItemQt &item : CartSession::instance().items) {
+            m_orderCompleteWidget->addMenuItem(item.quantity, item.menuName);
+        }
+    }
+}
+
 void MainWindow::onOrderSuccess()
 {
     CartSession::instance().clear();
     m_homeWidget->updateCartBar();
-    ui->stackedWidget->setCurrentWidget(m_homeWidget);
+    ui->stackedWidget->setCurrentWidget(m_orderCompleteWidget);
 }
 
 void MainWindow::showLogin() { ui->stackedWidget->setCurrentWidget(m_loginWidget); }
