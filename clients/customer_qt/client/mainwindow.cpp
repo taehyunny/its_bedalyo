@@ -107,7 +107,8 @@ MainWindow::MainWindow(QWidget *parent)
                 if (CartSession::instance().storeId == -1)
                     CartSession::instance().storeId = m_storeDetailWidget->currentStoreId();
 
-                CartSession::instance().storeName = m_storeDetailWidget->currentStoreName();
+                if (!m_storeDetailWidget->currentStoreName().isEmpty())
+                    CartSession::instance().storeName = m_storeDetailWidget->currentStoreName();
                 CartSession::instance().addItem(item);
                 m_homeWidget->updateCartBar();
                 m_storeDetailWidget->updateCartBar();

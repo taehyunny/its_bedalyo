@@ -1,5 +1,6 @@
 ﻿#include "NetworkManager.h"
 #include "json.hpp"
+#include "cartsession.h"
 #include <QDebug>
 #include <QDataStream>
 #include <cstring>
@@ -422,6 +423,12 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 return;
             }
 
+            auto& session = CartSession::instance();
+            session.storeId           = dto.storeData.storeId;
+            session.storeName         = QString::fromStdString(dto.storeData.storeName);
+            session.storeAddress      = QString::fromStdString(dto.storeData.storeAddress);
+            session.deliveryTimeRange = QString::fromStdString(dto.storeData.deliveryTimeRange);
+
             StoreDetailQt detail;
             detail.storeId           = dto.storeData.storeId;
             detail.storeName         = QString::fromStdString(dto.storeData.storeName);
@@ -551,7 +558,10 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             emit onCheckoutInfoReceived(dto.status,
                                         QString::fromStdString(dto.customerGrade),
                                         dto.deliveryFee,
-                                        dto.minOrderAmount);
+                                        dto.minOrderAmount,
+                                        QString::fromStdString(dto.pickupTime),
+                                        QString::fromStdString(dto.cardNumber),
+                                        QString::fromStdString(dto.accountNumber));
 
         } else if (cmdId == CmdID::RES_ORDER_CREATE) {
             OrderCreateResDTO dto = j.get<OrderCreateResDTO>();

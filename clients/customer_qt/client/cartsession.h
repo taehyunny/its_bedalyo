@@ -10,12 +10,12 @@
 // 서버 연동 시 CartItem → CartItemQt 변환 필요
 // ============================================================
 struct CartItemQt {
-    int     menuId;       // 메뉴 ID (서버 식별용)
-    QString menuName;     // 메뉴명 (UI 표시용)
-    int     quantity;     // 수량
-    int     unitPrice;    // 단가 (원)
-    // TODO: 옵션 목록 추가 예정 (서버팀과 DTO 확정 후)
-    QList<int> optionIds;
+    int        menuId;      // 메뉴 ID (서버 식별용)
+    QString    menuName;    // 메뉴명 (UI 표시용)
+    QString    optionName;  // 선택된 옵션 표시용 (예: "3단계 불타는 매운맛")
+    int        quantity;    // 수량
+    int        unitPrice;   // 단가 (원, 옵션 가격 포함)
+    QList<int> optionIds;   // 선택된 옵션 ID 목록
 };
 
 // ============================================================
@@ -51,6 +51,8 @@ public:
     // ── 장바구니 소속 가게 정보 ──
     int     storeId   = -1;  // 현재 담긴 가게 ID (-1 = 비어있음)
     QString storeName;       // 가게명 (UI 표시용)
+    QString storeAddress;      // 가게주소 (UI 표시용)
+    QString deliveryTimeRange; // 배달 / 포장 시간
 
     // ── 메뉴 목록 ──
     QList<CartItemQt> items; // 담긴 메뉴 리스트
@@ -62,14 +64,14 @@ public:
     // ============================================================
     void addItem(const CartItemQt &item)
     {
-        // 이미 담긴 동일 메뉴가 있으면 수량 증가
+        // 같은 menuId + 같은 optionIds 조합만 수량 증가
         for (CartItemQt &existing : items) {
-            if (existing.menuId == item.menuId) {
+            if (existing.menuId == item.menuId && existing.optionIds == item.optionIds) {
                 existing.quantity += item.quantity;
                 return;
             }
         }
-        // 새 메뉴 추가
+        // 다른 옵션이면 별도 항목으로 추가
         items.append(item);
     }
 
@@ -77,34 +79,26 @@ public:
     // 수량 변경
     // quantity가 0 이하면 해당 메뉴 제거
     // ============================================================
-    void updateQuantity(int menuId, int quantity)
+    // 인덱스 기반 수량 변경 (같은 메뉴 다른 옵션 구분을 위해 index 사용)
+    void updateQuantityByIndex(int index, int quantity)
     {
+        if (index < 0 || index >= items.size()) return;
         if (quantity <= 0) {
-            removeItem(menuId);
-            return;
-        }
-        for (CartItemQt &item : items) {
-            if (item.menuId == menuId) {
-                item.quantity = quantity;
-                return;
-            }
+            items.removeAt(index);
+            if (items.isEmpty()) { storeId = -1; storeName.clear(); }
+        } else {
+            items[index].quantity = quantity;
         }
     }
 
     // ============================================================
-    // 단일 메뉴 제거
+    // 단일 메뉴 제거 (인덱스 기반)
     // ============================================================
-    void removeItem(int menuId)
+    void removeItemByIndex(int index)
     {
-        items.removeIf([menuId](const CartItemQt &i) {
-            return i.menuId == menuId;
-        });
-
-        // 마지막 메뉴가 제거되면 가게 정보도 초기화
-        if (items.isEmpty()) {
-            storeId   = -1;
-            storeName.clear();
-        }
+        if (index < 0 || index >= items.size()) return;
+        items.removeAt(index);
+        if (items.isEmpty()) { storeId = -1; storeName.clear(); }
     }
 
     // ============================================================
@@ -115,6 +109,8 @@ public:
         items.clear();
         storeId   = -1;
         storeName.clear();
+        storeAddress = "";      // 초기화 추가
+        deliveryTimeRange = ""; // 초기화 추가
     }
 
     // ── 상태 조회 ──

@@ -26,7 +26,10 @@ signals:
 
 private slots:
     void onCheckoutInfoReceived(int status, const QString &customerGrade,
-                                int deliveryFee, int minOrderAmount);
+                                int deliveryFee, int minOrderAmount,
+                                const QString &pickupTime,
+                                const QString &cardNumber,
+                                const QString &accountNumber);
     void onOrderCreateReceived(int status, const QString &message,
                                const QString &orderId);
 
@@ -47,6 +50,10 @@ private slots:
     void on_btnPickupPay_clicked();
     void on_btnPickupCopyAddress_clicked();
 
+    // ── 결제수단 토글 ──
+    void on_btnPaymentExpand_clicked();
+    void on_btnPickupPaymentExpand_clicked();
+
 private:
     Ui::CartWidget *ui;
     NetworkManager *m_network;
@@ -56,9 +63,13 @@ private:
     int     m_deliveryFee    = 0;
     int     m_minOrderAmount = 0;
 
-    // ── 포장 서버 데이터 (추후 checkout DTO 확장 시 채워짐) ──
-    QString m_pickupTime         = "15~25분";  // TODO: 서버에서 받아오기
-    QString m_pickupStoreAddress = "";         // TODO: 서버에서 받아오기
+    // ── 포장/결제 서버 데이터 ──
+    QString m_pickupTime         = "15~25분";
+    QString m_pickupStoreAddress = "";
+    QString m_cardNumber;     // 결제수단: 카드번호
+    QString m_accountNumber;  // 결제수단: 계좌번호
+    bool    m_paymentExpanded       = false;
+    bool    m_pickupPaymentExpanded = false;
 
     // ── 모드 ──
     bool m_isPickupMode          = false;
@@ -79,8 +90,11 @@ private:
     // ── 공통 하단 바 ──
     void updateBottomBar();
 
-    // ── 메뉴 카드 (배달/포장 공용, isPickup으로 람다 콜백 구분) ──
-    QWidget* makeMenuCard(const CartItemQt &item, bool isPickup = false);
+    // ── 메뉴 카드 (인덱스 기반, isPickup으로 콜백 구분) ──
+    QWidget* makeMenuCard(int index, bool isPickup = false);
+
+    // ── 결제수단 섹션 업데이트 ──
+    void updatePaymentSection();
 
     // ── 계산 헬퍼 ──
     int  calcDeliveryFee() const;

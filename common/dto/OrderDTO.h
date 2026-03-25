@@ -23,8 +23,9 @@ struct OrderItemDTO
     int quantity;                   // 주문한 수량
     int unitPrice;                  // 주문 당시 메뉴의 단가 (가격 변동 대비)
     nlohmann::json selectedOptions; // 주문 당시 스냅샷
+    std::string menuName;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(OrderItemDTO, menuId, quantity, unitPrice, selectedOptions)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(OrderItemDTO, menuId, quantity, unitPrice, selectedOptions, menuName)
 };
 
 struct OrderCreateReqDTO
@@ -35,8 +36,10 @@ struct OrderCreateReqDTO
     std::string deliveryAddress;     // 배달 주소 (고객이 입력한 대로)
     int couponId;                    // 쿠폰 ID (쿠폰이 적용된 경우, 아니면 -1)
     std::vector<OrderItemDTO> items; // 주문 아이템 목록
+    std::string storeRequest;
+    std::string riderRequest;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(OrderCreateReqDTO, userId, storeId, totalPrice, deliveryAddress, couponId, items)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(OrderCreateReqDTO, userId, storeId, totalPrice, deliveryAddress, storeRequest, riderRequest, items)
 };
 
 struct OrderCreateResDTO
@@ -62,8 +65,8 @@ struct OrderAcceptResDTO
 {
     int status;          // 0: 성공, 1: 실패 (DB 에러 등)
     std::string message; // "주문이 성공적으로 수락되었습니다."
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(OrderAcceptResDTO, status, message)
+    std::string orderId; // 수락된 주문번호 (클라이언트가 어떤 주문이 수락됐는지 알 수 있도록)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(OrderAcceptResDTO, status, message, orderId)
 };
 
 // 🙋‍♂️ 3. 서버 -> 고객 실시간 상태 푸시 (NOTIFY_ORDER_STATE = 9010)
@@ -98,20 +101,121 @@ struct ReqCheckoutInfoDTO
 };
 
 // 🚀 [2027] 결제 화면 정보 응답 DTO
+// 🚀 [2027] 결제 화면 정보 응답 DTO (완전판)
 struct ResCheckoutInfoDTO
 {
     int status;
 
     // --- 유저 정보 (CUSTOMERS 테이블) ---
     std::string customerGrade; // "일반" or "와우"
-    std::string cardNumber;    // "1234-5678-****-****" (없으면 빈 문자열)
-    std::string accountNumber; // "국민 123-456-789" (없으면 빈 문자열)
-    int userPoint;             // (보너스) 보유 포인트도 보여주면 좋겠죠?
+    std::string cardNumber;    // "1234-5678-****-****"
+    std::string accountNumber; // "국민 123-456-789"
+    int userPoint;             // 보유 포인트
+    std::string userAddress;   // 🚀 고객 주소 (배달용)
 
     // --- 매장 정보 (STORES 테이블) ---
     int minOrderAmount; // 최소주문금액
-    int deliveryFee;    // 배달비 (와우회원이면 프론트에서 0원으로 처리 가능!)
+    int deliveryFee;    // 배달비 (포장일 땐 0원, 와우일 땐 0원 처리)
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ResCheckoutInfoDTO,
-                                   status, customerGrade, cardNumber, accountNumber, userPoint, minOrderAmount, deliveryFee)
+    // 🚀 [클라이언트 요청 사항] 포장용 필드 추가
+    std::string storeAddress; // 매장의 실제 주소
+    std::string pickupTime;   // 예: "15~25분 후 방문 포장"
+
+    // (보너스) 총 주문 금액도 내려주면 프론트가 편해집니다
+    int totalPrice;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(ResCheckoutInfoDTO,
+                                   status, customerGrade, cardNumber, accountNumber, userPoint, userAddress,
+                                   minOrderAmount, deliveryFee, storeAddress, pickupTime, totalPrice)
+};
+// 🧑‍🍳 [추가 제안] 만능 주문 상태 변경 요청 (예: REQ_CHANGE_ORDER_STATE = 3020)
+struct ReqChangeOrderStateDTO
+{
+    std::string orderId; // 상태를 바꿀 주문번호
+    int newState;        // 변경할 상태값 (예: 2=조리완료, 3=배달출발, 4=배달완료)
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqChangeOrderStateDTO, orderId, newState)
+};
+
+// 🧑‍🍳 [추가 제안] 만능 상태 변경 응답
+struct ResChangeOrderStateDTO
+{
+    int status;
+    std::string message;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ResChangeOrderStateDTO, status, message)
+};
+struct NotifyNewOrderDTO
+{
+    std::string orderId;
+    std::string userId;
+    std::string menuSummary; // "떡볶이 외 1건"
+    int totalPrice;
+    std::string deliveryAddress;
+    std::string createdAt;
+    std::vector<OrderItemDTO> items;
+    std::string storeRequest; // 🚀 사장님 요청사항 추가
+    std::string riderRequest; // 🚀 라이더 요청사항 추가
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(NotifyNewOrderDTO,
+                                   orderId, userId, menuSummary, totalPrice,
+                                   deliveryAddress, createdAt, items, storeRequest, riderRequest)
+};
+
+// 🧑‍🍳 주문 거절 요청 (REQ_ORDER_REJECT = 3010)
+struct ReqOrderRejectDTO
+{
+    std::string orderId; // 거절할 주문 번호
+    std::string reason;  // 🚀 핵심: 거절 사유 ("재료 소진", "영업 종료" 등)
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqOrderRejectDTO, orderId, reason)
+};
+
+// 🧑‍🍳 주문 거절 응답 (RES_ORDER_REJECT = 3011)
+struct ResOrderRejectDTO
+{
+    int status;          // 0: 성공, 1: 실패
+    std::string message; // "주문 거절 처리가 완료되었습니다."
+    std::string orderId; // 거절된 주문 번호 (클라이언트가 어떤 주문이 거절됐는지 알 수 있도록)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ResOrderRejectDTO, status, message, orderId)
+};
+
+// 🙋‍♂️ 주문 내역 하나를 나타내는 단위
+struct OrderHistoryItemDTO
+{
+    std::string orderId;
+    int storeId;
+    std::string storeName;
+    int totalPrice;
+    int status;
+    std::string menuSummary; // "짜장면 외 1건"
+    std::string createdAt;
+    std::string deliveryPhotoUrl; // 배달 완료 사진 (영수증 대용)
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(OrderHistoryItemDTO,
+                                   orderId, storeId, storeName, totalPrice, status, menuSummary, createdAt, deliveryPhotoUrl)
+};
+
+// 🙋‍♂️ 2081: RES_ORDER_HISTORY
+struct ResOrderHistoryDTO
+{
+    int status;
+    std::vector<OrderHistoryItemDTO> historyList;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ResOrderHistoryDTO, status, historyList)
+};
+
+// 🙋‍♂️ 2080: 일반 과거 주문 내역 요청
+struct ReqOrderHistoryDTO
+{
+    std::string userId;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqOrderHistoryDTO, userId)
+};
+
+// 🙋‍♂️ 2082: 검색어가 포함된 주문 내역 요청
+struct ReqOrderHistorySearchDTO
+{
+    std::string userId;
+    std::string keyword; // 검색어 (매장명 or 메뉴명)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqOrderHistorySearchDTO, userId, keyword)
 };
