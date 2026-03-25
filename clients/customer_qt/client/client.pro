@@ -6,6 +6,7 @@ CONFIG += c++17
 
 SOURCES += \
     cartbarwidget.cpp \
+    form.cpp \
     loginwidget.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -14,6 +15,7 @@ SOURCES += \
     menucategori.cpp \
     menuoption.cpp \
     ordercompletewidget.cpp \
+    readylist.cpp \
     searchwidget.cpp \
     searchresultwidget.cpp \
     orderhistorywidget.cpp \
@@ -28,6 +30,7 @@ SOURCES += \
 
 HEADERS += \
     cartbarwidget.h \
+    form.h \
     loginwidget.h \
     mainwindow.h \
     NetworkManager.h \
@@ -35,6 +38,7 @@ HEADERS += \
     menucategori.h \
     menuoption.h \
     ordercompletewidget.h \
+    readylist.h \
     searchwidget.h \
     searchresultwidget.h \
     orderhistorywidget.h \
@@ -53,12 +57,14 @@ HEADERS += \
 
 FORMS += \
     cartbarwidget.ui \
+    form.ui \
     loginwidget.ui \
     mainwindow.ui \
     homewidget.ui \
     menucategori.ui \
     menuoption.ui \
     ordercompletewidget.ui \
+    readylist.ui \
     searchwidget.ui \
     searchresultwidget.ui \
     orderhistorywidget.ui \

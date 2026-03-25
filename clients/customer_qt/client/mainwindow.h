@@ -18,6 +18,7 @@
 #include "menuoption.h"
 #include "cartbarwidget.h"
 #include "ordercompletewidget.h"
+#include "form.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -85,6 +86,8 @@ private:
 
     QList<CategoryInfoQt> m_cachedCategories;
     QWidget              *m_previousWidget = nullptr;
+
+    Form                  *m_formWidget;
 
     // CartBar 위치 관련 헬퍼
     void repositionCartBar();
