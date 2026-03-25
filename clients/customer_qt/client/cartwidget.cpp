@@ -39,6 +39,8 @@ CartWidget::CartWidget(NetworkManager *network, QWidget *parent)
             this, &CartWidget::onCheckoutInfoReceived);
     connect(m_network, &NetworkManager::onOrderCreateReceived,
             this, &CartWidget::onOrderCreateReceived);
+
+    hide();
 }
 
 CartWidget::~CartWidget() { delete ui; }

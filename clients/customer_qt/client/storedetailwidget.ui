@@ -309,8 +309,11 @@
        </widget>
       </widget>
      </item>
+     <!-- CartBar: stackedWidget 바로 아래, 레이아웃 안에 embed -->
      <item>
-      <widget class="CartBarWidget" name="myCartBar" native="true"/>
+      <widget class="CartBarWidget" name="cartBar">
+       <property name="visible"><bool>false</bool></property>
+      </widget>
      </item>
     </layout>
    </item>

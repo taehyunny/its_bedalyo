@@ -1,33 +1,41 @@
 #pragma once
+
 #include <QWidget>
 #include <QScrollArea>
-#include <QLabel>
-#include <QPushButton>
+#include <QScrollBar>
+#include <QMouseEvent>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QMouseEvent>
-#include <QEvent>
+#include <QPushButton>
+#include <QLabel>
 #include "NetworkManager.h"
-#include "cartsession.h"
+#include "cartbarwidget.h"
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class HomeWidget; }
-QT_END_NAMESPACE
-
-class DragScrollArea : public QScrollArea {
+// ============================================================
+// DragScrollArea
+// ============================================================
+class DragScrollArea : public QScrollArea
+{
     Q_OBJECT
 public:
     explicit DragScrollArea(QWidget *parent = nullptr);
+
 protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
+
 private:
     bool   m_dragging = false;
     QPoint m_lastPos;
 };
 
-class HomeWidget : public QWidget {
+QT_BEGIN_NAMESPACE
+namespace Ui { class HomeWidget; }
+QT_END_NAMESPACE
+
+class HomeWidget : public QWidget
+{
     Q_OBJECT
 
 public:
@@ -36,38 +44,37 @@ public:
 
     void setUserName(const QString &userName);
     void setAddress(const QString &address);
-
-    bool eventFilter(QObject *obj, QEvent *event) override;
+    void updateCartBar(); // CartBar show/hide 갱신
 
 signals:
-    void categorySelected(int categoryId, const QString &categoryName);
-    void storeSelected(int storeId);
+    void addressRequested();
     void searchRequested();
-    void favoriteRequested();
+    void categorySelected(int id, const QString &name);
+    void storeSelected(int storeId);
     void orderListRequested();
     void mypageRequested();
-    void logoutRequested();
-    void cartRequested();
-    void addressRequested();   // 주소 버튼 클릭 → 주소 관리 화면으로
+    void favoriteRequested();
+    void cartRequested(); // CartBar 클릭 → MainWindow가 받아서 결제 화면으로
 
 private slots:
+    void on_btnAddress_clicked();
     void on_btnSearch_clicked();
-    void on_btnAddress_clicked();  // 주소 버튼 클릭 슬롯
     void on_navHome_clicked();
     void on_navSearch_clicked();
     void on_navFavorite_clicked();
     void on_navOrder_clicked();
     void on_navMy_clicked();
-
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
                             QList<TopStoreInfoQt> topStores);
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
-    Ui::HomeWidget *ui;
-    NetworkManager *m_network;
-    QString         m_userName;
-    QString         m_address;
+    Ui::HomeWidget   *ui;
+    NetworkManager   *m_network;
+    QString           m_userName;
+    QString           m_address;
 
     QWidget* makeCategoryItem(int id, const QString &name, const QString &iconPath);
     QWidget* makeStoreCard(const TopStoreInfoQt &store);

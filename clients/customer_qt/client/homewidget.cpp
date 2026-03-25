@@ -90,6 +90,8 @@ HomeWidget::HomeWidget(NetworkManager *network, QWidget *parent)
 {
     ui->setupUi(this);
 
+    // CartBar는 MainWindow가 직접 관리하므로 여기선 아무것도 안 함
+
     auto *filter1 = new CatScrollFilter(ui->catScroll1);
     ui->catScroll1->viewport()->installEventFilter(filter1);
     ui->catScroll1->viewport()->setMouseTracking(true);
@@ -105,6 +107,9 @@ HomeWidget::HomeWidget(NetworkManager *network, QWidget *parent)
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &HomeWidget::onMainHomeReceived);
 
+    // CartBar: 클릭 시 cartRequested 시그널 발사
+    connect(ui->cartBar, &CartBarWidget::cartRequested,
+            this, &HomeWidget::cartRequested);
 }
 
 HomeWidget::~HomeWidget() { delete ui; }
@@ -117,9 +122,6 @@ void HomeWidget::setAddress(const QString &address)
     ui->btnAddress->setText(address.isEmpty() ? "주소를 설정해주세요 ▾" : address + " ▾");
 }
 
-// ============================================================
-// 주소 버튼 클릭 → 주소 관리 화면으로
-// ============================================================
 void HomeWidget::on_btnAddress_clicked()
 {
     emit addressRequested();
@@ -287,10 +289,17 @@ bool HomeWidget::eventFilter(QObject *obj, QEvent *event)
     return QWidget::eventFilter(obj, event);
 }
 
-
 void HomeWidget::on_btnSearch_clicked()   { emit searchRequested(); }
 void HomeWidget::on_navHome_clicked()     {}
 void HomeWidget::on_navSearch_clicked()   { emit searchRequested(); }
 void HomeWidget::on_navFavorite_clicked() { emit favoriteRequested(); }
 void HomeWidget::on_navOrder_clicked()    { emit orderListRequested(); }
 void HomeWidget::on_navMy_clicked()       { emit mypageRequested(); }
+
+// ============================================================
+// CartBar 갱신 — CartSession 상태 보고 show/hide
+// ============================================================
+void HomeWidget::updateCartBar()
+{
+    ui->cartBar->updateCartUI(); // CartBarWidget 내부에서 show/hide 처리
+}

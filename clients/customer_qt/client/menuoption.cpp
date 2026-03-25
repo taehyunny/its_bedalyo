@@ -2,6 +2,7 @@
 #include "ui_menuoption.h"
 #include "NetworkManager.h"
 #include <QRadioButton>
+#include <QMessageBox>
 #include <QCheckBox>
 #include <QLabel>
 #include <QDebug>
@@ -46,8 +47,6 @@ void menuoption::loadMenuOption(int menuId, const QString &menuName, int basePri
 
 void menuoption::buildOptionUI(const QList<OptionGroup> &groups)
 {
-    // 1. 기존에 그려진 거 싹 지우기
-    clearOptionUI();
 
     // 2. "불러오는 중..." 문구 숨기기 (이게 안 숨겨지면 화면이 안 바뀜)
     ui->lbl_option_placeholder->hide();
@@ -101,7 +100,8 @@ void menuoption::recalculatePrice()
     int optionTotal = 0;
     const auto buttons = this->findChildren<QAbstractButton *>();
     for (auto *btn : buttons) {
-        if (btn->isChecked()) {
+        // price property가 있는 버튼만 처리
+        if (btn->isChecked() && btn->property("price").isValid()) {
             optionTotal += btn->property("price").toInt();
         }
     }
@@ -124,7 +124,7 @@ void menuoption::onAddToCart()
     int optTotal = 0;
     const auto buttons = this->findChildren<QAbstractButton *>();
     for (auto *btn : buttons) {
-        if (btn->isChecked()) {
+        if (btn->isChecked() && btn->property("price").isValid()) {
             item.optionIds << btn->property("id").toInt();
             optTotal += btn->property("price").toInt();
         }
@@ -138,21 +138,42 @@ void menuoption::onBackClicked() { emit backRequested(); }
 
 void menuoption::clearOptionUI()
 {
-    QLayoutItem *child;
-    while ((child = ui->dynamicOptionLayout->takeAt(0)) != nullptr) {
-        if (child->widget()) delete child->widget();
-        delete child;
+    for (auto *g : findChildren<QButtonGroup*>()) {
+        g->setParent(nullptr);
+        delete g;
     }
+
+    while (ui->dynamicOptionLayout->count() > 0) {
+        QLayoutItem *item = ui->dynamicOptionLayout->takeAt(0);
+        QWidget *w = item->widget();
+        // lbl_option_placeholder는 ui가 관리하므로 절대 삭제하면 안됨!
+        if (w && w != ui->lbl_option_placeholder) {
+            w->setParent(nullptr);
+            delete w;
+        }
+        delete item;
+    }
+
+    // placeholder는 레이아웃에서 빠졌으니 다시 추가하고 보여주기
+    ui->dynamicOptionLayout->addWidget(ui->lbl_option_placeholder);
+    ui->lbl_option_placeholder->setText("[ 옵션 정보를 불러오는 중... ]");
+    ui->lbl_option_placeholder->show();
 }
 
 bool menuoption::validateRequiredOptions()
 {
     const auto groups = this->findChildren<QButtonGroup *>();
     for (auto *g : groups) {
-        if (g->checkedButton() == nullptr) return false;
-    }
+        if (g->checkedButton() == nullptr)
+        {
+            // 경고 메시지 띄우고 실패 반환
+            QMessageBox::warning(this, "알림", "필수 옵션을 선택해주세요.");
+            return false;
+        }
     return true;
+    }
 }
+
 
 void menuoption::onMenuOptionDataReceived(int menuId, QList<OptionGroup> groups)
 {
