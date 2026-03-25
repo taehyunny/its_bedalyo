@@ -1,4 +1,6 @@
 #include "menuoption.h"
+#include <QMap>
+#include <QHBoxLayout>
 #include "ui_menuoption.h"
 #include "NetworkManager.h"
 #include <QRadioButton>
@@ -58,13 +60,31 @@ void menuoption::buildOptionUI(const QList<OptionGroup> &groups)
     }
 
     for (const auto &group : groups) {
-        // 그룹 이름 (예: 매운맛 선택)
-        QLabel *groupLabel = new QLabel(QString::fromStdString(group.groupName));
-        groupLabel->setStyleSheet("font-weight: bold; font-size: 15px; margin-top: 15px; color: #333;");
-        ui->dynamicOptionLayout->addWidget(groupLabel);
+        // 그룹 헤더: [그룹이름] [stretch] [에러라벨]
+        QWidget *groupHeader = new QWidget();
+        QHBoxLayout *groupHl = new QHBoxLayout(groupHeader);
+        groupHl->setContentsMargins(0, 8, 0, 0);
+        groupHl->setSpacing(0);
 
-        // 필수 선택인 경우 라디오 버튼 그룹화
-        QButtonGroup *btnGroup = group.isRequired ? new QButtonGroup(this) : nullptr;
+        QLabel *groupLabel = new QLabel(QString::fromStdString(group.groupName));
+        groupLabel->setStyleSheet("font-weight: bold; font-size: 15px; color: #333;");
+        groupHl->addWidget(groupLabel);
+        groupHl->addStretch();
+
+        // 에러 라벨 (기본 숨김)
+        QLabel *errorLabel = nullptr;
+        QButtonGroup *btnGroup = nullptr;
+
+        if (group.isRequired) {
+            btnGroup = new QButtonGroup(this);
+            errorLabel = new QLabel("* 필수 선택입니다");
+            errorLabel->setStyleSheet("font-size: 12px; color: #e53935;");
+            errorLabel->hide();
+            groupHl->addWidget(errorLabel);
+            m_errorLabels[btnGroup] = errorLabel;
+        }
+
+        ui->dynamicOptionLayout->addWidget(groupHeader);
 
         // [주의] group.options 인지 group.items 인지 확인 (제 가이드대로라면 options입니다)
         for (const auto &item : group.options) {
@@ -75,7 +95,7 @@ void menuoption::buildOptionUI(const QList<OptionGroup> &groups)
             QAbstractButton *choiceBtn;
             if (group.isRequired) {
                 choiceBtn = new QRadioButton(QString::fromStdString(item.optionName));
-                if(btnGroup) btnGroup->addButton(choiceBtn, item.optionId);
+                if (btnGroup) btnGroup->addButton(choiceBtn, item.optionId);
             } else {
                 choiceBtn = new QCheckBox(QString::fromStdString(item.optionName));
             }
@@ -154,6 +174,9 @@ void menuoption::clearOptionUI()
         delete item;
     }
 
+    // 에러 라벨 맵 초기화
+    m_errorLabels.clear();
+
     // placeholder는 레이아웃에서 빠졌으니 다시 추가하고 보여주기
     ui->dynamicOptionLayout->addWidget(ui->lbl_option_placeholder);
     ui->lbl_option_placeholder->setText("[ 옵션 정보를 불러오는 중... ]");
@@ -162,16 +185,21 @@ void menuoption::clearOptionUI()
 
 bool menuoption::validateRequiredOptions()
 {
-    const auto groups = this->findChildren<QButtonGroup *>();
-    for (auto *g : groups) {
-        if (g->checkedButton() == nullptr)
-        {
-            // 경고 메시지 띄우고 실패 반환
-            QMessageBox::warning(this, "알림", "필수 옵션을 선택해주세요.");
-            return false;
+    bool allValid = true;
+
+    // 기존 에러 라벨 모두 숨김
+    for (QLabel *lbl : m_errorLabels.values())
+        lbl->hide();
+
+    for (auto it = m_errorLabels.begin(); it != m_errorLabels.end(); ++it) {
+        QButtonGroup *g    = it.key();
+        QLabel       *lbl  = it.value();
+        if (g->checkedButton() == nullptr) {
+            lbl->show();  // 빨간 에러 라벨 표시
+            allValid = false;
         }
-    return true;
     }
+    return allValid;
 }
 
 

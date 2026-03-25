@@ -260,20 +260,9 @@ QWidget* HomeWidget::makeStoreCard(const TopStoreInfoQt &store)
     divider->setFixedHeight(1);
     vl->addWidget(divider);
 
-    QPushButton *clickOverlay = new QPushButton(card);
-    clickOverlay->setStyleSheet("background: transparent; border: none;");
-    clickOverlay->setCursor(Qt::PointingHandCursor);
-
-    QVBoxLayout *overlayLayout = new QVBoxLayout(card);
-    overlayLayout->setContentsMargins(0, 0, 0, 0);
-    overlayLayout->addWidget(clickOverlay);
-    clickOverlay->raise();
-
-    connect(clickOverlay, &QPushButton::clicked, this, [this, storeId = store.storeId]() {
-        qDebug() << "[HomeWidget] 가게 클릭됨! ID:" << storeId;
-        emit storeSelected(storeId);
-    });
-
+    card->setProperty("storeId", store.storeId);
+    card->setCursor(Qt::PointingHandCursor);
+    card->installEventFilter(this);
     return card;
 }
 

@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QButtonGroup>
 #include <QFrame>
+#include <QLabel>
+#include <QMap>
 #include "StoreDTO.h"    // OptionGroup, OptionItem 사용
 #include "cartsession.h" // CartItemQt 사용
 
@@ -42,5 +44,8 @@ private:
     QString m_menuName;
     int     m_basePrice = 0;
     int     m_quantity = 1;
+
+    // 필수 옵션 그룹 → 에러 라벨 매핑
+    QMap<QButtonGroup*, QLabel*> m_errorLabels;
 };
 #endif

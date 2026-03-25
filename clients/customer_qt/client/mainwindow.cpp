@@ -103,10 +103,11 @@ MainWindow::MainWindow(QWidget *parent)
                     if (reply != QMessageBox::Yes) return;
                     CartSession::instance().clear();
                 }
-                if (CartSession::instance().storeId == -1) {
-                    CartSession::instance().storeId   = m_storeDetailWidget->currentStoreId();
-                    CartSession::instance().storeName = m_storeDetailWidget->currentStoreName();
-                }
+                // storeId가 -1일 때뿐 아니라 항상 storeName 동기화
+                if (CartSession::instance().storeId == -1)
+                    CartSession::instance().storeId = m_storeDetailWidget->currentStoreId();
+
+                CartSession::instance().storeName = m_storeDetailWidget->currentStoreName();
                 CartSession::instance().addItem(item);
                 m_homeWidget->updateCartBar();
                 m_storeDetailWidget->updateCartBar();

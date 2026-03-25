@@ -119,6 +119,9 @@ void CartWidget::on_btnTabDelivery_clicked()
     ui->btnTabPickup->setStyleSheet(
         "QPushButton{background:transparent;border:none;border-bottom:2.5px solid transparent;"
         "font-size:15px;color:#aaaaaa;padding:0 20px;}");
+    // 배달 탭으로 올 때 포장쪽 변경사항 동기화
+    rebuildMenuList();
+    updatePriceSection();
     updateBottomBar();
 }
 
@@ -134,6 +137,9 @@ void CartWidget::on_btnTabPickup_clicked()
         "QPushButton{background:transparent;border:none;border-bottom:2.5px solid transparent;"
         "font-size:15px;color:#aaaaaa;padding:0 20px;}");
     updatePickupInfo();
+    // 포장 탭으로 올 때 배달쪽 변경사항 동기화
+    rebuildPickupMenuList();
+    updatePickupPriceSection();
     updateBottomBar();
 }
 
