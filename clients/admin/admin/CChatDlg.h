@@ -33,6 +33,11 @@ protected:
     DECLARE_MESSAGE_MAP()
 
 private:
+
+    struct ChatUserData {
+        std::string userId;
+        int         storeId;
+    };
     void InitListCtrl();
     int  GetSelectedUserIndex();
 
@@ -40,6 +45,7 @@ private:
 
     // 현재 선택된 상담 유저 ID
     std::string m_selectedUserId;
+    int         m_selectedStoreId = 0;
 
     CListCtrl   m_listChatUsers;   // IDC_LIST_CHAT_USERS
     CListBox    m_listChatLog;     // IDC_LIST_CHAT_LOG

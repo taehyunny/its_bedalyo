@@ -174,9 +174,8 @@ enum class CmdID : uint16_t
     RES_DELIVERY_ACCEPT = 4001,   // 배달 콜 수락 응답
     REQ_DELIVERY_COMPLETE = 4010, // 현관 앞 도착 및 사진 인증 완료 요청
     RES_DELIVERY_COMPLETE = 4011, // 사진 인증 완료 응답
-    REQ_RIDER_ORDER_LIST = 4020,  // 라이더 배달 가능 주문 목록 요청
-    RES_RIDER_ORDER_LIST = 4021,  // 라이더 배달 가능 주문 목록 응답
-
+    REQ_RIDER_ORDER_LIST = 4020,
+    RES_RIDER_ORDER_LIST = 4021,
     // ---------------------------------------------------------
     // [5000번대] 관리자(Admin) 파트
     // ---------------------------------------------------------
