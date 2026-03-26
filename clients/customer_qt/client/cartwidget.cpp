@@ -25,7 +25,7 @@ CartWidget::CartWidget(NetworkManager *network, QWidget *parent)
     connect(ui->btnClose,         &QPushButton::clicked, this, &CartWidget::on_btnClose_clicked);
     connect(ui->btnAddMenu,       &QPushButton::clicked, this, &CartWidget::on_btnAddMenu_clicked);
     connect(ui->btnAddressEdit,   &QPushButton::clicked, this, &CartWidget::on_btnAddressEdit_clicked);
-    connect(ui->btnPay,           &QPushButton::clicked, this, &CartWidget::on_btnPay_clicked);
+    // connect(ui->btnPay,           &QPushButton::clicked, this, &CartWidget::on_btnPay_clicked);
     connect(ui->btnRequestToggle, &QPushButton::clicked, this, &CartWidget::on_btnRequestToggle_clicked);
 
     // ── 포장 버튼 ──

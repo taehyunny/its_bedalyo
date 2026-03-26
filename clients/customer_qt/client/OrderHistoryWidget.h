@@ -3,6 +3,8 @@
 #include <QWidget>
 #include <QPushButton>
 #include "NetworkManager.h"
+#include "readylist.h"
+#include "OrderHistoryCard.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class OrderHistoryWidget; }
@@ -31,6 +33,12 @@ public:
 
     // MainWindow에서 화면 진입 시 호출 → 서버에 데이터 요청
     void loadData();
+    readylist* getReadyList() const { return m_readyList; }
+    void addPendingOrder(const QString &orderId, const QString &storeName, const QString &menuSummary, int totalPrice); //추가
+    void updateOrderState(const QString &orderId, int state);
+
+    void showPastOrdersTab(); // 과거 주문 내역 탭을 강제로 보여주는 함수
+    void addPastOrderCard(const PastOrderInfo& info);
 
 signals:
     void homeRequested();
@@ -56,6 +64,8 @@ private slots:
 private:
     Ui::OrderHistoryWidget *ui;
     NetworkManager         *m_network;
+    readylist *m_readyList; // 주문 내역 목록 위젯 (추가)
+    void setupPendingPage(); // 초기 레이아웃 설정 함수 (추가)
 
     // 탭 스타일 헬퍼
     void setTabActive(QPushButton *activeBtn, QPushButton *inactiveBtn);

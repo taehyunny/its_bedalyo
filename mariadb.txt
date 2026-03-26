@@ -43,7 +43,7 @@ CREATE TABLE CUSTOMERS (
     address VARCHAR(255) DEFAULT '주소 미상',
     point INT(11) DEFAULT 0,
     customer_grade VARCHAR(20) DEFAULT '일반'
-        card_number VARCHAR(50) DEFAULT NULL;
+    card_number VARCHAR(50) DEFAULT NULL;
     account_number VARCHAR(50) DEFAULT NULL;
 );
 
@@ -78,9 +78,14 @@ CREATE TABLE ORDERS (
     store_id INT(11) NOT NULL, -- MUL KEY
     total_price INT(11) NOT NULL,
     order_status INT(11) DEFAULT 0,
+    order_type INT(11) DEFAULT 0,
     delivery_address VARCHAR(255) NOT NULL,
     reject_reason VARCHAR(100) DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+    store_request VARCHAR(255) DEFAULT '',  -- 사장님께 (예: "단무지 많이")
+    rider_request VARCHAR(255) DEFAULT ''  -- 라이더님께 (예: "문 앞에 두고 가세요")
+    store_request VARCHAR(255) DEFAULT '',
+    rider_request VARCHAR(255) DEFAULT '',
 );
 
 -- 9. ORDER_ITEMS (주문 상세 항목)
@@ -139,6 +144,7 @@ CREATE TABLE STORES (
     owner_id VARCHAR(50) NOT NULL, -- MUL KEY
     store_name VARCHAR(100) NOT NULL,
     category VARCHAR(20) NOT NULL,
+    brand_name VARCHAR(50) DEFAULT NULL,
     store_address VARCHAR(255) DEFAULT '주소 미상',
     open_time VARCHAR(10) DEFAULT '09:00',
     close_time VARCHAR(10) DEFAULT '22:00',
@@ -190,4 +196,42 @@ CREATE TABLE USER_ADDRESSES (
     label        VARCHAR(20)  DEFAULT '기타',  -- 집 / 회사 / 기타
     is_default   TINYINT(1)   DEFAULT 0,       -- 현재 선택된 주소 (1: 선택됨)
     created_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- 18. PAYMENTS (결제 승인 내역 및 영수증 정보)
+CREATE TABLE PAYMENTS (
+    payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id VARCHAR(50) NOT NULL,                -- 어떤 주문에 대한 결제인가 (MUL KEY)
+    user_id VARCHAR(50) NOT NULL,                 -- 결제자 ID (MUL KEY)
+    pay_method VARCHAR(20) NOT NULL,              -- 결제 수단 (예: '이츠페이', '신용카드')
+    total_amount INT NOT NULL,                    -- 원래 결제해야 할 총 금액
+    discount_amount INT DEFAULT 0,                -- 쿠폰/와우회원 할인 금액
+    actual_pay_amount INT NOT NULL,               -- 실제 결제 금액 (total - discount)
+    pay_status VARCHAR(20) DEFAULT 'COMPLETED',   -- 결제 상태 (COMPLETED, REFUNDED)
+    pg_receipt_url VARCHAR(255) DEFAULT NULL,     -- 외부 영수증 링크
+    approved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- 19. CREATE TABLE USER_MEMBERSHIPS (
+    membership_id INT AUTO_INCREMENT PRIMARY KEY, -- 결제/구독 고유 번호
+    user_id VARCHAR(50) NOT NULL,                 -- 누구의 구독인가?
+    grade_name VARCHAR(20) NOT NULL,              -- 등급 이름 
+    start_date DATETIME NOT NULL,                 -- 시작일
+    end_date DATETIME NOT NULL,                   -- 만료 예정일 (한 달 뒤)
+    is_active BOOLEAN DEFAULT TRUE,               -- 현재 활성화 상태인지? (1: 유지, 0: 만료/해지)
+    FOREIGN KEY (user_id) REFERENCES CUSTOMERS(user_id)
+);
+CREATE TABLE ORDER_DETAILS (
+    order_detail_id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    order_id VARCHAR(50) NOT NULL,
+    menu_id INT(11) NOT NULL,
+    menu_name VARCHAR(100) NOT NULL, -- "황궁짜장면"
+    quantity INT(11) NOT NULL,       -- 2개
+    price INT(11) NOT NULL           -- 14000원
+);
+
+CREATE TABLE BRANDS (
+    brand_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    logo_url VARCHAR(255)
 );
