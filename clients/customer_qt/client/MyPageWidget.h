@@ -31,7 +31,7 @@ private slots:
     void on_btnDetail_clicked();
     void on_btnAddress_clicked();
     void on_btnFavorite_clicked();
-    void on_btnCoupon_clicked();
+    void on_btnWow_clicked();
     void on_btnFaq_clicked();
     void on_btnPolicy_clicked();
     void on_btnSettings_clicked();

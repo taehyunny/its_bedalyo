@@ -65,9 +65,9 @@ void MyPageWidget::on_btnFavorite_clicked()  { emit favoriteRequested(); }
 void MyPageWidget::on_btnPolicy_clicked()    { emit policyRequested(); }
 void MyPageWidget::on_btnSettings_clicked()  { emit settingsRequested(); }
 
-void MyPageWidget::on_btnCoupon_clicked()
+void MyPageWidget::on_btnWow_clicked()
 {
-    QMessageBox::information(this, "준비 중", "쿠폰·이용권 화면은 준비 중입니다.");
+    QMessageBox::information(this, "준비 중", "와우 멤버십 화면은 준비 중입니다.");
 }
 
 void MyPageWidget::on_btnFaq_clicked()

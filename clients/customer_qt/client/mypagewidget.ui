@@ -215,8 +215,8 @@
           </item>
 
           <item>
-           <widget class="QPushButton" name="btnCoupon">
-            <property name="text"><string>🏷️  쿠폰·이용권</string></property>
+           <widget class="QPushButton" name="btnWow">
+            <property name="text"><string>🚀  와우 멤버십</string></property>
             <property name="minimumHeight"><number>56</number></property>
             <property name="styleSheet">
              <string notr="true">QPushButton{background:#ffffff;border:none;border-bottom:1px solid #f0f0f0;font-size:15px;color:#222222;text-align:left;padding-left:20px;}QPushButton:hover{background:#f9f9f9;}QPushButton:pressed{background:#f0f0f0;}</string>
