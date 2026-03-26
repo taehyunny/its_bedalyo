@@ -88,13 +88,10 @@ private:
     Form                  *m_formWidget;
     menureview            *m_menureviewWidget;
     CartBarWidget         *m_cartBar = nullptr; // MainWindow가 직접 소유
-    OrderCompleteWidget   *m_orderCompleteWidget;
-
     QList<CategoryInfoQt> m_cachedCategories;
     QWidget              *m_previousWidget = nullptr;
-
-    Form                  *m_formWidget;
     DeliveryCompleteWidget *m_deliveryCompleteWidget;
+    OrderCompleteWidget   *m_orderCompleteWidget;
 
     // CartBar 위치 관련 헬퍼
     void repositionCartBar();

@@ -124,7 +124,6 @@ signals:
     void onOrderCreateReceived(int status, QString message, QString orderId);
     void onOrderStateChanged(int state, const QString &orderId);
     void onMenuReviewsReceived(int menuId, QList<ReviewDTO> reviews);
-    void onOrderStateChanged(int state, const QString &orderId);
     void onDeliveryCompleteReceived(const QString &orderId); // 배달 완료 신호 (4011번) 수신 시 발생할 시그널
     void onOrderHistoryReceived(const ResOrderHistoryDTO &resDto);
     void onOrderDetailReceived(const ResOrderDetailDTO &resDto);

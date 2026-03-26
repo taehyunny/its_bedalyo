@@ -370,6 +370,7 @@ void MainWindow::onNetworkOrderCreated(int status, QString message, QString orde
                           (extraCount > 0 ? QString(" 외 %1건").arg(extraCount) : "");
         }
 
+        // --- 2. 주문 내역(준비중) 목록에 데이터 세팅 ---
         QString storeName = CartSession::instance().storeName;
         int totalPrice = CartSession::instance().totalPrice();
 
@@ -385,16 +386,6 @@ void MainWindow::onNetworkOrderCreated(int status, QString message, QString orde
             // 수량에 따른 가격 계산 (단가 * 수량)
             int itemTotalPrice = item.unitPrice * item.quantity;
             m_formWidget->addMenuItem(item.menuName, item.quantity, itemTotalPrice);
-        }
-
-        // --- 2. 주문 내역(준비중) 목록에 데이터 세팅 ---
-        QString storeName = CartSession::instance().storeName;
-        int totalPrice = CartSession::instance().totalPrice();
-        QString menuSummary = ""; 
-        if(!CartSession::instance().items.isEmpty()) {
-            int extraCount = CartSession::instance().items.size() - 1;
-            menuSummary = CartSession::instance().items[0].menuName + 
-                          (extraCount > 0 ? QString(" 외 %1건").arg(extraCount) : "");
         }
         
         // 진짜 orderId와 안전하게 빼둔 데이터를 사용해 목록에 추가!

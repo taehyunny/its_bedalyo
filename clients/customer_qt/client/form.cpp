@@ -20,9 +20,9 @@ Form::Form(QWidget *parent) :
     // 3. 메뉴 확장 버튼 (상자가 삭제되었으므로 일단 비워둡니다)
     connect(ui->btn_expand_menu, &QPushButton::clicked, this, [=]() {
         // 나중에 상자를 다시 만들면 여기에 코드를 넣습니다.
-        bool isHidden = ui->menuDetailContainer->isHidden();
-        ui->menuDetailContainer->setVisible(isHidden);
-        ui->btn_expand_menu->setText(isHidden ? "▲" : "▼");
+        //bool isHidden = ui->menuDetailContainer->isHidden();
+        //ui->menuDetailContainer->setVisible(isHidden);
+        //ui->btn_expand_menu->setText(isHidden ? "▲" : "▼");
     });
 }
 
