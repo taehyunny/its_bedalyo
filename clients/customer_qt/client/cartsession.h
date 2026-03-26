@@ -1,4 +1,5 @@
 #pragma once
+#include "storeutils.h"
 #include <QString>
 #include <QList>
 #include <QLocale>
@@ -53,6 +54,7 @@ public:
     QString storeName;       // 가게명 (UI 표시용)
     QString storeAddress;      // 가게주소 (UI 표시용)
     QString deliveryTimeRange; // 배달 / 포장 시간
+    QString minOrderAmount;
 
     // ── 메뉴 목록 ──
     QList<CartItemQt> items; // 담긴 메뉴 리스트
@@ -109,8 +111,9 @@ public:
         items.clear();
         storeId   = -1;
         storeName.clear();
-        storeAddress = "";      // 초기화 추가
-        deliveryTimeRange = ""; // 초기화 추가
+        storeAddress.clear();
+        storeAddress.clear();       // 추가
+        deliveryTimeRange.clear();  // 추가
     }
 
     // ── 상태 조회 ──
@@ -139,7 +142,7 @@ public:
     // 총 금액 — 포맷된 문자열 (예: "24,000원")
     QString totalPriceStr() const
     {
-        return QLocale(QLocale::Korean).toString(totalPrice()) + "원";
+        return StoreUtils::formatWon(totalPrice());
     }
 
     // 다른 가게 메뉴인지 확인 (UI에서 경고 팝업 띄우기 전 호출)

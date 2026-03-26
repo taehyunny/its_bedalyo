@@ -3,6 +3,7 @@
 #include "UserSession.h"
 #include "OrderHistoryCard.h"
 #include "orderreceiptdialog.h"
+#include "StoreUtils.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QScroller>
@@ -118,9 +119,9 @@ void OrderHistoryWidget::addPendingOrder(const QString &orderId, const QString &
     m_readyList->addOrderCard(
         orderId,         // 👈 이게 빠지면 안 됩니다!
         storeName, 
-        "가게접수", 
-        menuSummary, 
-        QString::number(totalPrice) + "원"
+        "가게접수",
+        menuSummary,
+        StoreUtils::formatWon(totalPrice)
     );
 }
 

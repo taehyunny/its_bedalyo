@@ -1,6 +1,7 @@
 ﻿#include "form.h"
 #include "ui_form.h"
-#include <QLocale> // 맨 위에 없다면 추가해 주세요 (천 단위 콤마용)
+#include "storeutils.h"
+// #include <QLocale> // 맨 위에 없다면 추가해 주세요 (천 단위 콤마용)
 
 Form::Form(QWidget *parent) :
     QWidget(parent),
@@ -33,7 +34,7 @@ Form::~Form()
 
 // 🚀 실시간 배달 상태 업데이트 (MainWindow에서 호출됨)
 void Form::updateStatus(int index) {
-    // 0:가게접수, 1:조리중, 2:조리완료, 3:배달중
+    // 0:접수, 1:조리중, 2:배달중, 3:배달완료
     if (index >= 0 && index < ui->statusStackedWidget->count()) {
         ui->statusStackedWidget->setCurrentIndex(index);
     }
@@ -78,8 +79,7 @@ void Form::addMenuItem(const QString &menuName, int quantity, int price) {
     nameLabel->setStyleSheet("color: #333333; font-size: 14px;");
 
     // 3. 오른쪽 글자 (예: 7,000원) - QLocale로 콤마(,) 찍기
-    QLocale locale(QLocale::Korean);
-    QString priceText = locale.toString(price) + "원";
+    QString priceText = StoreUtils::formatWon(price);
     QLabel *priceLabel = new QLabel(priceText, itemWidget);
     priceLabel->setStyleSheet("color: #111111; font-size: 14px; font-weight: bold;");
     priceLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);

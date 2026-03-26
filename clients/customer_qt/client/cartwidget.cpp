@@ -68,6 +68,8 @@ void CartWidget::open()
     ui->btnTabPickup->setStyleSheet(
         "QPushButton{background:transparent;border:none;border-bottom:2.5px solid transparent;"
         "font-size:15px;color:#aaaaaa;padding:0 20px;}");
+    m_serverDataLoaded = false;
+    m_selectedAddress = UserSession::instance().address;
 
     // 주소
     updateAddress();
@@ -93,6 +95,11 @@ void CartWidget::open()
     m_customerGrade.clear();
     m_deliveryFee    = 0;
     m_minOrderAmount = 0;
+
+    ui->btnPay->setEnabled(false);
+    ui->btnPay->setText("정보 불러오는 중...");
+    ui->btnPickupPay->setEnabled(false);
+    ui->btnPickupPay->setText("정보 불러오는 중...");
 
     // 메뉴 / 가격 / 하단바 초기화
     rebuildMenuList();
@@ -545,6 +552,8 @@ void CartWidget::onCheckoutInfoReceived(int status, const QString &customerGrade
     m_deliveryFee    = deliveryFee;
     m_minOrderAmount = minOrderAmount;
 
+    m_serverDataLoaded = true;
+
     // 포장 시간 / 결제수단: 서버에서 직접 받음
     if (!pickupTime.isEmpty())   m_pickupTime    = pickupTime;
     if (!cardNumber.isEmpty())   m_cardNumber    = cardNumber;
@@ -593,7 +602,8 @@ int  CartWidget::calcDeliveryFee() const { return (m_customerGrade == "와우") 
 int  CartWidget::calcDiscount()    const { return (m_customerGrade == "와우") ? m_deliveryFee : 0; }
 int  CartWidget::calcTotal()       const { return CartSession::instance().totalPrice() + calcDeliveryFee(); }
 int  CartWidget::calcPickupTotal() const { return CartSession::instance().totalPrice(); } // 배달비 없음
-bool CartWidget::isMinOrderMet()   const {
+bool CartWidget::isMinOrderMet() const {
+    if (!m_serverDataLoaded) return false;   // ← 서버 데이터 오기 전엔 false
     if (m_minOrderAmount <= 0) return true;
     return CartSession::instance().totalPrice() >= m_minOrderAmount;
 }
@@ -614,44 +624,32 @@ void CartWidget::on_btnRequestToggle_clicked()
 
 void CartWidget::on_btnPay_clicked()
 {
-    static int callCount = 0;
-    qDebug() << "[CartWidget] 결제 버튼 클릭됨! 횟수:" << ++callCount;
-
-    if (!isMinOrderMet() || CartSession::instance().isEmpty()) return;
+    if (!m_serverDataLoaded || !isMinOrderMet() || CartSession::instance().isEmpty()) return;
 
     OrderCreateReqDTO dto;
     dto.userId          = UserSession::instance().userId.toStdString();
     dto.storeId         = CartSession::instance().storeId;
     dto.totalPrice      = calcTotal();
-    dto.deliveryAddress = UserSession::instance().address.toStdString();
+    dto.deliveryAddress = m_selectedAddress.toStdString(); // ← 수정
     dto.couponId        = -1;
 
     for (const CartItemQt &item : CartSession::instance().items) {
         OrderItemDTO orderItem;
-        orderItem.menuId          = item.menuId;
-        orderItem.quantity        = item.quantity;
-        orderItem.unitPrice       = item.unitPrice;
-        orderItem.menuName        = item.menuName.toStdString();
+        orderItem.menuId    = item.menuId;
+        orderItem.quantity  = item.quantity;
+        orderItem.unitPrice = item.unitPrice;
+        orderItem.menuName  = item.menuName.toStdString();
+
         nlohmann::json optArr = nlohmann::json::array();
         for (int id : item.optionIds) optArr.push_back(id);
         orderItem.selectedOptions = optArr;
+
         dto.items.push_back(orderItem);
     }
-    dto.storeRequest = ui->pickupStoreRequestEdit->toPlainText().toStdString();
 
-    qDebug() << "====== [배달주문 결제하기] ======";
-    qDebug() << "userId         :" << QString::fromStdString(dto.userId);
-    qDebug() << "storeId        :" << dto.storeId;
-    qDebug() << "totalPrice     :" << dto.totalPrice;
-    qDebug() << "deliveryAddress:" << QString::fromStdString(dto.deliveryAddress);
-    qDebug() << "couponId       :" << dto.couponId;
-    qDebug() << "── 메뉴 목록 ──";
-    for (const auto &item : dto.items) {
-        qDebug() << "  menuId:" << item.menuId
-                 << "qty:"      << item.quantity
-                 << "price:"    << item.unitPrice;
-    }
-    qDebug() << "=================================";
+    // ← storeRequest/riderRequest 소스 수정
+    dto.storeRequest = ui->storeRequestEdit->toPlainText().toStdString();
+    dto.riderRequest = m_riderRequest.toStdString();
 
     m_network->sendOrderCreate(dto);
 }
@@ -723,4 +721,87 @@ void CartWidget::on_btnPickupPay_clicked()
         dto.items.push_back(orderItem);
     }
     m_network->sendOrderCreate(dto);
+}
+
+void CartWidget::onAddressUpdated(const QString &newAddress)
+{
+    m_selectedAddress = newAddress;
+    updateAddress(); // 주소 라벨 즉시 갱신
+}
+
+void CartWidget::on_btnRiderRequest_clicked()
+{
+    QStringList options = {
+        "직접 받을게요 (부재 시 문 앞)",
+        "문 앞에 놔주세요 (초인종 O)",
+        "문 앞에 놔주세요 (초인종 X)",
+        "도착하면 전화해주세요",
+        "도착하면 문자해주세요"
+    };
+
+    QDialog *dlg = new QDialog(this);
+    dlg->setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
+    dlg->setAttribute(Qt::WA_TranslucentBackground);
+    dlg->setFixedWidth(390);
+
+    QVBoxLayout *layout = new QVBoxLayout(dlg);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+
+    QWidget *sheet = new QWidget();
+    sheet->setStyleSheet(
+        "background:#ffffff;"
+        "border-top-left-radius:16px;"
+        "border-top-right-radius:16px;");
+    QVBoxLayout *sheetLayout = new QVBoxLayout(sheet);
+    sheetLayout->setContentsMargins(20, 20, 20, 20);
+    sheetLayout->setSpacing(0);
+
+    // 헤더
+    QWidget *header = new QWidget();
+    QHBoxLayout *headerLayout = new QHBoxLayout(header);
+    headerLayout->setContentsMargins(0, 0, 0, 12);
+    QLabel *title = new QLabel("요청사항");
+    title->setStyleSheet("font-size:16px;font-weight:bold;color:#111111;");
+    QPushButton *btnClose = new QPushButton("✕");
+    btnClose->setStyleSheet(
+        "QPushButton{border:none;background:transparent;font-size:18px;color:#333;}");
+    btnClose->setFixedSize(32, 32);
+    connect(btnClose, &QPushButton::clicked, dlg, &QDialog::reject);
+    headerLayout->addWidget(title);
+    headerLayout->addStretch();
+    headerLayout->addWidget(btnClose);
+    sheetLayout->addWidget(header);
+
+    // 구분선
+    QFrame *line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setStyleSheet("color:#eeeeee;");
+    sheetLayout->addWidget(line);
+
+    // 선택지
+    for (const QString &opt : options) {
+        QPushButton *btn = new QPushButton();
+        btn->setStyleSheet(
+            "QPushButton{border:none;background:transparent;font-size:15px;"
+            "color:#333333;padding:18px 4px;text-align:left;}"
+            "QPushButton:hover{color:#1a73e8;}");
+        btn->setText(opt == m_riderRequest ? "✓  " + opt : opt);
+
+        connect(btn, &QPushButton::clicked, this, [this, opt, dlg]() {
+            m_riderRequest = opt;
+            ui->btnRiderRequest->setText(opt);
+            dlg->accept();
+        });
+        sheetLayout->addWidget(btn);
+
+        QFrame *sep = new QFrame();
+        sep->setFrameShape(QFrame::HLine);
+        sep->setStyleSheet("color:#f0f0f0;");
+        sheetLayout->addWidget(sep);
+    }
+
+    layout->addStretch();
+    layout->addWidget(sheet);
+    dlg->exec();
 }

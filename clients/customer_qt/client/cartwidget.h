@@ -16,10 +16,10 @@ public:
     explicit CartWidget(NetworkManager *network, QWidget *parent = nullptr);
     ~CartWidget();
 
-public slots: 
+public slots:
     void onOrderCreateReceived(int status, const QString &message, const QString &orderId);
-
     void open();
+    void onAddressUpdated(const QString &newAddress);
 
 signals:
     void closeRequested();
@@ -33,8 +33,8 @@ private slots:
                                 const QString &pickupTime,
                                 const QString &cardNumber,
                                 const QString &accountNumber);
-    void onOrderCreateReceived(int status, const QString &message,
-                               const QString &orderId);
+    // void onOrderCreateReceived(int status, const QString &message,
+    //                            const QString &orderId);
 
     // ── 탭 ──
     void on_btnTabDelivery_clicked();
@@ -57,6 +57,9 @@ private slots:
     void on_btnPaymentExpand_clicked();
     void on_btnPickupPaymentExpand_clicked();
 
+    // 라이더에게 요청사항 버튼
+    void on_btnRiderRequest_clicked();
+
 private:
     Ui::CartWidget *ui;
     NetworkManager *m_network;
@@ -71,6 +74,7 @@ private:
     QString m_pickupStoreAddress = "";
     QString m_cardNumber;     // 결제수단: 카드번호
     QString m_accountNumber;  // 결제수단: 계좌번호
+    QString m_selectedAddress;
     bool    m_paymentExpanded       = false;
     bool    m_pickupPaymentExpanded = false;
 
@@ -78,6 +82,7 @@ private:
     bool m_isPickupMode          = false;
     bool m_requestExpanded       = true;
     bool m_pickupRequestExpanded = true;
+    bool m_serverDataLoaded      = false;
 
     // ── 배달 UI 업데이트 ──
     void updateAddress();
@@ -105,4 +110,6 @@ private:
     int  calcTotal()       const;
     int  calcPickupTotal() const;
     bool isMinOrderMet()   const;
+
+    QString m_riderRequest = "문 앞에 놔주세요 (초인종 O)";
 };

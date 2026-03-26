@@ -72,10 +72,10 @@ void StoreDetailWidget::onStoreDetailReceived(StoreDetailQt detail)
                            .arg(averageRating, 0, 'f', 1)
                            .arg(reviewTotalCount));
 
-    ui->lblDeliveryStats->setText(QString("배달 %1 | 최소주문 %2원 | 배달비 %3")
-                                  .arg(detail.deliveryTimeRange)
-                                  .arg(detail.minOrderAmount)
-                                  .arg(detail.deliveryFees));
+    ui->lblDeliveryStats->setText(QString("배달 %1 | 최소주문 %2 | 배달비 %3")
+                                      .arg(detail.deliveryTimeRange)
+                                      .arg(StoreUtils::formatWon(detail.minOrderAmount))
+                                      .arg(detail.deliveryFees));
 
     populatePhotoReviewBar(detail.reviews);
 

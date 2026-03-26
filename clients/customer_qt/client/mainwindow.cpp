@@ -107,15 +107,17 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_network, &NetworkManager::onMainHomeReceived, this, &MainWindow::onMainHomeReceived);
     
     connect(m_network, &NetworkManager::onOrderStateChanged, this, [=](int state, QString orderId) {
-    // 🚀 포인트: 지금 사용자가 보고 있는 상세화면의 주문번호가 알림이 온 번호와 같을 때만 업데이트!
-    m_orderHistoryWidget->updateOrderState(orderId, state);
-    if (ui->stackedWidget->currentWidget() == m_formWidget && 
-        m_formWidget->currentOrderId() == orderId) {
-        m_formWidget->updateStatus(state);
+        m_orderHistoryWidget->updateOrderState(orderId, state);
+        if (ui->stackedWidget->currentWidget() == m_formWidget &&
+            m_formWidget->currentOrderId() == orderId) {
+            m_formWidget->updateStatus(state);
+        }
+        // ← connect 중첩 제거
+    });
 
-    }
+    // 이 connect는 밖으로 빼서 생성자에서 한 번만 연결
     connect(m_menureviewWidget, &menureview::backRequested, this, [=]() {
-    ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);});
+        ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);
     });
 
     connect(m_menureviewWidget, &menureview::backRequested, this, [=]() {
@@ -123,15 +125,25 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);
     });
 
+    // AddressWidget의 완료 시그널 → CartWidget의 슬롯 연결
+    connect(m_addressWidget, &AddressWidget::addressSelected,
+            m_cartWidget,    &CartWidget::onAddressUpdated);
 
-connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, this, [=](const QString &id){
-    
-    // 🚀 중요: 폼 위젯에 클릭한 주문의 ID를 먼저 저장합니다.
-    m_formWidget->setCurrentOrderId(id); 
-    
-    m_formWidget->updateOrderInfo(id, id, "상세 메뉴 내역..."); 
-    ui->stackedWidget->setCurrentWidget(m_formWidget);
-});
+    // AddressDetailWidget → CartWidget 연결 (상세 주소 수정 완료 시)
+    connect(m_addressDetailWidget, &AddressDetailWidget::completed,
+            this, [this](const AddressItem &item) {
+                m_cartWidget->onAddressUpdated(item.address);
+            });
+
+
+    connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, this, [=](const QString &id){
+
+        // 🚀 중요: 폼 위젯에 클릭한 주문의 ID를 먼저 저장합니다.
+        m_formWidget->setCurrentOrderId(id);
+
+        m_formWidget->updateOrderInfo(id, id, "상세 메뉴 내역...");
+        ui->stackedWidget->setCurrentWidget(m_formWidget);
+    });
 
     // 메뉴 옵션 선택 → 장바구니 담기
     connect(m_storeDetailWidget, &StoreDetailWidget::menuSelected,
@@ -175,7 +187,7 @@ connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, 
     connect(m_cartWidget, &CartWidget::orderSuccess, this, &MainWindow::onOrderSuccess);
 
     // 기존 연결을 끊습니다 (Qt 매크로 방식을 사용하여 private 접근 제한을 우회합니다)
-   disconnect(m_network, &NetworkManager::onOrderCreateReceived, 
+    disconnect(m_network, &NetworkManager::onOrderCreateReceived,
                m_cartWidget, &CartWidget::onOrderCreateReceived);
 
     // 메인 화면이 신호를 가장 먼저 가로채도록 연결합니다
@@ -295,6 +307,7 @@ void MainWindow::onSettingsRequested(){ ui->stackedWidget->setCurrentWidget(m_se
 
 void MainWindow::onAddressRequested()
 {
+
     m_prevWidget = ui->stackedWidget->currentWidget();  // ← 현재 화면 기억
     if (m_cartBar) m_cartBar->hide();
     m_addressWidget->loadData();
@@ -305,6 +318,7 @@ void MainWindow::onAddressSelected(const QString &address)
 {
     UserSession::instance().address = address;
     m_homeWidget->setAddress(address);
+    m_cartWidget->onAddressUpdated(address);
     // 이전 화면으로 복귀
     if (m_prevWidget)
         ui->stackedWidget->setCurrentWidget(m_prevWidget);
@@ -331,6 +345,7 @@ void MainWindow::onAddressDetailCompleted(const AddressItem &item)
     if (item.addressId <= 0 || item.isDefault) {
         UserSession::instance().address = item.address;
         m_homeWidget->setAddress(item.address);
+        m_cartWidget->onAddressUpdated(item.address);
     }
     ui->stackedWidget->setCurrentWidget(m_addressWidget);
 }
@@ -351,7 +366,7 @@ void MainWindow::onFavoriteRequested() { /* TODO */ }
 
 void MainWindow::onStoreSelected(int storeId)
 {
-    m_previousWidget = ui->stackedWidget->currentWidget();
+    m_prevWidget = ui->stackedWidget->currentWidget();
     m_storeDetailWidget->loadStoreData(storeId);
     m_storeDetailWidget->updateCartBar();
     ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
@@ -360,12 +375,12 @@ void MainWindow::onStoreSelected(int storeId)
 void MainWindow::onStoreDetailBack()
 {
     // 장바구니 바 갱신
-    if (m_previousWidget == m_homeWidget)
+    if (m_prevWidget == m_homeWidget)
         m_homeWidget->updateCartBar();
-    else if (m_previousWidget == m_menuWidget)
+    else if (m_prevWidget == m_menuWidget)
         m_storeDetailWidget->updateCartBar(); // 카테고리에서 왔으면 cartBar 유지
 
-    QWidget *target = m_previousWidget ? m_previousWidget : m_homeWidget;
+    QWidget *target = m_prevWidget ? m_prevWidget : m_homeWidget;
     ui->stackedWidget->setCurrentWidget(target);
 }
 

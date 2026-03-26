@@ -1,6 +1,7 @@
 #include "menuoption.h"
 #include "ui_menuoption.h"
 #include "NetworkManager.h"
+#include "storeutils.h"
 #include <QRadioButton>
 #include <QMessageBox>
 #include <QCheckBox>
@@ -36,9 +37,9 @@ void menuoption::loadMenuOption(int menuId, const QString &menuName, int basePri
     m_menuId = menuId; m_menuName = menuName; m_basePrice = basePrice; m_quantity = 1;
 
     ui->lbl_title->setText(m_menuName);
-    ui->lbl_price_value->setText(QString::number(m_basePrice) + "원");
+    ui->lbl_price_value->setText(StoreUtils::formatWon(m_basePrice));
     ui->lbl_quantity_value->setText("1");
-    ui->btn_add_cart->setText(QString::number(m_basePrice) + "원 담기");
+    ui->btn_add_cart->setText(StoreUtils::formatWon(m_basePrice) + " 담기");
 
     clearOptionUI();
     // [39라인] NetworkManager에 추가한 함수 호출
@@ -88,7 +89,8 @@ void menuoption::buildOptionUI(const QList<OptionGroup> &groups)
 
             itemLayout->addWidget(choiceBtn);
             itemLayout->addStretch();
-            itemLayout->addWidget(new QLabel(item.additionalPrice > 0 ? "+" + QString::number(item.additionalPrice) + "원" : "0원"));
+            QString priceText = (item.additionalPrice > 0 ? "+" : "") + StoreUtils::formatWon(item.additionalPrice);
+            itemLayout->addWidget(new QLabel(priceText));
 
             ui->dynamicOptionLayout->addWidget(itemContainer);
         }
@@ -107,7 +109,7 @@ void menuoption::recalculatePrice()
         }
     }
     int finalPrice = (m_basePrice + optionTotal) * m_quantity;
-    ui->btn_add_cart->setText(QString::number(finalPrice) + "원 담기");
+    ui->btn_add_cart->setText(StoreUtils::formatWon(finalPrice) + " 담기");
 }
 
 void menuoption::onIncreaseQty() { m_quantity++; ui->lbl_quantity_value->setText(QString::number(m_quantity)); recalculatePrice(); }

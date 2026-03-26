@@ -1,4 +1,5 @@
 #include "orderreceiptdialog.h"
+#include "storeutils.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -66,7 +67,7 @@ OrderReceiptDialog::OrderReceiptDialog(const ResOrderDetailDTO& data, QWidget* p
         nameLabel->setStyleSheet("font-size: 15px;");
 
         // 가격 계산 (단가 * 수량)
-        QLabel* priceLabel = new QLabel(QLocale(QLocale::Korean).toString(item.unitPrice * item.quantity) + "원");
+        QLabel* priceLabel = new QLabel(StoreUtils::formatWon(item.unitPrice * item.quantity));
         priceLabel->setStyleSheet("font-size: 15px;");
         priceLabel->setAlignment(Qt::AlignRight);
 
@@ -90,14 +91,14 @@ OrderReceiptDialog::OrderReceiptDialog(const ResOrderDetailDTO& data, QWidget* p
         mainLayout->addLayout(row);
     };
 
-    addSummaryRow("주문금액", QLocale(QLocale::Korean).toString(data.totalMenuPrice) + "원");
-    addSummaryRow("배달비", QLocale(QLocale::Korean).toString(data.deliveryFee) + "원");
+    addSummaryRow("주문금액", StoreUtils::formatWon(data.totalMenuPrice));
+    addSummaryRow("배달비", StoreUtils::formatWon(data.deliveryFee));
     mainLayout->addWidget(createLine());
 
     // 5. 총 결제 금액
     addSummaryRow(QString::fromStdString(data.paymentMethod) + " 결제", QLocale(QLocale::Korean).toString(data.totalPrice) + "원");
     mainLayout->addSpacing(10);
-    addSummaryRow("총 결제금액", QLocale(QLocale::Korean).toString(data.totalPrice) + "원", true); // 볼드 처리
+    addSummaryRow("총 결제금액", StoreUtils::formatWon(data.totalPrice), true); // 볼드 처리
     mainLayout->addSpacing(20);
 
     // 6. 배달 주소

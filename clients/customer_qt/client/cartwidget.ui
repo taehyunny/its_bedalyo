@@ -368,7 +368,7 @@
                   </widget>
                  </item>
                  <item><widget class="QLabel" name="lblRiderTitle"><property name="text"><string>배달파트너님께</string></property><property name="styleSheet"><string notr="true">font-size:13px;color:#555555;font-weight:bold;</string></property></widget></item>
-                 <item><widget class="QLabel" name="lblRiderPlaceholder"><property name="text"><string>(추후 고정 멘트 선택 기능 추가 예정)</string></property><property name="styleSheet"><string notr="true">font-size:12px;color:#aaaaaa;</string></property></widget></item>
+                 <item><widget class="QPushButton" name="btnRiderRequest"><property name="text"><string>문 앞에 놔주세요 (초인종 O)</string></property><property name="styleSheet"><string notr="true">QPushButton{border:1px solid #dddddd;border-radius:8px;background:#ffffff;font-size:14px;color:#333333;padding:14px 16px;text-align:left;}QPushButton:hover{background:#f5f5f5;}</string></property></widget></item>
                 </layout>
                </widget>
               </item>

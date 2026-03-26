@@ -1,4 +1,5 @@
 #include "OrderHistoryCard.h"
+#include "StoreUtils.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -48,7 +49,7 @@ OrderHistoryCard::OrderHistoryCard(const OrderHistoryItemDTO& info, QWidget* par
     mainLayout->addWidget(lblMenuSummary);
 
     // 4. 총 금액
-    QLabel *lblTotal = new QLabel(QString("합계: %1원").arg(QLocale(QLocale::Korean).toString(info.totalPrice)));
+    QLabel *lblTotal = new QLabel("합계: " + StoreUtils::formatWon(info.totalPrice));
     lblTotal->setStyleSheet("font-size: 16px; font-weight: bold; color: #111111; border: none; margin-top: 10px;");
     mainLayout->addWidget(lblTotal);
 
