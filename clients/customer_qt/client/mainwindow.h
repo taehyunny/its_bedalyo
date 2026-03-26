@@ -19,6 +19,8 @@
 #include "cartbarwidget.h"
 #include "ordercompletewidget.h"
 #include "form.h"
+#include "menureview.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -81,13 +83,15 @@ private:
     AddressDetailWidget   *m_addressDetailWidget;
     CartWidget            *m_cartWidget;
     menuoption            *m_menuOptionWidget;
+    Form                  *m_formWidget;
+    menureview            *m_menureviewWidget;
     CartBarWidget         *m_cartBar = nullptr; // MainWindow가 직접 소유
     OrderCompleteWidget   *m_orderCompleteWidget;
 
     QList<CategoryInfoQt> m_cachedCategories;
     QWidget              *m_previousWidget = nullptr;
 
-    Form                  *m_formWidget;
+    
 
     // CartBar 위치 관련 헬퍼
     void repositionCartBar();

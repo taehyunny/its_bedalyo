@@ -74,6 +74,7 @@ class NetworkManager : public QObject {
     Q_OBJECT
 public:
     explicit NetworkManager(QObject *parent = nullptr);
+    void sendMenuReviewRequest(int menuId);
     void connectToServer(const QString &ip, quint16 port);
 
     // 요청 함수들
@@ -119,7 +120,7 @@ signals:
     void onCheckoutInfoReceived(int status, QString customerGrade, int deliveryFee, int minOrderAmount);
     void onOrderCreateReceived(int status, QString message, QString orderId);
     void onOrderStateChanged(int state, const QString &orderId);
-
+    void onMenuReviewsReceived(int menuId, QList<ReviewDTO> reviews);
     // 메뉴 옵션 수신 시그널 (중복 제거됨)
     void onMenuOptionsReceived(int menuId, QList<OptionGroup> groups);
 

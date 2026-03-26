@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/ui_mainwindow.h"
 #include "ui_mainwindow.h"
 #include "UserSession.h"
 #include <QDebug>
@@ -24,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_menuOptionWidget(new menuoption(m_network, this))
     , m_orderCompleteWidget(new OrderCompleteWidget(m_network, this))
     , m_formWidget(new Form(this))
+    , m_menureviewWidget(new menureview(m_network, this)) 
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -49,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_orderCompleteWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
     ui->stackedWidget->addWidget(m_formWidget);
+    ui->stackedWidget->addWidget(m_menureviewWidget);
 
     connect(m_loginWidget, &LoginWidget::loginSuccess, this, &MainWindow::onLoginSuccess);
     connect(m_homeWidget, &HomeWidget::categorySelected, this, &MainWindow::onCategorySelected);
@@ -97,7 +100,15 @@ MainWindow::MainWindow(QWidget *parent)
         m_formWidget->updateStatus(state);
 
     }
-});
+    connect(m_menureviewWidget, &menureview::backRequested, this, [=]() {
+    ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);});
+    });
+
+    connect(m_menureviewWidget, &menureview::backRequested, this, [=]() {
+    qDebug() << "메인윈도우: 리뷰 화면에서 메뉴 옵션 화면으로 돌아갑니다.";
+    ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);
+    });
+
 
 connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, this, [=](const QString &id){
     
@@ -169,6 +180,19 @@ connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, 
     connect(m_formWidget, &Form::backRequested, this, [=]() {
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
     });
+
+    connect(m_menuOptionWidget, &menuoption::reviewRequested, this, [this](int menuId) {
+    m_menureviewWidget->loadReviews(menuId);  // 서버 요청
+    ui->stackedWidget->setCurrentWidget(m_menureviewWidget);
+    });
+
+    connect(m_menuOptionWidget, &menuoption::reviewRequested, this, [=](int menuId) {
+    qDebug() << "메인윈도우: 리뷰 화면으로 전환합니다. 메뉴 ID:" << menuId;
+    m_menureviewWidget->clearReviews();
+    ui->stackedWidget->setCurrentWidget(m_menureviewWidget); 
+    });
+
+    
 
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
 }

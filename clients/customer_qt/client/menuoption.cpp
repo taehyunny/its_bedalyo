@@ -21,6 +21,7 @@ menuoption::menuoption(NetworkManager *network, QWidget *parent)
     
     ui->setupUi(this);
     ui->img_product_placeholder->hide();
+    ui->btn_menu_review->installEventFilter(this);
 
     connect(ui->btn_plus,     &QPushButton::clicked, this, &menuoption::onIncreaseQty);
     connect(ui->btn_minus,    &QPushButton::clicked, this, &menuoption::onDecreaseQty);
@@ -218,4 +219,20 @@ void menuoption::onMenuOptionDataReceived(int menuId, QList<OptionGroup> groups)
 
     // 실제 UI를 생성하는 함수 호출
     buildOptionUI(groups);
+}
+
+bool menuoption::eventFilter(QObject *obj, QEvent *event)
+{
+    // 🚀 2. btn_menu_review(라벨) 위에서 마우스 왼쪽 버튼이 눌렸는지 확인
+    if (obj == ui->btn_menu_review && event->type() == QEvent::MouseButtonPress) {
+        qDebug() << "리뷰 라벨 클릭됨! 메뉴 ID:" << m_menuId;
+        
+        // 여기에 리뷰 화면(menureview)으로 이동하는 로직을 작성하면 됩니다.
+        // 예: emit reviewTabRequested(m_menuId);
+        
+        emit reviewRequested(m_menuId);
+
+        return true; // 이벤트 처리 완료
+    }
+    return QWidget::eventFilter(obj, event);
 }
