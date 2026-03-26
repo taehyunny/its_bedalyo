@@ -3,225 +3,428 @@
  <class>Form</class>
  <widget class="QWidget" name="Form">
   <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>360</width>
-    <height>640</height>
-   </rect>
+   <rect><x>0</x><y>0</y><width>360</width><height>640</height></rect>
+  </property>
+  <property name="styleSheet">
+   <string>QWidget#Form { background-color: #f5f5f5; }</string>
   </property>
   <layout class="QVBoxLayout" name="mainLayout">
-   <property name="spacing">
-    <number>0</number>
-   </property>
-   <property name="margin" stdset="0">
-    <number>0</number>
-   </property>
+   <property name="spacing"><number>0</number></property>
+   <property name="margin" stdset="0"><number>0</number></property>
+
+   <!-- ===== TOP NAV ===== -->
    <item>
     <widget class="QWidget" name="topNav" native="true">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>40</height>
-      </size>
-     </property>
+     <property name="maximumSize"><size><width>16777215</width><height>44</height></size></property>
+     <property name="styleSheet"><string>background-color: white; border-bottom: 1px solid #eeeeee;</string></property>
      <layout class="QHBoxLayout" name="navLayout">
-      <property name="leftMargin">
-       <number>10</number>
-      </property>
-      <property name="topMargin">
-       <number>5</number>
-      </property>
-      <property name="rightMargin">
-       <number>10</number>
-      </property>
-      <property name="bottomMargin">
-       <number>5</number>
-      </property>
+      <property name="leftMargin"><number>12</number></property>
+      <property name="topMargin"><number>8</number></property>
+      <property name="rightMargin"><number>12</number></property>
+      <property name="bottomMargin"><number>8</number></property>
       <item>
        <widget class="QPushButton" name="btn_back_form">
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>X</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="fixedSize" stdset="0">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
+        <property name="text"><string>X</string></property>
+        <property name="flat"><bool>true</bool></property>
+        <property name="styleSheet"><string>font-size: 16px; color: #333333;</string></property>
+        <property name="maximumSize"><size><width>30</width><height>30</height></size></property>
        </widget>
       </item>
       <item>
        <spacer>
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
+        <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+        <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
        </spacer>
       </item>
      </layout>
     </widget>
    </item>
+
+   <!-- ===== STATUS STACKED WIDGET ===== -->
    <item>
     <widget class="QStackedWidget" name="statusStackedWidget">
+     <property name="styleSheet"><string>background-color: white;</string></property>
+
+     <!-- ============================== -->
+     <!-- PAGE 0: 주문수락               -->
+     <!-- ============================== -->
      <widget class="QWidget" name="page_checking">
       <layout class="QVBoxLayout">
-       <item alignment="Qt::AlignmentFlag::AlignHCenter">
-        <widget class="QLabel" name="label_checking">
-         <property name="styleSheet">
-          <string>color: #00b9ff; font-weight: bold;</string>
-         </property>
-         <property name="text">
-          <string>매장에서 주문을 확인하고 있습니다.</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="page_cooking">
-      <layout class="QVBoxLayout">
-       <item alignment="Qt::AlignmentFlag::AlignHCenter">
-        <widget class="QLabel" name="label_cooking">
-         <property name="styleSheet">
-          <string>color: #ff9800; font-weight: bold;</string>
-         </property>
-         <property name="text">
-          <string>음식을 조리하고 있습니다.</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="page_ready">
-      <layout class="QVBoxLayout">
-       <item alignment="Qt::AlignmentFlag::AlignHCenter">
-        <widget class="QLabel" name="label_ready">
-         <property name="styleSheet">
-          <string>color: #4caf50; font-weight: bold;</string>
-         </property>
-         <property name="text">
-          <string>조리가 완료되었습니다.</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="page_delivering">
-      <layout class="QVBoxLayout">
-       <item alignment="Qt::AlignmentFlag::AlignHCenter">
-        <widget class="QLabel" name="label_delivering">
-         <property name="styleSheet">
-          <string>color: #1565c0; font-weight: bold;</string>
-         </property>
-         <property name="text">
-          <string>배달 중입니다.</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="mapArea">
-     <property name="styleSheet">
-      <string>background-color: #e6f2f9;</string>
-     </property>
-     <property name="text">
-      <string>[ 지도 영역 ]</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QScrollArea" name="scrollArea">
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>358</width>
-        <height>223</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="scrollLayout">
+       <property name="leftMargin"><number>16</number></property>
+       <property name="rightMargin"><number>16</number></property>
+       <property name="topMargin"><number>12</number></property>
+       <property name="bottomMargin"><number>12</number></property>
+       <property name="spacing"><number>8</number></property>
        <item>
-        <widget class="QLabel" name="lbl_address_content">
-         <property name="text">
-          <string/>
-         </property>
+        <widget class="QLabel" name="label_checking">
+         <property name="text"><string>매장에서 주문을 확인하고 있습니다.</string></property>
+         <property name="styleSheet"><string>color: #1565c0; font-weight: bold; font-size: 13px;</string></property>
         </widget>
        </item>
        <item>
         <layout class="QHBoxLayout">
-         <item>
-          <layout class="QVBoxLayout">
-           <item>
-            <widget class="QLabel" name="lbl_store_name">
-             <property name="styleSheet">
-              <string>font-weight: bold;</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="lbl_order_summary">
-             <property name="styleSheet">
-              <string>color: #666;</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+         <property name="spacing"><number>0</number></property>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter">
+          <widget class="QLabel" name="c0_1">
+           <property name="text"><string>V</string></property>
+           <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+           <property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:10px;font-weight:bold;</string></property>
+           <property name="minimumSize"><size><width>24</width><height>24</height></size></property>
+           <property name="maximumSize"><size><width>24</width><height>24</height></size></property>
+          </widget>
          </item>
-         <item alignment="Qt::AlignmentFlag::AlignRight">
-          <widget class="QPushButton" name="btn_expand_menu">
-           <property name="text">
-            <string>▼</string>
-           </property>
-           <property name="flat">
-            <bool>true</bool>
-           </property>
+         <item>
+          <widget class="QLabel" name="l0_12">
+           <property name="text"><string></string></property>
+           <property name="styleSheet"><string>background-color:#dddddd;</string></property>
+           <property name="minimumSize"><size><width>10</width><height>2</height></size></property>
+           <property name="maximumSize"><size><width>9999</width><height>2</height></size></property>
+          </widget>
+         </item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter">
+          <widget class="QLabel" name="c0_2">
+           <property name="text"><string></string></property>
+           <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+           <property name="styleSheet"><string>background-color:#dddddd;border-radius:12px;</string></property>
+           <property name="minimumSize"><size><width>24</width><height>24</height></size></property>
+           <property name="maximumSize"><size><width>24</width><height>24</height></size></property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="l0_23">
+           <property name="text"><string></string></property>
+           <property name="styleSheet"><string>background-color:#dddddd;</string></property>
+           <property name="minimumSize"><size><width>10</width><height>2</height></size></property>
+           <property name="maximumSize"><size><width>9999</width><height>2</height></size></property>
+          </widget>
+         </item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter">
+          <widget class="QLabel" name="c0_3">
+           <property name="text"><string></string></property>
+           <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+           <property name="styleSheet"><string>background-color:#dddddd;border-radius:12px;</string></property>
+           <property name="minimumSize"><size><width>24</width><height>24</height></size></property>
+           <property name="maximumSize"><size><width>24</width><height>24</height></size></property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="l0_34">
+           <property name="text"><string></string></property>
+           <property name="styleSheet"><string>background-color:#dddddd;</string></property>
+           <property name="minimumSize"><size><width>10</width><height>2</height></size></property>
+           <property name="maximumSize"><size><width>9999</width><height>2</height></size></property>
+          </widget>
+         </item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter">
+          <widget class="QLabel" name="c0_4">
+           <property name="text"><string></string></property>
+           <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+           <property name="styleSheet"><string>background-color:#dddddd;border-radius:12px;</string></property>
+           <property name="minimumSize"><size><width>24</width><height>24</height></size></property>
+           <property name="maximumSize"><size><width>24</width><height>24</height></size></property>
           </widget>
          </item>
         </layout>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="menuItemsArea"/>
+        <layout class="QHBoxLayout">
+         <property name="spacing"><number>0</number></property>
+         <item alignment="Qt::AlignmentFlag::AlignLeft">
+          <widget class="QLabel" name="t0_1"><property name="text"><string>주문수락</string></property><property name="styleSheet"><string>color:#1565c0;font-size:10px;font-weight:bold;</string></property></widget>
+         </item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignHCenter">
+          <widget class="QLabel" name="t0_2"><property name="text"><string>조리중</string></property><property name="styleSheet"><string>color:#aaaaaa;font-size:10px;</string></property></widget>
+         </item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignHCenter">
+          <widget class="QLabel" name="t0_3"><property name="text"><string>배달중</string></property><property name="styleSheet"><string>color:#aaaaaa;font-size:10px;</string></property></widget>
+         </item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignRight">
+          <widget class="QLabel" name="t0_4"><property name="text"><string>배달완료</string></property><property name="styleSheet"><string>color:#aaaaaa;font-size:10px;</string></property></widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+
+     <!-- ============================== -->
+     <!-- PAGE 1: 조리중                 -->
+     <!-- ============================== -->
+     <widget class="QWidget" name="page_cooking">
+      <layout class="QVBoxLayout">
+       <property name="leftMargin"><number>16</number></property>
+       <property name="rightMargin"><number>16</number></property>
+       <property name="topMargin"><number>12</number></property>
+       <property name="bottomMargin"><number>12</number></property>
+       <property name="spacing"><number>8</number></property>
+       <item>
+        <widget class="QLabel" name="label_cooking">
+         <property name="text"><string>음식을 조리하고 있습니다.</string></property>
+         <property name="styleSheet"><string>color: #ff9800; font-weight: bold; font-size: 13px;</string></property>
+        </widget>
        </item>
        <item>
+        <layout class="QHBoxLayout">
+         <property name="spacing"><number>0</number></property>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter">
+          <widget class="QLabel" name="c1_1"><property name="text"><string>V</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:10px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget>
+         </item>
+         <item><widget class="QLabel" name="l1_12"><property name="text"><string></string></property><property name="styleSheet"><string>background-color:#1565c0;</string></property><property name="minimumSize"><size><width>10</width><height>2</height></size></property><property name="maximumSize"><size><width>9999</width><height>2</height></size></property></widget></item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter">
+          <widget class="QLabel" name="c1_2"><property name="text"><string>O</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:9px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget>
+         </item>
+         <item><widget class="QLabel" name="l1_23"><property name="text"><string></string></property><property name="styleSheet"><string>background-color:#dddddd;</string></property><property name="minimumSize"><size><width>10</width><height>2</height></size></property><property name="maximumSize"><size><width>9999</width><height>2</height></size></property></widget></item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter">
+          <widget class="QLabel" name="c1_3"><property name="text"><string></string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#dddddd;border-radius:12px;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget>
+         </item>
+         <item><widget class="QLabel" name="l1_34"><property name="text"><string></string></property><property name="styleSheet"><string>background-color:#dddddd;</string></property><property name="minimumSize"><size><width>10</width><height>2</height></size></property><property name="maximumSize"><size><width>9999</width><height>2</height></size></property></widget></item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter">
+          <widget class="QLabel" name="c1_4"><property name="text"><string></string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#dddddd;border-radius:12px;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout">
+         <property name="spacing"><number>0</number></property>
+         <item alignment="Qt::AlignmentFlag::AlignLeft"><widget class="QLabel" name="t1_1"><property name="text"><string>주문수락</string></property><property name="styleSheet"><string>color:#1565c0;font-size:10px;</string></property></widget></item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignHCenter"><widget class="QLabel" name="t1_2"><property name="text"><string>조리중</string></property><property name="styleSheet"><string>color:#1565c0;font-size:10px;font-weight:bold;</string></property></widget></item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignHCenter"><widget class="QLabel" name="t1_3"><property name="text"><string>배달중</string></property><property name="styleSheet"><string>color:#aaaaaa;font-size:10px;</string></property></widget></item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignRight"><widget class="QLabel" name="t1_4"><property name="text"><string>배달완료</string></property><property name="styleSheet"><string>color:#aaaaaa;font-size:10px;</string></property></widget></item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+
+     <!-- ============================== -->
+     <!-- PAGE 2: 배달중                 -->
+     <!-- ============================== -->
+     <widget class="QWidget" name="page_delivering">
+      <layout class="QVBoxLayout">
+       <property name="leftMargin"><number>16</number></property>
+       <property name="rightMargin"><number>16</number></property>
+       <property name="topMargin"><number>12</number></property>
+       <property name="bottomMargin"><number>12</number></property>
+       <property name="spacing"><number>8</number></property>
+       <item>
+        <widget class="QLabel" name="label_delivering">
+         <property name="text"><string>배달 중입니다.</string></property>
+         <property name="styleSheet"><string>color: #1565c0; font-weight: bold; font-size: 13px;</string></property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout">
+         <property name="spacing"><number>0</number></property>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c2_1"><property name="text"><string>V</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:10px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
+         <item><widget class="QLabel" name="l2_12"><property name="text"><string></string></property><property name="styleSheet"><string>background-color:#1565c0;</string></property><property name="minimumSize"><size><width>10</width><height>2</height></size></property><property name="maximumSize"><size><width>9999</width><height>2</height></size></property></widget></item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c2_2"><property name="text"><string>V</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:10px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
+         <item><widget class="QLabel" name="l2_23"><property name="text"><string></string></property><property name="styleSheet"><string>background-color:#1565c0;</string></property><property name="minimumSize"><size><width>10</width><height>2</height></size></property><property name="maximumSize"><size><width>9999</width><height>2</height></size></property></widget></item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c2_3"><property name="text"><string>O</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:9px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
+         <item><widget class="QLabel" name="l2_34"><property name="text"><string></string></property><property name="styleSheet"><string>background-color:#dddddd;</string></property><property name="minimumSize"><size><width>10</width><height>2</height></size></property><property name="maximumSize"><size><width>9999</width><height>2</height></size></property></widget></item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c2_4"><property name="text"><string></string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#dddddd;border-radius:12px;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout">
+         <property name="spacing"><number>0</number></property>
+         <item alignment="Qt::AlignmentFlag::AlignLeft"><widget class="QLabel" name="t2_1"><property name="text"><string>주문수락</string></property><property name="styleSheet"><string>color:#1565c0;font-size:10px;</string></property></widget></item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignHCenter"><widget class="QLabel" name="t2_2"><property name="text"><string>조리중</string></property><property name="styleSheet"><string>color:#1565c0;font-size:10px;</string></property></widget></item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignHCenter"><widget class="QLabel" name="t2_3"><property name="text"><string>배달중</string></property><property name="styleSheet"><string>color:#1565c0;font-size:10px;font-weight:bold;</string></property></widget></item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignRight"><widget class="QLabel" name="t2_4"><property name="text"><string>배달완료</string></property><property name="styleSheet"><string>color:#aaaaaa;font-size:10px;</string></property></widget></item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+
+     <!-- ============================== -->
+     <!-- PAGE 3: 배달완료               -->
+     <!-- ============================== -->
+     <widget class="QWidget" name="page_complete">
+      <layout class="QVBoxLayout">
+       <property name="leftMargin"><number>16</number></property>
+       <property name="rightMargin"><number>16</number></property>
+       <property name="topMargin"><number>12</number></property>
+       <property name="bottomMargin"><number>12</number></property>
+       <property name="spacing"><number>8</number></property>
+       <item>
+        <widget class="QLabel" name="label_complete">
+         <property name="text"><string>배달이 완료되었습니다!</string></property>
+         <property name="styleSheet"><string>color: #4caf50; font-weight: bold; font-size: 13px;</string></property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout">
+         <property name="spacing"><number>0</number></property>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c3_1"><property name="text"><string>V</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:10px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
+         <item><widget class="QLabel" name="l3_12"><property name="text"><string></string></property><property name="styleSheet"><string>background-color:#1565c0;</string></property><property name="minimumSize"><size><width>10</width><height>2</height></size></property><property name="maximumSize"><size><width>9999</width><height>2</height></size></property></widget></item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c3_2"><property name="text"><string>V</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:10px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
+         <item><widget class="QLabel" name="l3_23"><property name="text"><string></string></property><property name="styleSheet"><string>background-color:#1565c0;</string></property><property name="minimumSize"><size><width>10</width><height>2</height></size></property><property name="maximumSize"><size><width>9999</width><height>2</height></size></property></widget></item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c3_3"><property name="text"><string>V</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:10px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
+         <item><widget class="QLabel" name="l3_34"><property name="text"><string></string></property><property name="styleSheet"><string>background-color:#4caf50;</string></property><property name="minimumSize"><size><width>10</width><height>2</height></size></property><property name="maximumSize"><size><width>9999</width><height>2</height></size></property></widget></item>
+         <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c3_4"><property name="text"><string>V</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#4caf50;color:white;border-radius:12px;font-size:10px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout">
+         <property name="spacing"><number>0</number></property>
+         <item alignment="Qt::AlignmentFlag::AlignLeft"><widget class="QLabel" name="t3_1"><property name="text"><string>주문수락</string></property><property name="styleSheet"><string>color:#1565c0;font-size:10px;</string></property></widget></item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignHCenter"><widget class="QLabel" name="t3_2"><property name="text"><string>조리중</string></property><property name="styleSheet"><string>color:#1565c0;font-size:10px;</string></property></widget></item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignHCenter"><widget class="QLabel" name="t3_3"><property name="text"><string>배달중</string></property><property name="styleSheet"><string>color:#1565c0;font-size:10px;</string></property></widget></item>
+         <item><spacer><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property></spacer></item>
+         <item alignment="Qt::AlignmentFlag::AlignRight"><widget class="QLabel" name="t3_4"><property name="text"><string>배달완료</string></property><property name="styleSheet"><string>color:#4caf50;font-size:10px;font-weight:bold;</string></property></widget></item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+
+    </widget>
+   </item>
+
+   <!-- ===== 지도 영역 ===== -->
+   <item>
+    <widget class="QLabel" name="mapArea">
+     <property name="minimumSize"><size><width>0</width><height>160</height></size></property>
+     <property name="maximumSize"><size><width>16777215</width><height>160</height></size></property>
+     <property name="styleSheet"><string>background-color: #dce9dc; color: #557755; font-size: 14px;</string></property>
+     <property name="text"><string>[ 지도 영역 ]</string></property>
+     <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+    </widget>
+   </item>
+
+   <!-- ===== 스크롤 영역: 주소 + 가게/메뉴 ===== -->
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable"><bool>true</bool></property>
+     <property name="styleSheet"><string>QScrollArea { border: none; background-color: #f5f5f5; }</string></property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry"><rect><x>0</x><y>0</y><width>358</width><height>400</height></rect></property>
+      <layout class="QVBoxLayout" name="scrollLayout">
+       <property name="spacing"><number>0</number></property>
+       <property name="leftMargin"><number>0</number></property>
+       <property name="rightMargin"><number>0</number></property>
+       <property name="topMargin"><number>8</number></property>
+       <property name="bottomMargin"><number>8</number></property>
+
+       <!-- 배달 주소 카드 -->
+       <item>
+        <widget class="QWidget" name="addressCard" native="true">
+         <property name="styleSheet"><string>background-color: white;</string></property>
+         <layout class="QVBoxLayout">
+          <property name="leftMargin"><number>16</number></property>
+          <property name="rightMargin"><number>16</number></property>
+          <property name="topMargin"><number>14</number></property>
+          <property name="bottomMargin"><number>14</number></property>
+          <property name="spacing"><number>5</number></property>
+          <item>
+           <widget class="QLabel" name="lbl_address_title">
+            <property name="text"><string>배달 주소</string></property>
+            <property name="styleSheet"><string>font-weight: bold; font-size: 13px; color: #222222;</string></property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbl_address_content">
+            <property name="text"><string></string></property>
+            <property name="styleSheet"><string>font-size: 13px; color: #555555;</string></property>
+            <property name="wordWrap"><bool>true</bool></property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+
+       <!-- 카드 간 구분 여백 -->
+       <item>
+        <widget class="QLabel" name="cardGap">
+         <property name="text"><string></string></property>
+         <property name="minimumSize"><size><width>0</width><height>8</height></size></property>
+         <property name="maximumSize"><size><width>9999</width><height>8</height></size></property>
+        </widget>
+       </item>
+
+       <!-- 가게 + 메뉴 카드 -->
+       <item>
+        <widget class="QWidget" name="menuCard" native="true">
+         <property name="styleSheet"><string>background-color: white;</string></property>
+         <layout class="QVBoxLayout">
+          <property name="leftMargin"><number>16</number></property>
+          <property name="rightMargin"><number>16</number></property>
+          <property name="topMargin"><number>14</number></property>
+          <property name="bottomMargin"><number>14</number></property>
+          <property name="spacing"><number>6</number></property>
+
+          <!-- 가게 이름 + 펼치기 버튼 -->
+          <item>
+           <layout class="QHBoxLayout">
+            <item>
+             <layout class="QVBoxLayout">
+              <property name="spacing"><number>2</number></property>
+              <item>
+               <widget class="QLabel" name="lbl_store_name">
+                <property name="text"><string></string></property>
+                <property name="styleSheet"><string>font-weight: bold; font-size: 14px; color: #111111;</string></property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lbl_order_summary">
+                <property name="text"><string></string></property>
+                <property name="styleSheet"><string>color: #888888; font-size: 12px;</string></property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter">
+             <widget class="QPushButton" name="btn_expand_menu">
+              <property name="text"><string>▼</string></property>
+              <property name="flat"><bool>true</bool></property>
+              <property name="styleSheet"><string>font-size: 14px; color: #555555;</string></property>
+              <property name="maximumSize"><size><width>32</width><height>32</height></size></property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+
+          <!-- 구분선 -->
+          <item>
+           <widget class="QFrame" name="menuSeparator">
+            <property name="frameShape"><enum>QFrame::Shape::HLine</enum></property>
+            <property name="frameShadow"><enum>QFrame::Shadow::Sunken</enum></property>
+            <property name="styleSheet"><string>color: #eeeeee;</string></property>
+           </widget>
+          </item>
+
+          <!-- 메뉴 목록 (form.cpp 에서 동적으로 추가) -->
+          <item>
+           <layout class="QVBoxLayout" name="menuItemsArea">
+            <property name="spacing"><number>0</number></property>
+           </layout>
+          </item>
+
+         </layout>
+        </widget>
+       </item>
+
+       <!-- 하단 여백 -->
+       <item>
         <spacer>
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
+         <property name="orientation"><enum>Qt::Orientation::Vertical</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>0</width><height>20</height></size></property>
         </spacer>
        </item>
+
       </layout>
      </widget>
     </widget>
    </item>
+
   </layout>
  </widget>
  <resources/>
