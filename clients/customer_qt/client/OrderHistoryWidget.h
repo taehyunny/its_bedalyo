@@ -34,6 +34,7 @@ public:
     void loadData();
     readylist* getReadyList() const { return m_readyList; }
     void addPendingOrder(const QString &orderId, const QString &storeName, const QString &menuSummary, int totalPrice); //추가
+    void updateOrderState(const QString &orderId, int state);
 
 signals:
     void homeRequested();

@@ -16,6 +16,9 @@ public:
     explicit CartWidget(NetworkManager *network, QWidget *parent = nullptr);
     ~CartWidget();
 
+public slots: 
+    void onOrderCreateReceived(int status, const QString &message, const QString &orderId);
+
     void open();
 
 signals:
@@ -27,8 +30,6 @@ signals:
 private slots:
     void onCheckoutInfoReceived(int status, const QString &customerGrade,
                                 int deliveryFee, int minOrderAmount);
-    void onOrderCreateReceived(int status, const QString &message,
-                               const QString &orderId);
 
     // ── 탭 ──
     void on_btnTabDelivery_clicked();

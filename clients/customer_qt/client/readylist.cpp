@@ -31,7 +31,7 @@ readylist::~readylist()
     delete ui;
 }
 
-void readylist::addOrderCard(const QString &storeName, const QString &status,
+void readylist::addOrderCard(const QString &orderId, const QString &storeName, const QString &status,
                              const QString &menuList, const QString &totalPrice)
 {
     // 1. 메인 카드 프레임
@@ -52,6 +52,7 @@ void readylist::addOrderCard(const QString &storeName, const QString &status,
     nameLabel->setStyleSheet("font-weight: bold; font-size: 16px; border: none;");
 
     QLabel *statusBox = new QLabel(status, card);
+    m_statusLabels[orderId] = statusBox;
     statusBox->setFixedSize(70, 25);
     statusBox->setAlignment(Qt::AlignCenter);
     statusBox->setStyleSheet("background-color: #eef9ff; color: #00b9ff; border: 1px solid #00b9ff; "
@@ -103,7 +104,24 @@ void readylist::addOrderCard(const QString &storeName, const QString &status,
 
     // 상세보기 버튼에 시그널 연결
     connect(detailBtn, &QPushButton::clicked, this, [=]() {
-        // 실제로는 orderId를 저장해두었다가 넘겨줘야 함
-        emit orderDetailRequested(storeName); // 예시로 가게명을 넘김
+        emit orderDetailRequested(orderId); 
     });
+}
+
+void readylist::updateCardStatus(const QString &orderId, int state) {
+    if (!m_statusLabels.contains(orderId)) return;
+
+    QLabel *label = m_statusLabels[orderId];
+    QString statusText;
+
+    // 인덱스에 따른 글자 설정
+    switch(state) {
+        case 0: statusText = "가게접수"; break;
+        case 1: statusText = "조리중"; break;
+        case 2: statusText = "조리완료"; break;
+        case 3: statusText = "배달중"; break;
+        default: statusText = "준비중"; break;
+    }
+
+    label->setText(statusText); // 화면의 글자가 실시간으로 바뀝니다!
 }

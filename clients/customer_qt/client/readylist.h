@@ -1,5 +1,7 @@
 #ifndef READYLIST_H
 #define READYLIST_H
+#include <QMap> // 추가
+#include <QLabel> // 추가
 
 #include <QWidget>
 
@@ -20,11 +22,15 @@ signals:
 
 public slots:
     // 가게이름, 상태, 메뉴목록(문자열), 합계금액을 인자로 받음
-    void addOrderCard(const QString &storeName, const QString &status,
+    void addOrderCard(const QString &orderId, const QString &storeName, const QString &status,
                       const QString &menuList, const QString &totalPrice);
+    
+    
+    void updateCardStatus(const QString &orderId, int state);
 
 private:
     Ui::readylist *ui;
+    QMap<QString, QLabel*> m_statusLabels;
 };
 
 #endif // READYLIST_H

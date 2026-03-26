@@ -88,6 +88,25 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_homeWidget, &HomeWidget::storeSelected, this, &MainWindow::onStoreSelected);
     connect(m_storeDetailWidget, &StoreDetailWidget::backRequested, this, &MainWindow::onStoreDetailBack);
     connect(m_network, &NetworkManager::onMainHomeReceived, this, &MainWindow::onMainHomeReceived);
+    
+    connect(m_network, &NetworkManager::onOrderStateChanged, this, [=](int state, QString orderId) {
+    // 🚀 포인트: 지금 사용자가 보고 있는 상세화면의 주문번호가 알림이 온 번호와 같을 때만 업데이트!
+    m_orderHistoryWidget->updateOrderState(orderId, state);
+    if (ui->stackedWidget->currentWidget() == m_formWidget && 
+        m_formWidget->currentOrderId() == orderId) {
+        m_formWidget->updateStatus(state);
+
+    }
+});
+
+connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, this, [=](const QString &id){
+    
+    // 🚀 중요: 폼 위젯에 클릭한 주문의 ID를 먼저 저장합니다.
+    m_formWidget->setCurrentOrderId(id); 
+    
+    m_formWidget->updateOrderInfo(id, id, "상세 메뉴 내역..."); 
+    ui->stackedWidget->setCurrentWidget(m_formWidget);
+});
 
     // 메뉴 옵션 선택 → 장바구니 담기
     connect(m_storeDetailWidget, &StoreDetailWidget::menuSelected,
@@ -130,21 +149,25 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_cartWidget, &CartWidget::orderSuccess, this, &MainWindow::onOrderSuccess);
 
     // 기존 연결을 끊습니다 (Qt 매크로 방식을 사용하여 private 접근 제한을 우회합니다)
-    disconnect(m_network, SIGNAL(onOrderCreateReceived(int,QString,QString)), 
-               m_cartWidget, SLOT(onOrderCreateReceived(int,QString,QString)));
+   disconnect(m_network, &NetworkManager::onOrderCreateReceived, 
+               m_cartWidget, &CartWidget::onOrderCreateReceived);
 
     // 메인 화면이 신호를 가장 먼저 가로채도록 연결합니다
     connect(m_network, &NetworkManager::onOrderCreateReceived, 
             this, &MainWindow::onNetworkOrderCreated);
 
     // 장바구니 화면이 그다음으로 신호를 받도록 다시 연결해 줍니다 (private 접근 제한 우회)
-    connect(m_network, SIGNAL(onOrderCreateReceived(int,QString,QString)), 
-            m_cartWidget, SLOT(onOrderCreateReceived(int,QString,QString)));
+    connect(m_network, &NetworkManager::onOrderCreateReceived, 
+            m_cartWidget, &CartWidget::onOrderCreateReceived);
 
     // 주문 내역에서 상세 메뉴 요청 시 → 주문 완료 화면으로 전환
     connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, this, [=](QString id){
         m_formWidget->updateOrderInfo(id, "ORD-001", "상세 메뉴 내역..."); // form 데이터 채우기
         ui->stackedWidget->setCurrentWidget(m_formWidget); // form.ui 화면으로 전환
+    });
+
+    connect(m_formWidget, &Form::backRequested, this, [=]() {
+    ui->stackedWidget->setCurrentWidget(m_homeWidget);
     });
 
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
@@ -287,48 +310,49 @@ void MainWindow::onCartClose()
     ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
 }
 
-// 신규 슬롯: CartWidget이 세션을 비우기 전에 실행되어 데이터를 안전하게 보존합니다.
 void MainWindow::onNetworkOrderCreated(int status, QString message, QString orderId)
 {
     Q_UNUSED(message)
 
-    // 주의: 서버 응답 코드가 0(성공)이거나 200(성공)일 때 모두 처리되도록 수정
     if (status == 200 || status == 0) {
-        
-        // --- 1. 주문 완료 화면에 데이터 세팅 ---
-        m_orderCompleteWidget->clearMenuItems();
-        m_orderCompleteWidget->setOrderData(
-            orderId, // 가짜 "ORD-001" 대신 서버가 준 진짜 주문번호 사용!
-            CartSession::instance().storeName,
-            UserSession::instance().address
-        );
-        for (const CartItemQt &item : CartSession::instance().items) {
-            m_orderCompleteWidget->addMenuItem(item.quantity, item.menuName);
-        }
-
-        // --- 2. 주문 내역(준비중) 목록에 데이터 세팅 ---
-        QString storeName = CartSession::instance().storeName;
-        int totalPrice = CartSession::instance().totalPrice();
+        // 1. 장바구니 요약 텍스트 만들기 (예: "짜장면 외 1건")
         QString menuSummary = ""; 
         if(!CartSession::instance().items.isEmpty()) {
             int extraCount = CartSession::instance().items.size() - 1;
             menuSummary = CartSession::instance().items[0].menuName + 
                           (extraCount > 0 ? QString(" 외 %1건").arg(extraCount) : "");
         }
-        
-        // 진짜 orderId와 안전하게 빼둔 데이터를 사용해 목록에 추가!
+
+        QString storeName = CartSession::instance().storeName;
+        int totalPrice = CartSession::instance().totalPrice();
+
+        // 🚀 [추가] Form(영수증) 화면에 결제한 데이터 채워넣기!
+        m_formWidget->setCurrentOrderId(orderId);
+        m_formWidget->updateOrderInfo(storeName, orderId, menuSummary); // 가게명, 주문번호, 요약
+        m_formWidget->updateAddress(UserSession::instance().address);   // 배달 주소
+        m_formWidget->updateStatus(0);                                  // 상태를 '가게접수(0)'로 초기화
+
+        // 장바구니에 있던 메뉴들을 Form 화면 영수증에 한 줄씩 추가
+        m_formWidget->clearMenuItems();
+        for (const CartItemQt &item : CartSession::instance().items) {
+            // 수량에 따른 가격 계산 (단가 * 수량)
+            int itemTotalPrice = item.unitPrice * item.quantity;
+            m_formWidget->addMenuItem(item.menuName, item.quantity, itemTotalPrice);
+        }
+
+        // 2. 주문 내역(준비중) 목록에도 카드 추가
         m_orderHistoryWidget->addPendingOrder(orderId, storeName, menuSummary, totalPrice);
     }
 }
 
 void MainWindow::onOrderSuccess()
 {
-    // 장바구니 비우기 (이제 데이터가 날아가도 상관없음!)
+    // 장바구니 비우기 (이미 Form과 목록에 데이터를 다 옮겨 담았으므로 비워도 안전함!)
     CartSession::instance().clear();
     m_homeWidget->updateCartBar();
     
-    // 완료 화면으로 이동
-    ui->stackedWidget->setCurrentWidget(m_orderCompleteWidget);
+    // 🚀 [수정] 결제 완료 화면(m_orderCompleteWidget) 대신 우리가 만든 Form 화면으로 휙 이동!
+    ui->stackedWidget->setCurrentWidget(m_formWidget);
 }
 
 

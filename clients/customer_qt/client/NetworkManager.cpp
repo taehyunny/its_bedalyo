@@ -515,7 +515,26 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                      << "menuId:" << menuId;
             emit onMenuOptionsReceived(menuId, groups);
 
-        } else if (cmdId == CmdID::RES_ADDRESS_SAVE) {
+        } 
+        
+        else if (cmdId == CmdID::NOTIFY_ORDER_STATE) { // 🚀 9010번 실시간 알림 구간
+        qDebug() << "[NetworkManager] 주문 상태 변경 알림(9010) 수신";
+
+        try {
+        // 1. 서버가 보낸 JSON에서 정보 추출
+        int state = j.at("state").get<int>(); // 0:접수, 1:조리중, 2:완료, 3:배달중
+        QString orderId = QString::fromStdString(j.at("orderId").get<std::string>());
+
+        qDebug() << "[NetworkManager] 주문번호:" << orderId << " -> 변경된 상태:" << state;
+
+        // 2. MainWindow가 들을 수 있게 시그널 발생
+        emit onOrderStateChanged(state, orderId);
+
+    } catch (const std::exception &e) {
+        qWarning() << "[NetworkManager] 9010번 파싱 에러:" << e.what();
+    }
+    
+    } else if (cmdId == CmdID::RES_ADDRESS_SAVE) {
             ResAddressSaveDTO dto = j.get<ResAddressSaveDTO>();
             emit onAddressSaveReceived(dto.status, dto.addressId);
 

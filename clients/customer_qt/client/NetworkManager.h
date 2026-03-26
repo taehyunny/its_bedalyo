@@ -118,6 +118,7 @@ signals:
     void onAddressDefaultReceived(int status);
     void onCheckoutInfoReceived(int status, QString customerGrade, int deliveryFee, int minOrderAmount);
     void onOrderCreateReceived(int status, QString message, QString orderId);
+    void onOrderStateChanged(int state, const QString &orderId);
 
     // 메뉴 옵션 수신 시그널 (중복 제거됨)
     void onMenuOptionsReceived(int menuId, QList<OptionGroup> groups);

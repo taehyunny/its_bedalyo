@@ -56,7 +56,6 @@ OrderHistoryWidget::OrderHistoryWidget(NetworkManager *network, QWidget *parent)
 
 void OrderHistoryWidget::addPendingOrder(const QString &orderId, const QString &storeName, const QString &menuSummary, int totalPrice)
 {
-   Q_UNUSED(orderId);
 
     // 실제 ui 파일에 존재하는 객체명으로 숨김 처리
     ui->pendingIcon->hide();
@@ -65,7 +64,13 @@ void OrderHistoryWidget::addPendingOrder(const QString &orderId, const QString &
     m_readyList->show();
     
     // readylist에 카드 추가
-    m_readyList->addOrderCard(storeName, "준비 중", menuSummary, QString::number(totalPrice) + "원");
+    m_readyList->addOrderCard(
+        orderId,         // 👈 이게 빠지면 안 됩니다!
+        storeName, 
+        "가게접수", 
+        menuSummary, 
+        QString::number(totalPrice) + "원"
+    );
 }
 
 OrderHistoryWidget::~OrderHistoryWidget() { delete ui; }
@@ -142,3 +147,8 @@ void OrderHistoryWidget::on_navSearch_clicked()   { emit searchRequested(); }
 void OrderHistoryWidget::on_navFavorite_clicked() { emit favoriteRequested(); }
 void OrderHistoryWidget::on_navOrder_clicked()    {} // 현재 화면 — 아무 동작 없음
 void OrderHistoryWidget::on_navMy_clicked()       { emit mypageRequested(); }
+void OrderHistoryWidget::updateOrderState(const QString &orderId, int state) {
+    if (m_readyList) {
+        m_readyList->updateCardStatus(orderId, state); // 안쪽의 readylist에게 전달
+    }
+}

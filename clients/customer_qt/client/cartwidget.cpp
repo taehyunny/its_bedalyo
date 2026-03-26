@@ -25,7 +25,7 @@ CartWidget::CartWidget(NetworkManager *network, QWidget *parent)
     connect(ui->btnClose,         &QPushButton::clicked, this, &CartWidget::on_btnClose_clicked);
     connect(ui->btnAddMenu,       &QPushButton::clicked, this, &CartWidget::on_btnAddMenu_clicked);
     connect(ui->btnAddressEdit,   &QPushButton::clicked, this, &CartWidget::on_btnAddressEdit_clicked);
-    connect(ui->btnPay,           &QPushButton::clicked, this, &CartWidget::on_btnPay_clicked);
+    // connect(ui->btnPay,           &QPushButton::clicked, this, &CartWidget::on_btnPay_clicked);
     connect(ui->btnRequestToggle, &QPushButton::clicked, this, &CartWidget::on_btnRequestToggle_clicked);
 
     // ── 포장 버튼 ──
@@ -539,11 +539,13 @@ void CartWidget::onCheckoutInfoReceived(int status, const QString &customerGrade
 void CartWidget::onOrderCreateReceived(int status, const QString &message,
                                        const QString &orderId)
 {
-    Q_UNUSED(orderId)
-    if (status == 200) {
-        CartSession::instance().clear();
-        QString msg = m_isPickupMode ? "포장 주문이 완료되었습니다!" : "주문이 완료되었습니다!";
-        QMessageBox::information(this, "주문 완료", msg);
+    Q_UNUSED(orderId);
+    if (status == 200 || status == 0) {
+        // 🚀 팝업창 띄우는 코드 2줄을 삭제(주석 처리)했습니다!
+        // QString msg = m_isPickupMode ? "포장 주문이 완료되었습니다!" : "주문이 완료되었습니다!";
+        // QMessageBox::information(this, "주문 완료", msg);
+        
+        // 팝업 없이 곧바로 메인 윈도우로 성공 신호만 보냅니다.
         emit orderSuccess();
     } else {
         QMessageBox::warning(this, "주문 실패", message);
