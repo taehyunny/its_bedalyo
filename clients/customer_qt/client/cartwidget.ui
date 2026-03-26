@@ -312,11 +312,27 @@
            <item>
             <widget class="QWidget" name="paymentSection">
              <property name="styleSheet"><string notr="true">background:#ffffff;</string></property>
-             <layout class="QHBoxLayout" name="paymentSectionLayout">
-              <property name="leftMargin"><number>16</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>16</number></property><property name="bottomMargin"><number>14</number></property><property name="spacing"><number>0</number></property>
-              <item><widget class="QLabel" name="lblPaymentTitle"><property name="text"><string>결제수단</string></property><property name="styleSheet"><string notr="true">font-size:15px;font-weight:bold;color:#111111;</string></property></widget></item>
-              <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
-              <item><widget class="QPushButton" name="btnPaymentExpand"><property name="text"><string>∨</string></property><property name="styleSheet"><string notr="true">QPushButton{background:transparent;border:none;font-size:16px;color:#555;}</string></property></widget></item>
+             <layout class="QVBoxLayout" name="paymentSectionLayout">
+              <property name="leftMargin"><number>0</number></property><property name="topMargin"><number>0</number></property><property name="rightMargin"><number>0</number></property><property name="bottomMargin"><number>0</number></property><property name="spacing"><number>0</number></property>
+              <item>
+               <layout class="QHBoxLayout" name="paymentHeaderLayout">
+                <property name="leftMargin"><number>16</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>16</number></property><property name="bottomMargin"><number>14</number></property><property name="spacing"><number>0</number></property>
+                <item><widget class="QLabel" name="lblPaymentTitle"><property name="text"><string>결제수단</string></property><property name="styleSheet"><string notr="true">font-size:15px;font-weight:bold;color:#111111;</string></property></widget></item>
+                <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                <item><widget class="QPushButton" name="btnPaymentExpand"><property name="text"><string>∨</string></property><property name="styleSheet"><string notr="true">QPushButton{background:transparent;border:none;font-size:16px;color:#555;}</string></property></widget></item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QWidget" name="paymentBody">
+                <property name="visible"><bool>false</bool></property>
+                <property name="styleSheet"><string notr="true">background:#ffffff;</string></property>
+                <layout class="QVBoxLayout" name="paymentBodyLayout">
+                 <property name="leftMargin"><number>16</number></property><property name="topMargin"><number>0</number></property><property name="rightMargin"><number>16</number></property><property name="bottomMargin"><number>14</number></property><property name="spacing"><number>10</number></property>
+                 <item><widget class="QLabel" name="lblCardNumber"><property name="text"><string>💳 카드 정보 없음</string></property><property name="styleSheet"><string notr="true">font-size:14px;color:#333333;</string></property></widget></item>
+                 <item><widget class="QLabel" name="lblAccountNumber"><property name="text"><string>🏦 계좌 정보 없음</string></property><property name="styleSheet"><string notr="true">font-size:14px;color:#333333;</string></property></widget></item>
+                </layout>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
@@ -586,11 +602,27 @@
            <item>
             <widget class="QWidget" name="pickupPaymentSection">
              <property name="styleSheet"><string notr="true">background:#ffffff;</string></property>
-             <layout class="QHBoxLayout" name="pickupPaymentSectionLayout">
-              <property name="leftMargin"><number>16</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>16</number></property><property name="bottomMargin"><number>14</number></property><property name="spacing"><number>0</number></property>
-              <item><widget class="QLabel" name="lblPickupPaymentTitle"><property name="text"><string>결제수단</string></property><property name="styleSheet"><string notr="true">font-size:15px;font-weight:bold;color:#111111;</string></property></widget></item>
-              <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
-              <item><widget class="QPushButton" name="btnPickupPaymentExpand"><property name="text"><string>∨</string></property><property name="styleSheet"><string notr="true">QPushButton{background:transparent;border:none;font-size:16px;color:#555;}</string></property></widget></item>
+             <layout class="QVBoxLayout" name="pickupPaymentSectionLayout">
+              <property name="leftMargin"><number>0</number></property><property name="topMargin"><number>0</number></property><property name="rightMargin"><number>0</number></property><property name="bottomMargin"><number>0</number></property><property name="spacing"><number>0</number></property>
+              <item>
+               <layout class="QHBoxLayout" name="pickupPaymentHeaderLayout">
+                <property name="leftMargin"><number>16</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>16</number></property><property name="bottomMargin"><number>14</number></property><property name="spacing"><number>0</number></property>
+                <item><widget class="QLabel" name="lblPickupPaymentTitle"><property name="text"><string>결제수단</string></property><property name="styleSheet"><string notr="true">font-size:15px;font-weight:bold;color:#111111;</string></property></widget></item>
+                <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+                <item><widget class="QPushButton" name="btnPickupPaymentExpand"><property name="text"><string>∨</string></property><property name="styleSheet"><string notr="true">QPushButton{background:transparent;border:none;font-size:16px;color:#555;}</string></property></widget></item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QWidget" name="pickupPaymentBody">
+                <property name="visible"><bool>false</bool></property>
+                <property name="styleSheet"><string notr="true">background:#ffffff;</string></property>
+                <layout class="QVBoxLayout" name="pickupPaymentBodyLayout">
+                 <property name="leftMargin"><number>16</number></property><property name="topMargin"><number>0</number></property><property name="rightMargin"><number>16</number></property><property name="bottomMargin"><number>14</number></property><property name="spacing"><number>10</number></property>
+                 <item><widget class="QLabel" name="lblPickupCardNumber"><property name="text"><string>💳 카드 정보 없음</string></property><property name="styleSheet"><string notr="true">font-size:14px;color:#333333;</string></property></widget></item>
+                 <item><widget class="QLabel" name="lblPickupAccountNumber"><property name="text"><string>🏦 계좌 정보 없음</string></property><property name="styleSheet"><string notr="true">font-size:14px;color:#333333;</string></property></widget></item>
+                </layout>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>

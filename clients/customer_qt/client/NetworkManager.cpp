@@ -1,5 +1,6 @@
 ﻿#include "NetworkManager.h"
 #include "json.hpp"
+#include "cartsession.h"
 #include <QDebug>
 #include <QDataStream>
 #include <QString>      // 필수
@@ -334,7 +335,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         // ── 로그인 응답 ──
         if (cmdId == CmdID::RES_LOGIN) {
             AuthResDTO dto = j.get<AuthResDTO>();
-            qDebug() << "[Login] phoneNumber:" << QString::fromStdString(dto.phoneNumber);
             emit onLoginResponse(dto.status,
                                  QString::fromStdString(dto.message),
                                  QString::fromStdString(dto.userName),
@@ -469,6 +469,12 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 qWarning() << "매장 정보를 불러오지 못했습니다. status:" << dto.status;
                 return;
             }
+
+            auto& session = CartSession::instance();
+            session.storeId           = dto.storeData.storeId;
+            session.storeName         = QString::fromStdString(dto.storeData.storeName);
+            session.storeAddress      = QString::fromStdString(dto.storeData.storeAddress);
+            session.deliveryTimeRange = QString::fromStdString(dto.storeData.deliveryTimeRange);
 
             StoreDetailQt detail;
             detail.storeId           = dto.storeData.storeId;
@@ -631,6 +637,16 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         } else if (cmdId == CmdID::RES_ADDRESS_DEFAULT) {
             ResAddressDefaultDTO dto = j.get<ResAddressDefaultDTO>();
             emit onAddressDefaultReceived(dto.status);
+
+        } else if (cmdId == CmdID::RES_CHECKOUT_INFO) {
+            ResCheckoutInfoDTO dto = j.get<ResCheckoutInfoDTO>();
+            emit onCheckoutInfoReceived(dto.status,
+                                        QString::fromStdString(dto.customerGrade),
+                                        dto.deliveryFee,
+                                        dto.minOrderAmount,
+                                        QString::fromStdString(dto.pickupTime),
+                                        QString::fromStdString(dto.cardNumber),
+                                        QString::fromStdString(dto.accountNumber));
 
         } else if (cmdId == CmdID::RES_ORDER_CREATE) {
             OrderCreateResDTO dto = j.get<OrderCreateResDTO>();

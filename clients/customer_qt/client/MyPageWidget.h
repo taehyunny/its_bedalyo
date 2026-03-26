@@ -25,12 +25,13 @@ signals:
     void policyRequested();    // 약관 및 정책 화면으로
     void settingsRequested();  // 설정 화면으로
     void logoutRequested();    // 설정 화면에서 emit → MainWindow 전달용
+    void addressRequested();
 
 private slots:
     void on_btnDetail_clicked();
     void on_btnAddress_clicked();
     void on_btnFavorite_clicked();
-    void on_btnCoupon_clicked();
+    void on_btnWow_clicked();
     void on_btnFaq_clicked();
     void on_btnPolicy_clicked();
     void on_btnSettings_clicked();

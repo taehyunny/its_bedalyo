@@ -86,7 +86,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_settingsWidget, &SettingsWidget::backRequested, this, &MainWindow::onMypageRequested);
     connect(m_settingsWidget, &SettingsWidget::logoutRequested, this, &MainWindow::onLogoutRequested);
     connect(m_homeWidget, &HomeWidget::addressRequested, this, &MainWindow::onAddressRequested);
-    connect(m_addressWidget, &AddressWidget::backRequested, this, &MainWindow::onBackToHome);
+
+    // AddressWidget X버튼(backRequested) 연결 수정
+    connect(m_addressWidget, &AddressWidget::backRequested, this, [this]() {
+        if (m_prevWidget)
+            ui->stackedWidget->setCurrentWidget(m_prevWidget);
+        else
+            ui->stackedWidget->setCurrentWidget(m_homeWidget);
+    });
+
     connect(m_addressWidget, &AddressWidget::addressSelected, this, &MainWindow::onAddressSelected);
     connect(m_addressWidget, &AddressWidget::addressDetailRequested, this, &MainWindow::onAddressDetailRequested);
     connect(m_addressWidget, &AddressWidget::addressEditRequested, this, &MainWindow::onAddressEditRequested);
@@ -147,7 +155,8 @@ connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, 
                 if (CartSession::instance().storeId == -1)
                     CartSession::instance().storeId = m_storeDetailWidget->currentStoreId();
 
-                CartSession::instance().storeName = m_storeDetailWidget->currentStoreName();
+                if (!m_storeDetailWidget->currentStoreName().isEmpty())
+                    CartSession::instance().storeName = m_storeDetailWidget->currentStoreName();
                 CartSession::instance().addItem(item);
                 m_homeWidget->updateCartBar();
                 m_storeDetailWidget->updateCartBar();
@@ -215,6 +224,14 @@ connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, 
     ui->stackedWidget->setCurrentWidget(m_orderHistoryWidget);
 });
 
+    // 검색 결과 화면 -> 매장 화면
+    connect(m_searchResultWidget, &SearchResultWidget::storeSelected,
+            this, &MainWindow::onStoreSelected);
+
+    // 마이 이츠 주소 관리 => 주소 관리 화면
+    connect(m_myPageWidget, &MyPageWidget::addressRequested,
+            this, &MainWindow::onAddressRequested);
+
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
 
     connect(m_network, &NetworkManager::onDeliveryCompleteReceived, this, &MainWindow::handleDeliveryComplete);
@@ -278,6 +295,8 @@ void MainWindow::onSettingsRequested(){ ui->stackedWidget->setCurrentWidget(m_se
 
 void MainWindow::onAddressRequested()
 {
+    m_prevWidget = ui->stackedWidget->currentWidget();  // ← 현재 화면 기억
+    if (m_cartBar) m_cartBar->hide();
     m_addressWidget->loadData();
     ui->stackedWidget->setCurrentWidget(m_addressWidget);
 }
@@ -286,7 +305,12 @@ void MainWindow::onAddressSelected(const QString &address)
 {
     UserSession::instance().address = address;
     m_homeWidget->setAddress(address);
-    ui->stackedWidget->setCurrentWidget(m_homeWidget);
+    // 이전 화면으로 복귀
+    if (m_prevWidget)
+        ui->stackedWidget->setCurrentWidget(m_prevWidget);
+    else
+        ui->stackedWidget->setCurrentWidget(m_homeWidget);
+    // showCartBarForHome();
 }
 
 void MainWindow::onAddressDetailRequested(const QString &roadAddr)

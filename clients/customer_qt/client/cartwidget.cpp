@@ -34,6 +34,10 @@ CartWidget::CartWidget(NetworkManager *network, QWidget *parent)
     connect(ui->btnPickupPay,           &QPushButton::clicked, this, &CartWidget::on_btnPickupPay_clicked);
     connect(ui->btnPickupCopyAddress,   &QPushButton::clicked, this, &CartWidget::on_btnPickupCopyAddress_clicked);
 
+    // ── 결제수단 토글 ──
+    connect(ui->btnPaymentExpand,       &QPushButton::clicked, this, &CartWidget::on_btnPaymentExpand_clicked);
+    connect(ui->btnPickupPaymentExpand, &QPushButton::clicked, this, &CartWidget::on_btnPickupPaymentExpand_clicked);
+
     // ── 네트워크 ──
     connect(m_network, &NetworkManager::onCheckoutInfoReceived,
             this, &CartWidget::onCheckoutInfoReceived);
@@ -50,6 +54,11 @@ CartWidget::~CartWidget() { delete ui; }
 // ============================================================
 void CartWidget::open()
 {
+
+    // 디버그로 확인
+    qDebug() << "[CartWidget] open() storeName:" << CartSession::instance().storeName
+             << "storeId:" << CartSession::instance().storeId;
+
     // 탭 상태 초기화 → 배달 탭 활성
     m_isPickupMode = false;
     ui->contentStack->setCurrentIndex(0);
@@ -258,21 +267,25 @@ void CartWidget::updateDeliverySection()
 // ============================================================
 void CartWidget::updatePickupInfo()
 {
-    ui->lblPickupTime->setText(m_pickupTime.isEmpty() ? "15~25분" : m_pickupTime);
+    // CartSession에 저장된 정보를 멤버 변수에 업데이트
+    m_pickupStoreAddress = CartSession::instance().storeAddress;
+    m_pickupTime         = CartSession::instance().deliveryTimeRange;
 
-    if (m_pickupStoreAddress.isEmpty()) {
-        ui->lblPickupStoreAddress->setText("주소 정보를 불러오는 중...");
-    } else {
-        ui->lblPickupStoreAddress->setText(m_pickupStoreAddress);
-    }
+    // UI 라벨에 적용
+    ui->lblPickupTime->setText(m_pickupTime.isEmpty() ? "15~25분" : m_pickupTime);
+    ui->lblPickupStoreAddress->setText(m_pickupStoreAddress.isEmpty()
+                                           ? "주소 정보를 불러오는 중..."
+                                           : m_pickupStoreAddress);
 }
 
 // ============================================================
 // 메뉴 카드 (배달/포장 공용)
 // isPickup=true 이면 pickupMenuListContainer에 rebuildPickupMenuList가 넣음
 // ============================================================
-QWidget* CartWidget::makeMenuCard(const CartItemQt &item, bool isPickup)
+QWidget* CartWidget::makeMenuCard(int index, bool isPickup)
 {
+    const CartItemQt &item = CartSession::instance().items[index];
+
     QWidget *card = new QWidget();
     card->setStyleSheet("QWidget{background:#ffffff;border-bottom:1px solid #f0f0f0;}");
 
@@ -281,16 +294,26 @@ QWidget* CartWidget::makeMenuCard(const CartItemQt &item, bool isPickup)
     hl->setSpacing(12);
 
     QVBoxLayout *vl = new QVBoxLayout();
-    vl->setSpacing(3);
+    vl->setSpacing(2);
 
+    // 메뉴명
     QLabel *nameLabel = new QLabel(item.menuName);
     nameLabel->setStyleSheet("font-size:14px;font-weight:bold;color:#111111;");
+    vl->addWidget(nameLabel);
 
+    // 옵션명 (있을 때만 표시)
+    if (!item.optionName.isEmpty()) {
+        QLabel *optLabel = new QLabel(item.optionName);
+        optLabel->setStyleSheet("font-size:12px;color:#888888;");
+        optLabel->setWordWrap(true);
+        vl->addWidget(optLabel);
+    }
+
+    // 단가
     QLabel *priceLabel = new QLabel(StoreUtils::formatWon(item.unitPrice));
     priceLabel->setStyleSheet("font-size:13px;color:#555555;");
-
-    vl->addWidget(nameLabel);
     vl->addWidget(priceLabel);
+
     hl->addLayout(vl, 1);
 
     QWidget *qtyWidget = new QWidget();
@@ -305,8 +328,8 @@ QWidget* CartWidget::makeMenuCard(const CartItemQt &item, bool isPickup)
         "QPushButton{background:#f0f0f0;border-radius:16px;border:none;font-size:14px;color:#333333;}"
         "QPushButton:hover{background:#e0e0e0;}");
     connect(btnMinus, &QPushButton::clicked, this,
-            [this, menuId = item.menuId, qty = item.quantity, isPickup]() {
-        CartSession::instance().updateQuantity(menuId, qty - 1);
+            [this, index, qty = item.quantity, isPickup]() {
+        CartSession::instance().updateQuantityByIndex(index, qty - 1);
         if (isPickup) { rebuildPickupMenuList(); updatePickupPriceSection(); }
         else          { rebuildMenuList();        updatePriceSection(); }
         updateBottomBar();
@@ -323,8 +346,8 @@ QWidget* CartWidget::makeMenuCard(const CartItemQt &item, bool isPickup)
         "QPushButton{background:#1565c0;border-radius:16px;border:none;font-size:18px;color:#ffffff;}"
         "QPushButton:hover{background:#1976d2;}");
     connect(btnPlus, &QPushButton::clicked, this,
-            [this, menuId = item.menuId, qty = item.quantity, isPickup]() {
-        CartSession::instance().updateQuantity(menuId, qty + 1);
+            [this, index, qty = item.quantity, isPickup]() {
+        CartSession::instance().updateQuantityByIndex(index, qty + 1);
         if (isPickup) { rebuildPickupMenuList(); updatePickupPriceSection(); }
         else          { rebuildMenuList();        updatePriceSection(); }
         updateBottomBar();
@@ -352,8 +375,8 @@ void CartWidget::rebuildMenuList()
         delete child;
     }
 
-    for (const CartItemQt &item : CartSession::instance().items)
-        menuLayout->addWidget(makeMenuCard(item, false));
+    for (int i = 0; i < CartSession::instance().items.size(); i++)
+        menuLayout->addWidget(makeMenuCard(i, false));
 
     if (m_minOrderAmount > 0 && !isMinOrderMet()) {
         int diff = m_minOrderAmount - CartSession::instance().totalPrice();
@@ -378,8 +401,8 @@ void CartWidget::rebuildPickupMenuList()
         delete child;
     }
 
-    for (const CartItemQt &item : CartSession::instance().items)
-        menuLayout->addWidget(makeMenuCard(item, true));
+    for (int i = 0; i < CartSession::instance().items.size(); i++)
+        menuLayout->addWidget(makeMenuCard(i, true));
 
     if (m_minOrderAmount > 0 && !isMinOrderMet()) {
         int diff = m_minOrderAmount - CartSession::instance().totalPrice();
@@ -506,8 +529,12 @@ void CartWidget::updateBottomBar()
 // ============================================================
 // 서버 응답: 결제 정보 수신
 // ============================================================
+// 파라미터를 4개로 줄이고, storeAddress/pickupTime은 CartSession에서 꺼냄
 void CartWidget::onCheckoutInfoReceived(int status, const QString &customerGrade,
-                                        int deliveryFee, int minOrderAmount)
+                                        int deliveryFee, int minOrderAmount,
+                                        const QString &pickupTime,
+                                        const QString &cardNumber,
+                                        const QString &accountNumber)
 {
     if (status != 200) {
         qWarning() << "[CartWidget] 결제 정보 수신 실패 status:" << status;
@@ -518,16 +545,23 @@ void CartWidget::onCheckoutInfoReceived(int status, const QString &customerGrade
     m_deliveryFee    = deliveryFee;
     m_minOrderAmount = minOrderAmount;
 
-    // TODO: DTO 확장 시 m_pickupTime, m_pickupStoreAddress 여기서 받아오기
+    // 포장 시간 / 결제수단: 서버에서 직접 받음
+    if (!pickupTime.isEmpty())   m_pickupTime    = pickupTime;
+    if (!cardNumber.isEmpty())   m_cardNumber    = cardNumber;
+    if (!accountNumber.isEmpty()) m_accountNumber = accountNumber;
+
+    // storeAddress는 CartSession에서 (RES_STORE_DETAIL 때 저장됨)
+    m_pickupStoreAddress = CartSession::instance().storeAddress;
 
     qDebug() << "[CartWidget] grade:" << customerGrade
              << "fee:" << deliveryFee
-             << "min:" << minOrderAmount;
+             << "pickupTime:" << m_pickupTime;
 
     updateDeliverySection();
     updatePriceSection();
     updatePickupInfo();
     updatePickupPriceSection();
+    updatePaymentSection();
     updateBottomBar();
     rebuildMenuList();
     rebuildPickupMenuList();
@@ -580,6 +614,9 @@ void CartWidget::on_btnRequestToggle_clicked()
 
 void CartWidget::on_btnPay_clicked()
 {
+    static int callCount = 0;
+    qDebug() << "[CartWidget] 결제 버튼 클릭됨! 횟수:" << ++callCount;
+
     if (!isMinOrderMet() || CartSession::instance().isEmpty()) return;
 
     OrderCreateReqDTO dto;
@@ -594,10 +631,57 @@ void CartWidget::on_btnPay_clicked()
         orderItem.menuId          = item.menuId;
         orderItem.quantity        = item.quantity;
         orderItem.unitPrice       = item.unitPrice;
-        orderItem.selectedOptions = nlohmann::json::array();
+        orderItem.menuName        = item.menuName.toStdString();
+        nlohmann::json optArr = nlohmann::json::array();
+        for (int id : item.optionIds) optArr.push_back(id);
+        orderItem.selectedOptions = optArr;
         dto.items.push_back(orderItem);
     }
+    dto.storeRequest = ui->pickupStoreRequestEdit->toPlainText().toStdString();
+
+    qDebug() << "====== [배달주문 결제하기] ======";
+    qDebug() << "userId         :" << QString::fromStdString(dto.userId);
+    qDebug() << "storeId        :" << dto.storeId;
+    qDebug() << "totalPrice     :" << dto.totalPrice;
+    qDebug() << "deliveryAddress:" << QString::fromStdString(dto.deliveryAddress);
+    qDebug() << "couponId       :" << dto.couponId;
+    qDebug() << "── 메뉴 목록 ──";
+    for (const auto &item : dto.items) {
+        qDebug() << "  menuId:" << item.menuId
+                 << "qty:"      << item.quantity
+                 << "price:"    << item.unitPrice;
+    }
+    qDebug() << "=================================";
+
     m_network->sendOrderCreate(dto);
+}
+
+// ============================================================
+// 결제수단 섹션 업데이트
+// ============================================================
+void CartWidget::updatePaymentSection()
+{
+    QString cardText    = m_cardNumber.isEmpty()    ? "카드 정보 없음" : m_cardNumber;
+    QString accountText = m_accountNumber.isEmpty() ? "계좌 정보 없음" : m_accountNumber;
+    ui->lblCardNumber->setText("💳 " + cardText);
+    ui->lblAccountNumber->setText("🏦 " + accountText);
+    // 포장 탭에도 동일하게
+    ui->lblPickupCardNumber->setText("💳 " + cardText);
+    ui->lblPickupAccountNumber->setText("🏦 " + accountText);
+}
+
+void CartWidget::on_btnPaymentExpand_clicked()
+{
+    m_paymentExpanded = !m_paymentExpanded;
+    ui->paymentBody->setVisible(m_paymentExpanded);
+    ui->btnPaymentExpand->setText(m_paymentExpanded ? "∧" : "∨");
+}
+
+void CartWidget::on_btnPickupPaymentExpand_clicked()
+{
+    m_pickupPaymentExpanded = !m_pickupPaymentExpanded;
+    ui->pickupPaymentBody->setVisible(m_pickupPaymentExpanded);
+    ui->btnPickupPaymentExpand->setText(m_pickupPaymentExpanded ? "∧" : "∨");
 }
 
 // ============================================================
