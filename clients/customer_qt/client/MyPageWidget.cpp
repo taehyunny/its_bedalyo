@@ -58,7 +58,7 @@ void MyPageWidget::on_btnDetail_clicked()
 
 void MyPageWidget::on_btnAddress_clicked()
 {
-    QMessageBox::information(this, "준비 중", "주소 관리 화면은 준비 중입니다.");
+    emit addressRequested();
 }
 
 void MyPageWidget::on_btnFavorite_clicked()  { emit favoriteRequested(); }

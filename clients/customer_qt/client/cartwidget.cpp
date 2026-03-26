@@ -25,7 +25,7 @@ CartWidget::CartWidget(NetworkManager *network, QWidget *parent)
     connect(ui->btnClose,         &QPushButton::clicked, this, &CartWidget::on_btnClose_clicked);
     connect(ui->btnAddMenu,       &QPushButton::clicked, this, &CartWidget::on_btnAddMenu_clicked);
     connect(ui->btnAddressEdit,   &QPushButton::clicked, this, &CartWidget::on_btnAddressEdit_clicked);
-    connect(ui->btnPay,           &QPushButton::clicked, this, &CartWidget::on_btnPay_clicked);
+    // connect(ui->btnPay,           &QPushButton::clicked, this, &CartWidget::on_btnPay_clicked);
     connect(ui->btnRequestToggle, &QPushButton::clicked, this, &CartWidget::on_btnRequestToggle_clicked);
 
     // ── 포장 버튼 ──
@@ -612,6 +612,9 @@ void CartWidget::on_btnRequestToggle_clicked()
 
 void CartWidget::on_btnPay_clicked()
 {
+    static int callCount = 0;
+    qDebug() << "[CartWidget] 결제 버튼 클릭됨! 횟수:" << ++callCount;
+
     if (!isMinOrderMet() || CartSession::instance().isEmpty()) return;
 
     OrderCreateReqDTO dto;
@@ -633,6 +636,21 @@ void CartWidget::on_btnPay_clicked()
         dto.items.push_back(orderItem);
     }
     dto.storeRequest = ui->pickupStoreRequestEdit->toPlainText().toStdString();
+
+    qDebug() << "====== [배달주문 결제하기] ======";
+    qDebug() << "userId         :" << QString::fromStdString(dto.userId);
+    qDebug() << "storeId        :" << dto.storeId;
+    qDebug() << "totalPrice     :" << dto.totalPrice;
+    qDebug() << "deliveryAddress:" << QString::fromStdString(dto.deliveryAddress);
+    qDebug() << "couponId       :" << dto.couponId;
+    qDebug() << "── 메뉴 목록 ──";
+    for (const auto &item : dto.items) {
+        qDebug() << "  menuId:" << item.menuId
+                 << "qty:"      << item.quantity
+                 << "price:"    << item.unitPrice;
+    }
+    qDebug() << "=================================";
+
     m_network->sendOrderCreate(dto);
 }
 

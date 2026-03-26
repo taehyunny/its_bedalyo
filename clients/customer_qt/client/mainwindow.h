@@ -80,6 +80,7 @@ private:
 
     QList<CategoryInfoQt> m_cachedCategories;
     QWidget              *m_previousWidget = nullptr;
+    QWidget              *m_prevWidget = nullptr;
 
     // CartBar 위치 관련 헬퍼
     void repositionCartBar();
