@@ -7,6 +7,7 @@
 #include "CTabSalesDlg.h"
 #include "CTabSettlementDlg.h"
 #include "NetworkHelper.h"
+#include "CChatRoomDlg.h"
 
 class CMainMenuDlg : public CDialogEx
 {
@@ -69,5 +70,6 @@ private:
     CStatic     m_staticStatus;    // IDC_STATIC_STATUS
     CTabCtrl    m_tabCtrl;         // IDC_TAB_STATUS_SET
     CNetworkHelper* m_pNet = nullptr;
+    CChatRoomDlg* m_pChatRoomDlg = nullptr;
 
 };

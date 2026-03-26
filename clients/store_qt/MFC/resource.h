@@ -134,6 +134,11 @@
 #define IDC_BTN_DELETE                  1226
 #define IDC_STORE_REQUEST               1228
 #define IDC_RIDER_REQUEST               1229
+#define IDD_CHAT_ROOM               160
+#define IDC_LIST_CHAT_ROOM          1230
+#define IDC_EDIT_CHAT_ROOM_MSG      1231
+#define IDC_BTN_CHAT_ROOM_SEND      1232
+#define IDC_BTN_CHAT_ROOM_CLOSE     1233
 
 // Next default values for new objects
 // 

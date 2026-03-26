@@ -31,6 +31,12 @@ CMainMenuDlg::CMainMenuDlg(int storeId, CNetworkHelper* pNet,
 
 CMainMenuDlg::~CMainMenuDlg()
 {
+    if (m_pChatRoomDlg)
+    {
+        m_pChatRoomDlg->DestroyWindow();
+        delete m_pChatRoomDlg;
+        m_pChatRoomDlg = nullptr;
+    }
 }
 
 void CMainMenuDlg::DoDataExchange(CDataExchange* pDX)
@@ -253,16 +259,22 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     else if (pkt->cmdId == CmdID::RES_CHAT_CONNECT)
     {
         json resJson = json::parse(pkt->body);
-        if (resJson.value("status", 0) == 200)
+        int status = resJson.value("status", 0);
+        std::string msg = resJson.value("message", "");
+        CString strMsg = CA2W(msg.c_str(), CP_UTF8);
+
+        if (status == 200 || status == 202) 
         {
-            MessageBox(
-                L"관리자와 연결되었습니다.\n잠시 후 답변이 도착합니다.",
+            MessageBox(strMsg.IsEmpty() ?
+                L"관리자와 연결되었습니다.\n잠시 후 답변이 도착합니다." :
+                strMsg,
                 L"고객센터", MB_OK | MB_ICONINFORMATION);
         }
         else
         {
-            MessageBox(
-                L"현재 관리자가 없습니다.\n잠시 후 다시 시도해주세요.",
+            MessageBox(strMsg.IsEmpty() ?
+                L"현재 관리자가 없습니다.\n잠시 후 다시 시도해주세요." :
+                strMsg,
                 L"고객센터", MB_OK | MB_ICONWARNING);
             m_btnChatRequest.EnableWindow(TRUE);
             m_btnChatRequest.SetWindowText(L"고객센터");
@@ -273,6 +285,36 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         json resJson = json::parse(pkt->body);
         if (resJson.value("status", 0) == 200)
             m_tabOrderDlg.SetOrderList(resJson["orders"]);
+    }
+    else if (pkt->cmdId == CmdID::RES_CHAT_CONNECT)
+    {
+        json resJson = json::parse(pkt->body);
+        int status = resJson.value("status", 0);
+
+        if (status == 200 || status == 202)
+        {
+            // 채팅창 열기 (모달리스)
+            if (!m_pChatRoomDlg)
+            {
+                std::string userId = (const char*)CT2A(m_ownerName, CP_UTF8);
+                m_pChatRoomDlg = new CChatRoomDlg(m_pNet, userId, this);
+                m_pChatRoomDlg->Create(IDD_CHAT_ROOM, this);
+            }
+            m_pChatRoomDlg->ShowWindow(SW_SHOW);
+        }
+        else
+        {
+            MessageBox(L"현재 관리자가 없습니다.\n잠시 후 다시 시도해주세요.",
+                L"고객센터", MB_OK | MB_ICONWARNING);
+            m_btnChatRequest.EnableWindow(TRUE);
+            m_btnChatRequest.SetWindowText(L"고객센터");
+        }
+    }
+    else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG)
+    {
+        json resJson = json::parse(pkt->body);
+        if (m_pChatRoomDlg && ::IsWindow(m_pChatRoomDlg->GetSafeHwnd()))
+            m_pChatRoomDlg->AddMessage(resJson);
     }
 
     delete pkt;

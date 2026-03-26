@@ -188,6 +188,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CChatRoomDlg.h" />
     <ClInclude Include="CMainMenuDlg.h" />
     <ClInclude Include="CMenuEditDlg.h" />
     <ClInclude Include="CMenuOptionDlg.h" />
@@ -210,6 +211,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CChatRoomDlg.cpp" />
     <ClCompile Include="CMainMenuDlg.cpp" />
     <ClCompile Include="CMenuEditDlg.cpp" />
     <ClCompile Include="CMenuOptionDlg.cpp" />

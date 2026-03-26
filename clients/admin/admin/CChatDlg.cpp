@@ -36,7 +36,6 @@ void CChatDlg::InitListCtrl()
     m_listChatUsers.SetExtendedStyle(
         m_listChatUsers.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
     m_listChatUsers.InsertColumn(0, L"유저ID", LVCFMT_LEFT, 90);
-    m_listChatUsers.InsertColumn(1, L"상태", LVCFMT_CENTER, 40);
     m_listChatUsers.InsertColumn(1, L"매장ID", LVCFMT_CENTER, 60);
     m_listChatUsers.InsertColumn(2, L"상태", LVCFMT_CENTER, 50);
 }
