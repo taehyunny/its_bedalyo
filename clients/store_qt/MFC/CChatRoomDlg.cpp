@@ -29,26 +29,21 @@ BOOL CChatRoomDlg::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
     SetWindowText(L"고객센터 1:1 채팅");
-
-    // 안내 메시지
     m_listChatLog.AddString(L"── 관리자와 연결되었습니다 ──");
-
     return TRUE;
 }
 
 // =========================================================
-// 메시지 수신 (CMainMenuDlg에서 포워딩)
+// 메시지 수신
 // =========================================================
 void CChatRoomDlg::AddMessage(const json& msgJson)
 {
     std::string senderId = msgJson.value("senderId", "");
-    std::string message = msgJson.value("message", "");
+    std::string content = msgJson.value("content", "");  // ✅ "message" → "content"
 
-    CString strSender = CA2W(senderId.c_str(), CP_UTF8);
-    CString strMsg = CA2W(message.c_str(), CP_UTF8);
+    CString strMsg = CA2W(content.c_str(), CP_UTF8);
 
     CString strLine;
-    // 내가 보낸 메시지면 [나], 관리자면 [관리자]
     if (senderId == m_userId)
         strLine.Format(L"[나] %s", (LPCTSTR)strMsg);
     else
@@ -64,15 +59,21 @@ void CChatRoomDlg::AddMessage(const json& msgJson)
 void CChatRoomDlg::OnBnClickedBtnChatRoomSend()
 {
     if (!m_pNet) return;
+    if (m_roomId == -1)  // ✅ roomId 없으면 전송 불가
+    {
+        MessageBox(L"채팅방이 아직 준비되지 않았습니다.", L"알림", MB_OK);
+        return;
+    }
 
     CString strMsg;
     m_editChatMsg.GetWindowText(strMsg);
     if (strMsg.IsEmpty()) return;
 
+    // ✅ roomId 사용, "content" 키 사용
     json body;
+    body["roomId"] = m_roomId;
     body["senderId"] = m_userId;
-    body["receiverId"] = "admin";
-    body["message"] = (const char*)CT2A(strMsg, CP_UTF8);
+    body["content"] = (const char*)CT2A(strMsg, CP_UTF8);
     m_pNet->Send(CmdID::REQ_CHAT_SEND, body);
 
     // 내 메시지 즉시 표시
@@ -90,7 +91,7 @@ void CChatRoomDlg::OnBnClickedBtnChatRoomSend()
 // =========================================================
 void CChatRoomDlg::OnBnClickedBtnChatRoomClose()
 {
-    DestroyWindow();
+    ShowWindow(SW_HIDE);
 }
 
 BEGIN_MESSAGE_MAP(CChatRoomDlg, CDialogEx)

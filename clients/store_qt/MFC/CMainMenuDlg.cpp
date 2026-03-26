@@ -15,7 +15,7 @@ CMainMenuDlg::CMainMenuDlg(int storeId, CNetworkHelper* pNet,
     const CString& closeTime, const CString& ownerName,
     const CString& ownerPhone, const CString& accountNumber,
     const CString& approvalStatus,
-    int deliveryFee,        //  CString → int
+    int deliveryFee,
     CWnd* pParent)
     : CDialogEx(IDD_MAIN_MENU, pParent)
     , m_storeId(storeId), m_pNet(pNet), m_storeName(storeName)
@@ -53,7 +53,6 @@ BOOL CMainMenuDlg::OnInitDialog()
     CDialogEx::OnInitDialog();
     m_pNet->SetNotifyHwnd(GetSafeHwnd());
 
-    // 상단 매장명 / 영업상태 표시
     if (m_storeId == 0 || m_storeName.IsEmpty())
     {
         m_staticNameBar.SetWindowText(L"매장 정보가 없습니다.");
@@ -65,7 +64,6 @@ BOOL CMainMenuDlg::OnInitDialog()
         m_staticStatus.SetWindowText(L"영업중");
     }
 
-    // 탭 항목 추가
     m_tabCtrl.InsertItem(0, L"주문 관리");
     m_tabCtrl.InsertItem(1, L"메뉴 관리");
     m_tabCtrl.InsertItem(2, L"매장 설정");
@@ -73,12 +71,10 @@ BOOL CMainMenuDlg::OnInitDialog()
     m_tabCtrl.InsertItem(4, L"매출 통계");
     m_tabCtrl.InsertItem(5, L"정산 관리");
 
-    // Tab Control 내용 영역 계산
     CRect rcTab;
     m_tabCtrl.GetClientRect(&rcTab);
     m_tabCtrl.AdjustRect(FALSE, &rcTab);
 
-    // ── 탭 다이얼로그 생성 및 배치 ───────────────────────────
     m_tabOrderDlg.Create(IDD_TAB_ORDER, &m_tabCtrl);
     m_tabOrderDlg.MoveWindow(&rcTab);
     m_tabOrderDlg.ShowWindow(SW_SHOW);
@@ -91,7 +87,6 @@ BOOL CMainMenuDlg::OnInitDialog()
     m_tabStoreDlg.MoveWindow(&rcTab);
     m_tabStoreDlg.ShowWindow(SW_HIDE);
 
-    // ✅ int → CString 변환 후 SetStoreInfo 전달
     CString strDeliveryFee;
     strDeliveryFee.Format(L"%d", m_deliveryFee);
 
@@ -105,7 +100,6 @@ BOOL CMainMenuDlg::OnInitDialog()
 
     m_tabMenuDlg.SetMenuInfo(m_storeId, m_pNet);
 
-    // ✅ Create 먼저, SetReviewInfo 나중에
     m_tabReviewDlg.Create(IDD_TAB_REVIEW, &m_tabCtrl);
     m_tabReviewDlg.MoveWindow(&rcTab);
     m_tabReviewDlg.ShowWindow(SW_HIDE);
@@ -116,7 +110,6 @@ BOOL CMainMenuDlg::OnInitDialog()
     m_tabSalesDlg.ShowWindow(SW_HIDE);
     m_tabSalesDlg.SetSalesInfo(m_storeId, m_pNet);
 
-    // ✅ Create 먼저, SetSettlementInfo 나중에
     m_tabSettlementDlg.Create(IDD_TAB_SETTLEMENT, &m_tabCtrl);
     m_tabSettlementDlg.MoveWindow(&rcTab);
     m_tabSettlementDlg.ShowWindow(SW_HIDE);
@@ -171,6 +164,12 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     (void)wParam;
     auto* pkt = reinterpret_cast<ReceivedPacket*>(lParam);
     if (!pkt) return 0;
+
+    // [디버그 수정한 부분] 한글 깨짐 방지 처리
+    CString strUnicodeBody = CA2W(pkt->body.c_str(), CP_UTF8);
+    CString dbgPkt;
+    dbgPkt.Format(L"[DEBUG] RECV Packet ID: %d, Body: %s\n", pkt->cmdId, (LPCTSTR)strUnicodeBody);
+    OutputDebugString(dbgPkt);
 
     if (pkt->cmdId == CmdID::RES_STORE_INFO_UPDATE)
     {
@@ -260,25 +259,49 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     {
         json resJson = json::parse(pkt->body);
         int status = resJson.value("status", 0);
-        std::string msg = resJson.value("message", "");
-        CString strMsg = CA2W(msg.c_str(), CP_UTF8);
 
-        if (status == 200 || status == 202) 
+        if (status == 200 || status == 202)
         {
-            MessageBox(strMsg.IsEmpty() ?
-                L"관리자와 연결되었습니다.\n잠시 후 답변이 도착합니다." :
-                strMsg,
+            // 대기 메시지만 표시, 채팅창은 열지 않음
+            MessageBox(
+                L"관리자에게 요청을 보냈습니다.\n수락 시 채팅창이 자동으로 열립니다.",
                 L"고객센터", MB_OK | MB_ICONINFORMATION);
         }
         else
         {
-            MessageBox(strMsg.IsEmpty() ?
-                L"현재 관리자가 없습니다.\n잠시 후 다시 시도해주세요." :
-                strMsg,
+            MessageBox(
+                L"현재 관리자가 없습니다.\n잠시 후 다시 시도해주세요.",
                 L"고객센터", MB_OK | MB_ICONWARNING);
             m_btnChatRequest.EnableWindow(TRUE);
             m_btnChatRequest.SetWindowText(L"고객센터");
         }
+    }
+
+        // ✅ RES_REQUEST_OK (5000) - 관리자 수락 시 채팅창 오픈
+    else if (pkt->cmdId == CmdID::RES_REQUEST_OK)
+    {
+        json resJson = json::parse(pkt->body);
+        int roomId = resJson.value("roomId", -1);
+
+        // 채팅창 생성 (없을 때만)
+        if (!m_pChatRoomDlg)
+        {
+            std::string userId = (const char*)CT2A(m_ownerName, CP_UTF8);
+            m_pChatRoomDlg = new CChatRoomDlg(m_pNet, userId, this);
+            m_pChatRoomDlg->Create(IDD_CHAT_ROOM, this);
+        }
+
+        // ✅ roomId 전달 후 창 오픈
+        m_pChatRoomDlg->SetRoomId(roomId);
+        m_pChatRoomDlg->ShowWindow(SW_SHOW);
+        }
+
+        // ✅ NOTIFY_CHAT_MSG (9030) - 메시지 수신 시 채팅창에 추가
+    else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG)
+    {
+        json resJson = json::parse(pkt->body);
+        if (m_pChatRoomDlg && m_pChatRoomDlg->IsWindowVisible())
+            m_pChatRoomDlg->AddMessage(resJson);
     }
     else if (pkt->cmdId == CmdID::RES_ORDER_LIST)
     {
@@ -286,36 +309,35 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         if (resJson.value("status", 0) == 200)
             m_tabOrderDlg.SetOrderList(resJson["orders"]);
     }
-    else if (pkt->cmdId == CmdID::RES_CHAT_CONNECT)
+    else if (pkt->cmdId == CmdID::NOTIFY_ORDER_STATE)
     {
         json resJson = json::parse(pkt->body);
-        int status = resJson.value("status", 0);
+        std::string orderId = resJson.value("orderId", "");
+        int state = resJson.value("state", 0);
 
-        if (status == 200 || status == 202)
+        // state: 3 = 배달중, 4 = 배달완료
+        CString strStatus;
+        switch (state)
         {
-            // 채팅창 열기 (모달리스)
-            if (!m_pChatRoomDlg)
-            {
-                std::string userId = (const char*)CT2A(m_ownerName, CP_UTF8);
-                m_pChatRoomDlg = new CChatRoomDlg(m_pNet, userId, this);
-                m_pChatRoomDlg->Create(IDD_CHAT_ROOM, this);
-            }
-            m_pChatRoomDlg->ShowWindow(SW_SHOW);
+        case 3: strStatus = L"배달중"; break;
+        case 4: strStatus = L"완료";   break;
+        default: strStatus = L"알 수 없음"; break;
         }
-        else
-        {
-            MessageBox(L"현재 관리자가 없습니다.\n잠시 후 다시 시도해주세요.",
-                L"고객센터", MB_OK | MB_ICONWARNING);
-            m_btnChatRequest.EnableWindow(TRUE);
-            m_btnChatRequest.SetWindowText(L"고객센터");
-        }
+
+        // orderId로 리스트 탐색 후 상태 변경
+        m_tabOrderDlg.UpdateOrderStatus(orderId, strStatus);
     }
-    else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG)
-    {
-        json resJson = json::parse(pkt->body);
-        if (m_pChatRoomDlg && ::IsWindow(m_pChatRoomDlg->GetSafeHwnd()))
-            m_pChatRoomDlg->AddMessage(resJson);
-    }
+    // [새로 추가] 서버에서 채팅 종료 통보를 보냈을 때 (예: CmdID::NOTIFY_CHAT_EXIT)
+    //else if (pkt->cmdId == CmdID::NOTIFY_CHAT_EXIT)
+    //{
+    //    if (m_pChatRoomDlg && ::IsWindow(m_pChatRoomDlg->GetSafeHwnd()))
+    //    {
+    //        m_pChatRoomDlg->ShowWindow(SW_HIDE);
+    //        MessageBox(L"관리자에 의해 상담이 종료되었습니다.", L"알림", MB_OK | MB_ICONINFORMATION);
+    //    }
+    //    m_btnChatRequest.EnableWindow(TRUE);
+    //    m_btnChatRequest.SetWindowText(L"고객센터");
+    //}
 
     delete pkt;
     return 0;
@@ -333,6 +355,13 @@ void CMainMenuDlg::OnBnClickedBtnChatRequest()
         json body;
         body["storeId"] = m_storeId;
         body["userId"] = (const char*)CT2A(m_ownerName, CP_UTF8);
+
+        std::string dumped = body.dump();
+        CString strUnicodeSend = CA2W(dumped.c_str(), CP_UTF8);
+        CString dbgMsg;
+        dbgMsg.Format(L"[DEBUG] SEND REQ_CHAT_CONNECT: %s\n", (LPCTSTR)strUnicodeSend);
+        OutputDebugString(dbgMsg);
+
         m_pNet->Send(CmdID::REQ_CHAT_CONNECT, body);
 
         m_btnChatRequest.EnableWindow(FALSE);

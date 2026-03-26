@@ -2,6 +2,7 @@
 #include "admin.h"
 #include "afxdialogex.h"
 #include "CAdminDlg.h"
+#include "CRefundDlg.h"
 
 IMPLEMENT_DYNAMIC(CAdminDlg, CDialogEx)
 
@@ -83,15 +84,16 @@ void CAdminDlg::OnBnClickedBtnConnect()
     }
 
     m_net.SetNotifyHwnd(GetSafeHwnd());
-    m_tabChatDlg.SetNetworkHelper(&m_net);
-    m_tabRefundDlg.SetNetworkHelper(&m_net);
-    m_btnConnect.EnableWindow(FALSE);
-    m_btnConnectOff.EnableWindow(TRUE);
-    m_staticServerAddress.SetWindowText(L"✅ 서버 연결됨");
-    m_tabReviewDlg.SetNetworkHelper(&m_net);
-    m_tabBlackDlg.SetNetworkHelper(&m_net);
 
-    MessageBox(L"서버에 연결되었습니다.", L"연결 성공", MB_OK);
+    // ✅ 연결 후 관리자 인증 요청 전송
+    json auth;
+    auth["adminId"] = "admin";  // 서버팀과 약속된 관리자 ID
+    auth["role"] = 3;        // 관리자 role 값 (서버팀 확인 필요)
+    m_net.Send(CmdID::REQ_ADMIN_INIT, auth);
+
+    // ✅ 버튼은 RES_ADMIN_INIT 수신 후 활성화 (아직 비활성)
+    m_btnConnect.EnableWindow(FALSE);
+    m_staticServerAddress.SetWindowText(L"⏳ 인증 중...");
 }
 
 // =========================================================
@@ -143,33 +145,76 @@ LRESULT CAdminDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     auto* pkt = reinterpret_cast<ReceivedPacket*>(lParam);
     if (!pkt) return 0;
 
-    json resJson = json::parse(pkt->body);
+    CString strUnicodeBody = CA2W(pkt->body.c_str(), CP_UTF8);
 
-    if (pkt->cmdId == CmdID::REQ_CHAT_CONNECT)
-    {
-        // ✅ 사장님/고객 채팅 요청 → 채팅 탭에 추가
-        m_tabChatDlg.AddChatRequest(resJson);
+    CString dbgLog;
+    dbgLog.Format(L"[DEBUG RECV] ID: %d, Body: %s\n", pkt->cmdId, (LPCTSTR)strUnicodeBody);
+    OutputDebugString(dbgLog);
 
-        // 채팅 탭으로 자동 전환
-        m_tabCtrl.SetCurSel(0);
-        m_tabChatDlg.ShowWindow(SW_SHOW);
+    try {
+        json resJson = json::parse(pkt->body);
+
+        // ✅ 0. 관리자 인증 응답 (RES_ADMIN_INIT = 5091)
+        if (pkt->cmdId == CmdID::RES_ADMIN_INIT)
+        {
+            if (resJson.value("status", 0) == 200)
+            {
+                m_tabChatDlg.SetNetworkHelper(&m_net);
+                m_tabRefundDlg.SetNetworkHelper(&m_net);
+                m_tabReviewDlg.SetNetworkHelper(&m_net);
+                m_tabBlackDlg.SetNetworkHelper(&m_net);
+
+                m_btnConnectOff.EnableWindow(TRUE);
+                m_staticServerAddress.SetWindowText(L" 서버 연결됨");
+                MessageBox(L"관리자 인증 완료.", L"연결 성공", MB_OK);
+            }
+            else
+            {
+                m_net.Disconnect();
+                m_btnConnect.EnableWindow(TRUE);
+                m_staticServerAddress.SetWindowText(L" 인증 실패");
+                MessageBox(L"관리자 인증에 실패했습니다.", L"오류", MB_ICONERROR);
+            }
+        }
+        // 1. 채팅 요청 (사장님이 고객센터 버튼 눌렀을 때)
+        else if (pkt->cmdId == CmdID::REQ_CHAT_CONNECT)
+        {
+            m_tabChatDlg.AddChatRequest(resJson);
+
+            if (m_tabCtrl.GetCurSel() != 0) {
+                m_tabCtrl.SetCurSel(0);
+                NMHDR nmhdr = { m_tabCtrl.GetSafeHwnd(), (UINT_PTR)IDC_TAB, TCN_SELCHANGE };
+                SendMessage(WM_NOTIFY, IDC_TAB, (LPARAM)&nmhdr);
+            }
+        }
+        // 2. 새 채팅 메시지 수신
+        else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG)
+        {
+            m_tabChatDlg.AddChatMessage(resJson);
+        }
+        // 3. 기존 기능들
+        else if (pkt->cmdId == CmdID::RES_ADMIN_ORDER_LIST)
+        {
+            m_tabRefundDlg.OnSearchResult(resJson);
+        }
+        else if (pkt->cmdId == CmdID::RES_REVIEW_LIST)
+        {
+            m_tabReviewDlg.OnReviewListResult(resJson);
+        }
+        else if (pkt->cmdId == CmdID::RES_BLACKLIST_REQUEST)
+        {
+            m_tabBlackDlg.OnBlacklistResult(resJson);
+        }
+        else if (pkt->cmdId == CmdID::RES_CANCEL)
+        {
+            m_tabRefundDlg.OnCancelResult(resJson);
+        }
     }
-    else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG)
-    {
-        // ✅ 채팅 메시지 수신
-        m_tabChatDlg.AddChatMessage(resJson);
-    }
-    else if (pkt->cmdId == CmdID::RES_ADMIN_ORDER_LIST)
-    {
-        m_tabRefundDlg.OnSearchResult(resJson);
-    }
-    else if (pkt->cmdId == CmdID::RES_REVIEW_LIST)
-    {
-        m_tabReviewDlg.OnReviewListResult(resJson);
-    }
-    else if (pkt->cmdId == CmdID::RES_BLACKLIST_REQUEST)
-    {
-        m_tabBlackDlg.OnBlacklistResult(resJson);
+
+    catch (const std::exception& e) {
+        CString strErr;
+        strErr.Format(L"[ERROR] JSON 파싱 실패: %S\n", e.what());
+        OutputDebugString(strErr);
     }
 
     delete pkt;

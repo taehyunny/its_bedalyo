@@ -13,7 +13,7 @@ class CTabOrderDlg : public CDialogEx
 public:
     CTabOrderDlg(CWnd* pParent = nullptr);
     virtual ~CTabOrderDlg();
-
+    void UpdateOrderStatus(const std::string& orderId, const CString& strStatus);
 #ifdef AFX_DESIGN_TIME
     enum { IDD = IDD_TAB_ORDER };
 #endif

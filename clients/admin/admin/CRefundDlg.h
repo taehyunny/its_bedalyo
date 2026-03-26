@@ -19,7 +19,7 @@ public:
 
     void SetNetworkHelper(CNetworkHelper* pNet);
     void OnSearchResult(const json& resJson);  // 서버 검색 결과 수신
-
+    void CRefundDlg::OnCancelResult(const json& resJson);
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
@@ -29,7 +29,6 @@ protected:
     afx_msg void OnBnClickedBtnCancelOrder();
     afx_msg void OnBnClickedBtnRefundOrder();
     afx_msg void OnLvnItemchangedListRefundOrder(NMHDR* pNMHDR, LRESULT* pResult);
-
     DECLARE_MESSAGE_MAP()
 
 private:

@@ -21,6 +21,7 @@ void CRiderMainDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_BTN_REFRESH, m_btnRefresh);
     DDX_Control(pDX, IDC_LIST_ORDERS, m_listOrders);
     DDX_Control(pDX, IDC_BTN_DELIVER, m_btnDeliver);
+    DDX_Control(pDX, IDC_BTN_PICKUP, m_btnPickup);
 }
 
 BOOL CRiderMainDlg::OnInitDialog()
@@ -37,6 +38,7 @@ BOOL CRiderMainDlg::OnInitDialog()
     m_btnDisconnect.EnableWindow(FALSE);
     m_btnRefresh.EnableWindow(FALSE);
     m_btnDeliver.EnableWindow(FALSE);
+    m_btnPickup.EnableWindow(FALSE);
 
     InitListCtrl();
     return TRUE;
@@ -53,10 +55,29 @@ void CRiderMainDlg::InitListCtrl()
     m_listOrders.InsertColumn(4, L"주문시각", LVCFMT_LEFT, 120);
 }
 
+void CRiderMainDlg::OnBnClickedBtnPickup()
+{
+    int nIdx = GetSelectedIndex();
+    if (nIdx == -1) return;
+
+    auto* pOrderId = reinterpret_cast<std::string*>(
+        m_listOrders.GetItemData(nIdx));
+    if (!pOrderId) return;
+
+    if (MessageBox(L"해당 주문을 픽업하셨습니까?",
+        L"픽업 완료", MB_YESNO | MB_ICONQUESTION) == IDYES)
+    {
+        json body;
+        body["orderId"] = *pOrderId;
+        m_net.Send(CmdID::REQ_PICKUP, body);
+    }
+}
+
 void CRiderMainDlg::UpdateButtonState()
 {
     bool bSelected = (GetSelectedIndex() != -1);
     m_btnDeliver.EnableWindow(bSelected);
+    m_btnPickup.EnableWindow(bSelected);
 }
 
 int CRiderMainDlg::GetSelectedIndex()
@@ -216,6 +237,28 @@ void CRiderMainDlg::OnDeliveryCallReceived(const json& resJson)
 
     UpdateButtonState();
 }
+void CRiderMainDlg::OnPickupResult(const json& resJson)
+{
+    if (resJson.value("status", 0) == 200)
+    {
+        std::string orderId = resJson.value("orderId", "");
+        // 리스트에서 상태 컬럼 "배달중"으로 변경
+        for (int i = 0; i < m_listOrders.GetItemCount(); i++)
+        {
+            auto* pId = reinterpret_cast<std::string*>(
+                m_listOrders.GetItemData(i));
+            if (pId && *pId == orderId)
+            {
+                // 리스트에 상태 컬럼이 있다면 변경
+                // 없다면 MessageBox만 표시
+                break;
+            }
+        }
+        MessageBox(L"픽업 완료 처리되었습니다.", L"완료", MB_OK);
+    }
+    else
+        MessageBox(L"픽업 처리에 실패했습니다.", L"오류", MB_ICONERROR);
+}
 
 // =========================================================
 // 배달 완료 응답 (RES_DELIVERY_COMPLETE)
@@ -263,7 +306,8 @@ LRESULT CRiderMainDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         OnDeliverResult(resJson);
     else if (pkt->cmdId == CmdID::NOTIFY_DELIVERY_CALL) 
         OnDeliveryCallReceived(resJson);
-
+    else if (pkt->cmdId == CmdID::RES_PICKUP)
+        OnPickupResult(resJson);
     delete pkt;
     return 0;
 }
@@ -299,5 +343,6 @@ BEGIN_MESSAGE_MAP(CRiderMainDlg, CDialogEx)
     ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_ORDERS,
         &CRiderMainDlg::OnLvnItemchangedListOrders)
     ON_MESSAGE(WM_PACKET_RECEIVED, &CRiderMainDlg::OnPacketReceived)
+    ON_BN_CLICKED(IDC_BTN_PICKUP, &CRiderMainDlg::OnBnClickedBtnPickup)
     ON_WM_CLOSE()
 END_MESSAGE_MAP()

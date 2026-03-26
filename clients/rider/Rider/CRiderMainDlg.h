@@ -20,7 +20,7 @@ public:
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
-
+    afx_msg void OnBnClickedBtnPickup();
     afx_msg void OnBnClickedBtnConnect();
     afx_msg void OnBnClickedBtnDisconnect();
     afx_msg void OnBnClickedBtnRefresh();
@@ -35,7 +35,7 @@ private:
     void InitListCtrl();
     void UpdateButtonState();
     int  GetSelectedIndex();
-
+    void CRiderMainDlg::OnPickupResult(const json& resJson);
     // 주문 목록 수신 처리
     void OnOrderListReceived(const json& resJson);
     void OnDeliveryCallReceived(const json& resJson); // NOTIFY_DELIVERY_CALL 수신
@@ -45,7 +45,7 @@ private:
     CNetworkHelper  m_net;
     std::string     m_serverIp = "10.10.10.123";
     int             m_serverPort = 8000;
-
+    CButton m_btnPickup;
     CStatic     m_staticServer;     // IDC_STATIC_SERVER
     CButton     m_btnConnect;       // IDC_BTN_CONNECT
     CButton     m_btnDisconnect;    // IDC_BTN_DISCONNECT

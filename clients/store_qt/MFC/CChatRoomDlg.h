@@ -19,14 +19,14 @@ public:
     enum { IDD = IDD_CHAT_ROOM };
 #endif
 
-    // CMainMenuDlg에서 NOTIFY_CHAT_MSG 수신 시 호출
     void AddMessage(const json& msgJson);
+    void SetRoomId(int roomId) { m_roomId = roomId; }  // ✅ roomId 설정
 
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
     virtual BOOL OnInitDialog();
-    virtual void OnOK() override {}      // Enter 키 닫힘 방지
-    virtual void OnCancel() override {}  // ESC 키 닫힘 방지
+    virtual void OnOK() override {}
+    virtual void OnCancel() override {}
 
     afx_msg void OnBnClickedBtnChatRoomSend();
     afx_msg void OnBnClickedBtnChatRoomClose();
@@ -35,10 +35,11 @@ protected:
 
 private:
     CNetworkHelper* m_pNet = nullptr;
-    std::string     m_userId;           // 내 userId (= ownerName)
+    std::string     m_userId;
+    int             m_roomId = -1;  // ✅ roomId 추가
 
-    CListBox    m_listChatLog;      // IDC_LIST_CHAT_ROOM
-    CEdit       m_editChatMsg;      // IDC_EDIT_CHAT_ROOM_MSG
-    CButton     m_btnChatSend;      // IDC_BTN_CHAT_ROOM_SEND
-    CButton     m_btnChatClose;     // IDC_BTN_CHAT_ROOM_CLOSE
+    CListBox    m_listChatLog;
+    CEdit       m_editChatMsg;
+    CButton     m_btnChatSend;
+    CButton     m_btnChatClose;
 };

@@ -42,6 +42,20 @@ void CTabOrderDlg::OnBnClickedBtnOrderRefresh()
     body["storeId"] = m_storeId;
     m_pNet->Send(CmdID::REQ_ORDER_LIST, body);
 }
+void CTabOrderDlg::UpdateOrderStatus(
+    const std::string& orderId, const CString& strStatus)
+{
+    for (int i = 0; i < m_listOrder.GetItemCount(); i++)
+    {
+        auto* pId = reinterpret_cast<std::string*>(
+            m_listOrder.GetItemData(i));
+        if (pId && *pId == orderId)
+        {
+            m_listOrder.SetItemText(i, 3, strStatus);
+            break;
+        }
+    }
+}
 
 void CTabOrderDlg::OnBnClickedBtnOrderDelete()
 {

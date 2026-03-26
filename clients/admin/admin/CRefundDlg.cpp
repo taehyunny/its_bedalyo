@@ -153,8 +153,11 @@ void CRefundDlg::OnSearchResult(const json& resJson)
 // =========================================================
 void CRefundDlg::OnBnClickedBtnCancelOrder()
 {
-    int nIdx = GetSelectedIndex();
-    if (nIdx == -1) return;
+    int nIdx = m_listRefundOrder.GetNextItem(-1, LVNI_SELECTED);
+    if (nIdx == -1) {
+        MessageBox(L"취소할 주문을 선택하세요.", L"알림", MB_OK);
+        return;
+    }
     if (!m_pNet) return;
 
     auto* pOrderId = reinterpret_cast<std::string*>(
@@ -171,24 +174,27 @@ void CRefundDlg::OnBnClickedBtnCancelOrder()
 }
 
 // =========================================================
-// 환불 처리 버튼
+// 환불 처리 버튼  ( 현재 취소 버튼과 동일한 기능을 함 )
 // =========================================================
 void CRefundDlg::OnBnClickedBtnRefundOrder()
 {
-    int nIdx = GetSelectedIndex();
-    if (nIdx == -1) return;
+    int nIdx = m_listRefundOrder.GetNextItem(-1, LVNI_SELECTED);
+    if (nIdx == -1) {
+        MessageBox(L"환불할 주문을 선택하세요.", L"알림", MB_OK);
+        return;
+    }
     if (!m_pNet) return;
 
     auto* pOrderId = reinterpret_cast<std::string*>(
         m_listRefundOrder.GetItemData(nIdx));
     if (!pOrderId) return;
 
-    if (MessageBox(L"해당 주문을 환불 처리하시겠습니까?",
+    if (MessageBox(L"해당 주문을 취소 처리하시겠습니까?\n(환불은 별도 처리됩니다)",
         L"환불 처리", MB_YESNO | MB_ICONQUESTION) == IDYES)
     {
         json body;
         body["orderId"] = *pOrderId;
-        m_pNet->Send(CmdID::REQ_REFUND, body);
+        m_pNet->Send(CmdID::REQ_CANCEL, body);
     }
 }
 
@@ -200,6 +206,30 @@ void CRefundDlg::OnLvnItemchangedListRefundOrder(NMHDR* pNMHDR, LRESULT* pResult
     (void)pNMHDR;
     UpdateButtonState();
     *pResult = 0;
+}
+
+void CRefundDlg::OnCancelResult(const json& resJson)
+{
+    if (resJson.value("status", 0) == 200)
+    {
+        std::string orderId = resJson.value("orderId", "");
+
+        // 리스트에서 해당 항목 제거
+        for (int i = 0; i < m_listRefundOrder.GetItemCount(); i++)
+        {
+            auto* pId = reinterpret_cast<std::string*>(
+                m_listRefundOrder.GetItemData(i));
+            if (pId && *pId == orderId)
+            {
+                delete pId;
+                m_listRefundOrder.DeleteItem(i);
+                break;
+            }
+        }
+        MessageBox(L"주문이 취소 처리되었습니다.", L"완료", MB_OK);
+    }
+    else
+        MessageBox(L"주문 취소에 실패했습니다.", L"오류", MB_ICONERROR);
 }
 
 BEGIN_MESSAGE_MAP(CRefundDlg, CDialogEx)
