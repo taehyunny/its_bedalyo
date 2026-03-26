@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QMainWindow>
 #include "NetworkManager.h"
 #include "config.h"
@@ -18,8 +18,9 @@
 #include "menuoption.h"
 #include "cartbarwidget.h"
 #include "ordercompletewidget.h"
-#include "form.h"
 #include "menureview.h"
+#include "form.h"
+#include "deliverycompletewidget.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -65,6 +66,7 @@ private slots:
     
     // CartWidget이 데이터를 비우기 전에 가로챌 함수
     void onNetworkOrderCreated(int status, QString message, QString orderId);
+    void handleDeliveryComplete(const QString &orderId); // 4011번 수신 시 실행될 슬롯
 
 private:
     Ui::MainWindow        *ui;
@@ -91,7 +93,8 @@ private:
     QList<CategoryInfoQt> m_cachedCategories;
     QWidget              *m_previousWidget = nullptr;
 
-    
+    Form                  *m_formWidget;
+    DeliveryCompleteWidget *m_deliveryCompleteWidget;
 
     // CartBar 위치 관련 헬퍼
     void repositionCartBar();

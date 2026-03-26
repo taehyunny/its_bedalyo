@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Form</class>
  <widget class="QWidget" name="Form">
@@ -57,6 +57,7 @@
        <property name="spacing"><number>8</number></property>
        <item>
         <widget class="QLabel" name="label_checking">
+         <property name="styleSheet"><string>color: #00b9ff; font-weight: bold;</string></property>
          <property name="text"><string>매장에서 주문을 확인하고 있습니다.</string></property>
          <property name="styleSheet"><string>color: #1565c0; font-weight: bold; font-size: 13px;</string></property>
         </widget>
@@ -226,7 +227,7 @@
          <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c2_3"><property name="text"><string>O</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:9px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
          <item><widget class="QLabel" name="l2_34"><property name="text"><string></string></property><property name="styleSheet"><string>background-color:#dddddd;</string></property><property name="minimumSize"><size><width>10</width><height>2</height></size></property><property name="maximumSize"><size><width>9999</width><height>2</height></size></property></widget></item>
          <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c2_4"><property name="text"><string></string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#dddddd;border-radius:12px;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
-        </layout>
+      </layout>
        </item>
        <item>
         <layout class="QHBoxLayout">
@@ -257,9 +258,9 @@
         <widget class="QLabel" name="label_complete">
          <property name="text"><string>배달이 완료되었습니다!</string></property>
          <property name="styleSheet"><string>color: #4caf50; font-weight: bold; font-size: 13px;</string></property>
-        </widget>
-       </item>
-       <item>
+    </widget>
+   </item>
+   <item>
         <layout class="QHBoxLayout">
          <property name="spacing"><number>0</number></property>
          <item alignment="Qt::AlignmentFlag::AlignVCenter"><widget class="QLabel" name="c3_1"><property name="text"><string>V</string></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property><property name="styleSheet"><string>background-color:#1565c0;color:white;border-radius:12px;font-size:10px;font-weight:bold;</string></property><property name="minimumSize"><size><width>24</width><height>24</height></size></property><property name="maximumSize"><size><width>24</width><height>24</height></size></property></widget></item>
@@ -362,10 +363,10 @@
           <property name="spacing"><number>6</number></property>
 
           <!-- 가게 이름 + 펼치기 버튼 -->
-          <item>
-           <layout class="QHBoxLayout">
-            <item>
-             <layout class="QVBoxLayout">
+       <item>
+        <layout class="QHBoxLayout">
+         <item>
+          <layout class="QVBoxLayout">
               <property name="spacing"><number>2</number></property>
               <item>
                <widget class="QLabel" name="lbl_store_name">
@@ -389,8 +390,8 @@
               <property name="maximumSize"><size><width>32</width><height>32</height></size></property>
              </widget>
             </item>
-           </layout>
-          </item>
+          </layout>
+         </item>
 
           <!-- 구분선 -->
           <item>
@@ -406,9 +407,9 @@
            <layout class="QVBoxLayout" name="menuItemsArea">
             <property name="spacing"><number>0</number></property>
            </layout>
-          </item>
+         </item>
 
-         </layout>
+        </layout>
         </widget>
        </item>
 

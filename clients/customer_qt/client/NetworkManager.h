@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QObject>
 #include <QTcpSocket>
 #include <QByteArray>
@@ -12,6 +12,7 @@
 #include "OrderDTO.h"
 #include "PaymentDTO.h"
 #include "StoreDetailDTO.h"
+#include "PaymentDTO.h"
 
 // Qt용 구조체 정의 (생략 없이 유지)
 struct CategoryInfoQt { int id; QString name; QString iconPath; };
@@ -97,6 +98,8 @@ public:
     void sendAddressDefault(const QString &userId, int addressId);
     void sendCheckoutInfo(const QString &userId, int storeId);
     void sendOrderCreate(const OrderCreateReqDTO &dto);
+    void sendOrderHistoryRequest(const QString &userId);
+    void sendOrderDetailRequest(const QString &orderId);
 
     // 범용 전송 함수 (public으로 변경)
     void sendPacket(CmdID cmdId, const nlohmann::json &body);
@@ -121,6 +124,11 @@ signals:
     void onOrderCreateReceived(int status, QString message, QString orderId);
     void onOrderStateChanged(int state, const QString &orderId);
     void onMenuReviewsReceived(int menuId, QList<ReviewDTO> reviews);
+    void onOrderStateChanged(int state, const QString &orderId);
+    void onDeliveryCompleteReceived(const QString &orderId); // 배달 완료 신호 (4011번) 수신 시 발생할 시그널
+    void onOrderHistoryReceived(const ResOrderHistoryDTO &resDto);
+    void onOrderDetailReceived(const ResOrderDetailDTO &resDto);
+
     // 메뉴 옵션 수신 시그널 (중복 제거됨)
     void onMenuOptionsReceived(int menuId, QList<OptionGroup> groups);
 

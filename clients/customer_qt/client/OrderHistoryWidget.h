@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include <QWidget>
 #include <QPushButton>
 #include "NetworkManager.h"
 #include "readylist.h"
+#include "OrderHistoryCard.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class OrderHistoryWidget; }
@@ -35,6 +36,9 @@ public:
     readylist* getReadyList() const { return m_readyList; }
     void addPendingOrder(const QString &orderId, const QString &storeName, const QString &menuSummary, int totalPrice); //추가
     void updateOrderState(const QString &orderId, int state);
+
+    void showPastOrdersTab(); // 과거 주문 내역 탭을 강제로 보여주는 함수
+    void addPastOrderCard(const PastOrderInfo& info);
 
 signals:
     void homeRequested();

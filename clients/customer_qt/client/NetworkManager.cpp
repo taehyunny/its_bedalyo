@@ -658,6 +658,40 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 qWarning() << "[NetworkManager] MenuOption 내부 파싱 에러:" << e.what();
             }
 
+        } else if (cmdId == CmdID::RES_DELIVERY_COMPLETE) { // 4011번 수신
+        qDebug() << "[NetworkManager] 🏍️ 배달 완료 전용 신호(4011) 수신!";
+        
+        int status = j.value("status", 0);
+        
+        // 배달 완료된 주문번호 추출 (서버에서 "orderId" 키로 보낸다고 가정)
+        QString orderId = QString::fromStdString(j.value("orderId", "")); 
+
+        if (status == 0 || status == 200) {
+            // MainWindow에게 배달 완료를 알림
+            emit onDeliveryCompleteReceived(orderId);
+        } else {
+            qWarning() << "[NetworkManager] 배달 완료 처리 실패 status:" << status;
+        }
+
+        // 서버에서 영수증 상세 데이터(2087)가 왔을 때
+        } else if (cmdId == CmdID::RES_ORDER_DETAIL) { 
+            qDebug() << "[NetworkManager] 영수증 상세 데이터(2087) 수신!";
+            try {
+                ResOrderDetailDTO dto = j.get<ResOrderDetailDTO>();
+                emit onOrderDetailReceived(dto);
+            } catch(const std::exception &e) {
+                qWarning() << "2087 파싱 에러:" << e.what();
+            }
+
+        } else if (cmdId == CmdID::RES_ORDER_HISTORY) { // 2081 수신
+            qDebug() << "[NetworkManager] 과거 주문 내역 응답(2081) 수신!";
+            try {
+                ResOrderHistoryDTO dto = j.get<ResOrderHistoryDTO>();
+                emit onOrderHistoryReceived(dto);
+            } catch(const std::exception &e) {
+                qWarning() << "2081 파싱 에러:" << e.what();
+            }
+
         // ── 여기서부터는 기존 else if 체인과 맞춰서 닫힙니다 ──
         } else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"
@@ -678,4 +712,22 @@ void NetworkManager::handleConnected()
 void NetworkManager::handleError(QAbstractSocket::SocketError err)
 {
     qWarning() << "[NetworkManager] 소켓 에러:" << err << "-" << m_socket->errorString();
+}
+
+void NetworkManager::sendOrderHistoryRequest(const QString &userId)
+{
+    qDebug() << "[NetworkManager] 과거 주문 내역 요청(2080) userId:" << userId;
+    ReqOrderHistoryDTO dto;
+    dto.userId = userId.toStdString();
+    
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_ORDER_HISTORY, j);
+}
+
+void NetworkManager::sendOrderDetailRequest(const QString &orderId)
+{
+    qDebug() << "[NetworkManager] 주문 상세 영수증 요청(2086) orderId:" << orderId;
+    nlohmann::json j;
+    j["orderId"] = orderId.toStdString(); 
+    sendPacket(CmdID::REQ_ORDER_DETAIL, j);
 }

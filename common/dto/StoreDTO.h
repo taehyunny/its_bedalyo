@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <string>
 #include <vector>
 #include "json.hpp" // 경로 확인 필수!
@@ -8,9 +8,8 @@ using json = nlohmann::json;
 
 // 0. CategoryItem 정의 (누락되었던 부분 추가)
 
-
-
 // 1. 순서 교정: 하위 항목부터 정의
+// 🚀 [2012] 특정 메뉴의 추가 옵션 요청
 struct OptionItem
 {
     int optionId;
@@ -20,8 +19,6 @@ struct OptionItem
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(OptionItem, optionId, optionName, additionalPrice, displayOrder)
 };
-
-// 2. 옵션 카테고리 (큰 틀)
 struct OptionGroup
 {
     int groupId;
@@ -54,6 +51,25 @@ struct OptionGroup
         j.at("options").get_to(dto.options);
     }
 };
+
+struct ReqMenuOptionDTO
+{
+    int menuId; // 사용자가 클릭한 메뉴 번호
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqMenuOptionDTO, menuId)
+};
+
+// 🚀 [2013] 메뉴 옵션 응답 (태현님의 OptionGroup 활용!)
+struct ResMenuOptionDTO
+{
+    int status;
+    int menuId;
+    std::vector<OptionGroup> optionGroups; // 👈 통짜 JSON이 아니라 명확한 객체 배열로 담습니다!
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ResMenuOptionDTO, status, menuId, optionGroups)
+};
+
+// 2. 옵션 카테고리 (큰 틀)
 
 // 3. 메뉴 DTO
 struct MenuDTO
@@ -127,30 +143,30 @@ struct MenuListResDTO
 // 2. StoreDTO (개별 가게 정보)
 struct StoreDTO
 {
-    int storeId;
-    std::string storeName;
-    std::string category;
-    int status;
-    nlohmann::json deliveryFees;
-    int cookTime;
-    std::string imageUrl;
-    int minOrderAmount;
-    double rating;
+    int storeId;            // 가게 ID
+    std::string storeName;  // 가게 이름
+    std::string category;   // 카테고리명 (예: "한식", "중식", "편의점" 등)
+    int status;         // 영업 상태 (0: 영업 중, 1: 휴업, 2: 폐업) 
+    nlohmann::json deliveryFees; // 배달비 정보 (예: {"baseFee": 3000, "perKm": 500})
+    int cookTime;   // 조리 시간 (분 단위, 예: 30)
+    std::string imageUrl; // 가게 대표 이미지 URL
+    int minOrderAmount;   // 최소 주문 금액 (예: 15000)
+    double rating;    // 평점 (예: 4.5)
     int reviewCount;
-    std::string deliveryTimeRange;
-
+    std::string deliveryTimeRange; // 배달 시간 범위 (예: "30~40분")
+    std::string pickupTime;        // 픽업 시간 범위 (예: "20~30분")
     // 🚀 [추가된 컬럼들]
     std::string storeAddress; // 매장 주소
     std::string openTime;     // 오픈 시간 (예: "09:00")
     std::string closeTime;    // 마감 시간 (예: "22:00")
+    std::string brandName;    // 편의점 브랜드명 (예: "GS25", "CU", "7-Eleven")
 
     MenuDTO popularMenu;
 
     // ⚠️ 매크로 마지막 부분에 새 변수 3개를 꼭 추가해야 합니다!
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(StoreDTO,
                                    storeId, storeName, category, status, deliveryFees, cookTime,
-                                   imageUrl, minOrderAmount, rating, reviewCount, deliveryTimeRange,
-                                   storeAddress, openTime, closeTime, popularMenu)
+                                   imageUrl, minOrderAmount, rating, reviewCount, deliveryTimeRange, storeAddress, openTime, closeTime, brandName, pickupTime, popularMenu)
 };
 
 // 3. StoreListResDTO (가게 목록 전송용 껍데기)
@@ -159,7 +175,7 @@ struct StoreDTO
 // 4. MenuListResDTO (특정 가게의 상세 메뉴 전송용)
 
 // 5. 사장님 전용 REQ DTO (수정 없음, 완벽함)
-struct StoreStatusUpdateReqDTO
+struct StoreStatusUpdateReqDTO // 사장님이 매장 상태를 변경할 때 보내는 요청 DTO (예: 영업 시작/휴업/폐업)
 {
     int storeId;     // 가게 ID
     int updateType;  // 업데이트 유형 (0: 영업 시작, 1: 휴업, 2: 폐업)
@@ -167,7 +183,7 @@ struct StoreStatusUpdateReqDTO
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(StoreStatusUpdateReqDTO, storeId, updateType, statusValue)
 };
 
-struct MenuUpdateReqDTO
+struct MenuUpdateReqDTO // 사장님이 메뉴를 추가/수정/삭제할 때 보내는 요청 DTO (actionType으로 구분)
 {
     int storeId;      // 가게 ID
     int actionType;   // 작업 유형 (0: 메뉴 추가, 1: 메뉴 수정, 2: 메뉴 삭제)
@@ -175,23 +191,27 @@ struct MenuUpdateReqDTO
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(MenuUpdateReqDTO, storeId, actionType, menuData)
 };
 
-struct TopStoreInfo
+struct TopStoreInfo // 메인 화면에서 보여줄 매장 정보 (StoreDTO에서 필요한 부분만 추려서 만듦)
 {
-    int storeId;              // 매장 ID (검색 결과에서 상세 페이지로 넘어갈 때 필요)
-    std::string storeName;    // 매장 이름
-    std::string category;     // 매장 카테고리
-    double rating;            // 평점
-    int reviewCount;          // 리뷰 수
-    int minOrderPrice;        // 최소 주문 금액
-    std::string deliveryTime; // 배달 시간 (예: "30~40분")
-    int deliveryFee;          // 배달비
-    std::string iconPath;
+    std::string storeName;      // 매장 이름
+    std::string category;     // 카테고리명 (예: "한식", "중식", "편의점" 등)
+    std::string brandName; // 🚀 [추가] 편의점 탭 분류를 위한 브랜드명!
+    int minOrderPrice;   // 최소 주문 금액
+    std::string deliveryTime; // 예: "30~40분"
+    int deliveryFee;    // 배달비
+    std::string iconPath;          // 매장 아이콘 이미지 URL
     std::string deliveryTimeRange; // 배달 시간 범위 (예: "30~40분")
+    std::string pickupTime;        // 픽업 가능 시간 (예: "20~30분")
+    int storeId;                   // 매장 ID (검색 결과에서 상세 페이지로 넘어갈 때 필요)
+    double rating;                 // 평점
+    int reviewCount;               // 리뷰 수
     int minOrderAmount;            // 최소 주문 금액
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(TopStoreInfo, storeId, storeName, category, rating, reviewCount, minOrderPrice, deliveryTime, deliveryFee, iconPath, deliveryTimeRange, minOrderAmount)
+    std::string grade;             // 등급 (예: "wow", "일반")
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(TopStoreInfo, storeId, storeName, category, brandName, pickupTime, rating, grade, reviewCount, minOrderPrice, deliveryTime, deliveryFee, iconPath, deliveryTimeRange, minOrderAmount)
 };
 // 🚀 메인 화면용 '통합' 응답 패킷!
-struct MainHomeResDTO
+struct MainHomeResDTO  // 서버 -> 클라이언트: "메인 홈 화면 데이터입니다!" (카테고리 + 인기 매장 리스트)
 {
     int status;
     std::vector<CategoryItem> categories; // 위에는 카테고리
@@ -202,15 +222,15 @@ struct MainHomeResDTO
 };
 
 // 🚀 클라이언트 -> 서버: "이 카테고리 매장 다 주세요!" (예: REQ_STORES_BY_CATEGORY)
-struct StoreListReqDTO
-{
+struct StoreListReqDTO  // 카테고리별 매장 리스트 요청 DTO
+{ 
     int categoryId;
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(StoreListReqDTO, categoryId)
 };
 
 // 🚀 서버 -> 클라이언트: "여기 주문하신 매장 리스트입니다!" (예: RES_STORES_BY_CATEGORY)
 // 매장 정보는 아까 만든 TopStoreInfo를 이름만 StoreInfo로 바꿔서 재활용하면 개꿀입니다! ㅋㅋㅋ
-struct StoreListResDTO
+struct StoreListResDTO  // 카테고리별 매장 리스트 응답 DTO
 {
     int status;
     std::string message;              // 메시지 필드가 필요하다면 유지
@@ -220,13 +240,13 @@ struct StoreListResDTO
 };
 
 // 사장님 사업자 번호 중복 체크용 DTO
-struct BizNumCheckReqDTO
+struct BizNumCheckReqDTO   // 클라이언트 -> 서버: "이 사업자 번호 쓸 수 있나요?" 요청 DTO
 {
     std::string businessNum;
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(BizNumCheckReqDTO, businessNum)
 };
 
-struct BizNumCheckResDTO
+struct BizNumCheckResDTO   // 서버 -> 클라이언트: "이 사업자 번호 결과입니다!" 응답 DTO
 {
     int status;
     bool isAvailable;
@@ -234,4 +254,21 @@ struct BizNumCheckResDTO
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(BizNumCheckResDTO, status, isAvailable, message)
 };
 
-// 1. 개별 옵션 항목 (작은 틀)
+// 🧑‍🍳 조리 시간 재설정 요청 (REQ_COOK_TIME_SET = 3020)
+struct ReqCookTimeSetDTO
+{
+    std::string orderId; // 조리 시간을 설정할 주문 번호
+    int cookTime;        // 사장님이 설정한 조리 시간 (분 단위, 예: 20)
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqCookTimeSetDTO, orderId, cookTime)
+};
+
+// 🧑‍🍳 조리 시간 설정 응답 (RES_COOK_TIME_SET = 3021)
+struct ResCookTimeSetDTO
+{
+    int status;
+    std::string message;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ResCookTimeSetDTO, status, message)
+};
+

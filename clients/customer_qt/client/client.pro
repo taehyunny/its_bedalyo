@@ -1,11 +1,13 @@
-QT += widgets network
+﻿QT += widgets network
 
 CONFIG += c++17
 
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
 SOURCES += \
+    OrderHistoryCard.cpp \
     cartbarwidget.cpp \
+    deliverycompletewidget.cpp \
     form.cpp \
     loginwidget.cpp \
     main.cpp \
@@ -16,6 +18,7 @@ SOURCES += \
     menuoption.cpp \
     menureview.cpp \
     ordercompletewidget.cpp \
+    orderreceiptdialog.cpp \
     readylist.cpp \
     searchwidget.cpp \
     searchresultwidget.cpp \
@@ -30,7 +33,9 @@ SOURCES += \
 
 
 HEADERS += \
+    OrderHistoryCard.h \
     cartbarwidget.h \
+    deliverycompletewidget.h \
     form.h \
     loginwidget.h \
     mainwindow.h \
@@ -40,6 +45,7 @@ HEADERS += \
     menuoption.h \
     menureview.h \
     ordercompletewidget.h \
+    orderreceiptdialog.h \
     readylist.h \
     searchwidget.h \
     searchresultwidget.h \
@@ -54,11 +60,12 @@ HEADERS += \
     settingswidget.h \
     addresswidget.h \
     addressdetailwidget.h \
-    cartwidget.h \
-
+    cartwidget.h
+b
 
 FORMS += \
     cartbarwidget.ui \
+    deliverycompletewidget.ui \
     form.ui \
     loginwidget.ui \
     mainwindow.ui \
@@ -67,6 +74,7 @@ FORMS += \
     menuoption.ui \
     menureview.ui \
     ordercompletewidget.ui \
+    orderreceiptdialog.ui \
     readylist.ui \
     searchwidget.ui \
     searchresultwidget.ui \

@@ -1,9 +1,13 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/ui_mainwindow.h"
 #include "ui_mainwindow.h"
 #include "UserSession.h"
+#include "OrderHistoryCard.h"
 #include <QDebug>
 #include <QMessageBox>
+
+
+#include <QTimer>  // [임시 테스트용] 타이머 기능 추가! - 배달완료용
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -25,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_menuOptionWidget(new menuoption(m_network, this))
     , m_orderCompleteWidget(new OrderCompleteWidget(m_network, this))
     , m_formWidget(new Form(this))
+    , m_deliveryCompleteWidget(new DeliveryCompleteWidget(m_network, this))
     , m_menureviewWidget(new menureview(m_network, this)) 
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
@@ -52,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
     ui->stackedWidget->addWidget(m_formWidget);
     ui->stackedWidget->addWidget(m_menureviewWidget);
+    ui->stackedWidget->addWidget(m_deliveryCompleteWidget);
 
     connect(m_loginWidget, &LoginWidget::loginSuccess, this, &MainWindow::onLoginSuccess);
     connect(m_homeWidget, &HomeWidget::categorySelected, this, &MainWindow::onCategorySelected);
@@ -194,7 +200,24 @@ connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, 
 
     
 
+    // 주문 내역에서 상세 메뉴 요청 시 → 주문 완료 화면으로 전환
+    connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, this, [=](QString id){
+        m_formWidget->updateOrderInfo(id, "ORD-001", "상세 메뉴 내역..."); // form 데이터 채우기
+        ui->stackedWidget->setCurrentWidget(m_formWidget); // form.ui 화면으로 전환
+    });
+
+    //  배달 완료 화면에서 '등록하기'를 누르면 주문 내역 화면으로 이동
+    connect(m_deliveryCompleteWidget, &DeliveryCompleteWidget::orderListRequested, this, [this]() {
+    
+    // 화면 갱신 및 탭 이동
+    m_orderHistoryWidget->loadData(); 
+    m_orderHistoryWidget->showPastOrdersTab(); 
+    ui->stackedWidget->setCurrentWidget(m_orderHistoryWidget);
+});
+
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
+
+    connect(m_network, &NetworkManager::onDeliveryCompleteReceived, this, &MainWindow::handleDeliveryComplete);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -364,7 +387,17 @@ void MainWindow::onNetworkOrderCreated(int status, QString message, QString orde
             m_formWidget->addMenuItem(item.menuName, item.quantity, itemTotalPrice);
         }
 
-        // 2. 주문 내역(준비중) 목록에도 카드 추가
+        // --- 2. 주문 내역(준비중) 목록에 데이터 세팅 ---
+        QString storeName = CartSession::instance().storeName;
+        int totalPrice = CartSession::instance().totalPrice();
+        QString menuSummary = ""; 
+        if(!CartSession::instance().items.isEmpty()) {
+            int extraCount = CartSession::instance().items.size() - 1;
+            menuSummary = CartSession::instance().items[0].menuName + 
+                          (extraCount > 0 ? QString(" 외 %1건").arg(extraCount) : "");
+        }
+        
+        // 진짜 orderId와 안전하게 빼둔 데이터를 사용해 목록에 추가!
         m_orderHistoryWidget->addPendingOrder(orderId, storeName, menuSummary, totalPrice);
     }
 }
@@ -377,6 +410,13 @@ void MainWindow::onOrderSuccess()
     
     // 🚀 [수정] 결제 완료 화면(m_orderCompleteWidget) 대신 우리가 만든 Form 화면으로 휙 이동!
     ui->stackedWidget->setCurrentWidget(m_formWidget);
+}
+
+void MainWindow::handleDeliveryComplete(const QString &orderId)
+{
+    qDebug() << "[MainWindow] 픽업/배달 완료 감지! 화면 전환 시작. 주문번호:" << orderId;
+
+    ui->stackedWidget->setCurrentWidget(m_deliveryCompleteWidget);
 }
 
 

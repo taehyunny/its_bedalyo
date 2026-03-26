@@ -1,4 +1,4 @@
-#include "form.h"
+﻿#include "form.h"
 #include "ui_form.h"
 #include <QLocale> // 맨 위에 없다면 추가해 주세요 (천 단위 콤마용)
 
@@ -15,11 +15,14 @@ Form::Form(QWidget *parent) :
     // 2. 🚀 X 버튼 로직
     connect(ui->btn_back_form, &QPushButton::clicked, this, [=]() {
         emit backRequested(); // "이 화면 닫을래!"라고 신호 보냄
-    }); 
+    });
 
     // 3. 메뉴 확장 버튼 (상자가 삭제되었으므로 일단 비워둡니다)
     connect(ui->btn_expand_menu, &QPushButton::clicked, this, [=]() {
         // 나중에 상자를 다시 만들면 여기에 코드를 넣습니다.
+        bool isHidden = ui->menuDetailContainer->isHidden();
+        ui->menuDetailContainer->setVisible(isHidden);
+        ui->btn_expand_menu->setText(isHidden ? "▲" : "▼");
     });
 }
 
@@ -30,6 +33,7 @@ Form::~Form()
 
 // 🚀 실시간 배달 상태 업데이트 (MainWindow에서 호출됨)
 void Form::updateStatus(int index) {
+    // 0:가게접수, 1:조리중, 2:조리완료, 3:배달중
     if (index >= 0 && index < ui->statusStackedWidget->count()) {
         ui->statusStackedWidget->setCurrentIndex(index);
     }
