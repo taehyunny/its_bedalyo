@@ -425,29 +425,31 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 int status = j.value("status", 1);
                 if (status != 0) return;
 
-                QList<CategoryInfoQt> categories;
-                if (j.contains("categories")) {
-                    for (const auto &cat : j["categories"]) {
-                        CategoryInfoQt c;
-                        c.id       = cat.value("categoryId", 0);
-                        c.name     = QString::fromStdString(cat.value("name", ""));
-                        c.iconPath = "";
-                        categories.append(c);
-                    }
-                }
+                // 🚀 카테고리 파싱 로직 삭제 완료 (로그인 시 한 번만 받음)
 
+                // 🚀 오직 매출 1등 매장 리스트만 갱신!
                 QList<TopStoreInfoQt> topStores;
                 if (j.contains("topStores")) {
                     for (const auto &store : j["topStores"]) {
                         TopStoreInfoQt s;
-                        s.storeId   = store.value("storeId", 0);
-                        s.storeName = QString::fromStdString(store.value("storeName", ""));
-                        s.rating    = store.value("rating", 0.0);
+                        s.storeId           = store.value("storeId", 0);
+                        s.storeName         = QString::fromStdString(store.value("storeName", ""));
+                        s.rating            = store.value("rating", 0.0);
+
+                        // --- UI 상세 데이터 파싱 ---
+                        s.deliveryFee       = store.value("deliveryFee", 0);
+                        s.minOrderAmount    = store.value("minOrderAmount", 0);
+                        s.reviewCount       = store.value("reviewCount", 0);
+                        s.deliveryTimeRange = QString::fromStdString(store.value("deliveryTimeRange", ""));
+                        s.iconName          = QString::fromStdString(store.value("iconName", ""));
+
                         topStores.append(s);
                     }
                 }
 
-                emit onHeartbeatReceived(categories, topStores);
+                // 🚀 시그널 방출 (이제 파라미터는 topStores 딱 하나!)
+                emit onHeartbeatReceived(topStores);
+
             } catch (const std::exception &e) {
                 qWarning() << "[NetworkManager] RES_HEARTBEAT 파싱 에러:" << e.what();
             }
