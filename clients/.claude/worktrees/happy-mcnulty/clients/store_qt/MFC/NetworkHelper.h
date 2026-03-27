@@ -143,7 +143,7 @@ private:
             {
                 // ✅ [수정] 시그니처 불일치 시 바디까지 소진 후 continue
                 // continue만 하면 바디 데이터가 소켓 버퍼에 남아 다음 헤더 읽기가 꼬임
-                OutputDebugStringA("[RecvLoop] 시그니처 불일치! 바디 소진 후 재시도\n");
+                OutputDebugStringA("[RecvLoop] ❌ 시그니처 불일치! 바디 소진 후 재시도\n");
                 if (header.bodySize > 0 && header.bodySize < 1024 * 1024) // 1MB 이하만 소진
                 {
                     std::vector<char> trash(header.bodySize);
@@ -152,7 +152,7 @@ private:
                 continue;
             }
 
-            OutputDebugStringA("[RecvLoop] 시그니처 OK!\n");
+            OutputDebugStringA("[RecvLoop] ✅ 시그니처 OK!\n");
 
             std::vector<char> bodyBuf;
             if (header.bodySize > 0)

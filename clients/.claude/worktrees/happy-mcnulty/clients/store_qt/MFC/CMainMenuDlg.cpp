@@ -277,7 +277,7 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         }
     }
 
-        //  RES_REQUEST_OK (5000) - 관리자 수락 시 채팅창 오픈
+        // ✅ RES_REQUEST_OK (5000) - 관리자 수락 시 채팅창 오픈
     else if (pkt->cmdId == CmdID::RES_REQUEST_OK)
     {
         json resJson = json::parse(pkt->body);
@@ -291,12 +291,12 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
             m_pChatRoomDlg->Create(IDD_CHAT_ROOM, this);
         }
 
-        //  roomId 전달 후 창 오픈
+        // ✅ roomId 전달 후 창 오픈
         m_pChatRoomDlg->SetRoomId(roomId);
         m_pChatRoomDlg->ShowWindow(SW_SHOW);
         }
 
-        //  NOTIFY_CHAT_MSG (9030) - 메시지 수신 시 채팅창에 추가
+        // ✅ NOTIFY_CHAT_MSG (9030) - 메시지 수신 시 채팅창에 추가
     else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG)
     {
         json resJson = json::parse(pkt->body);
@@ -319,8 +319,8 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         CString strStatus;
         switch (state)
         {
-        case 2: strStatus = L"배달중"; break;
-        case 3: strStatus = L"완료";   break;
+        case 3: strStatus = L"배달중"; break;
+        case 4: strStatus = L"완료";   break;
         default: strStatus = L"알 수 없음"; break;
         }
 
