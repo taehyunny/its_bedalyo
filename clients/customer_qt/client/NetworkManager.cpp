@@ -29,6 +29,13 @@ void NetworkManager::connectToServer(const QString &ip, quint16 port)
     m_socket->connectToHost(ip, port);
 }
 
+void NetworkManager::sendHeartbeat()
+{
+    nlohmann::json body;
+    body["status"] = 0;
+    sendPacket(CmdID::REQ_HEARTBEAT, body);
+}
+
 // ── 인증 관련 ──
 
 void NetworkManager::sendLogin(const LoginReqDTO &dto)
@@ -412,6 +419,38 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 stores.append(toQt(s));
 
             emit onStoreListReceived(stores);
+
+        } else if (cmdId == CmdID::RES_HEARTBEAT) {
+            try {
+                int status = j.value("status", 1);
+                if (status != 0) return;
+
+                QList<CategoryInfoQt> categories;
+                if (j.contains("categories")) {
+                    for (const auto &cat : j["categories"]) {
+                        CategoryInfoQt c;
+                        c.id       = cat.value("categoryId", 0);
+                        c.name     = QString::fromStdString(cat.value("name", ""));
+                        c.iconPath = "";
+                        categories.append(c);
+                    }
+                }
+
+                QList<TopStoreInfoQt> topStores;
+                if (j.contains("topStores")) {
+                    for (const auto &store : j["topStores"]) {
+                        TopStoreInfoQt s;
+                        s.storeId   = store.value("storeId", 0);
+                        s.storeName = QString::fromStdString(store.value("storeName", ""));
+                        s.rating    = store.value("rating", 0.0);
+                        topStores.append(s);
+                    }
+                }
+
+                emit onHeartbeatReceived(categories, topStores);
+            } catch (const std::exception &e) {
+                qWarning() << "[NetworkManager] RES_HEARTBEAT 파싱 에러:" << e.what();
+            }
 
         } else if (cmdId == CmdID::RES_SEARCH_STORE) {
             ResSearchStoreDTO dto = j.get<ResSearchStoreDTO>();

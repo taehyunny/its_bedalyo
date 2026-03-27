@@ -107,6 +107,9 @@ HomeWidget::HomeWidget(NetworkManager *network, QWidget *parent)
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &HomeWidget::onMainHomeReceived);
 
+    connect(m_network, &NetworkManager::onHeartbeatReceived,
+            this, &HomeWidget::onMainHomeReceived);
+
     // CartBar: 클릭 시 cartRequested 시그널 발사
     connect(ui->cartBar, &CartBarWidget::cartRequested,
             this, &HomeWidget::cartRequested);
@@ -279,7 +282,7 @@ bool HomeWidget::eventFilter(QObject *obj, QEvent *event)
 }
 
 void HomeWidget::on_btnSearch_clicked()   { emit searchRequested(); }
-void HomeWidget::on_navHome_clicked()     {}
+void HomeWidget::on_navHome_clicked()     { m_network->sendHeartbeat(); }
 void HomeWidget::on_navSearch_clicked()   { emit searchRequested(); }
 void HomeWidget::on_navFavorite_clicked() { emit favoriteRequested(); }
 void HomeWidget::on_navOrder_clicked()    { emit orderListRequested(); }

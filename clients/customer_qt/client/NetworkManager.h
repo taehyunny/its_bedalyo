@@ -111,6 +111,9 @@ public:
     void sendMenuReviewRequest(int menuId);
     void connectToServer(const QString &ip, quint16 port);
 
+    // 1등 매장 불러오기
+    void sendHeartbeat();
+
     // ── 인증 관련 ──
     void sendLogin(const LoginReqDTO &dto);
     void sendSignup(const SignupReqDTO &dto);
@@ -176,6 +179,10 @@ signals:
 
     // ── 카테고리별 가게 목록 수신 (RES_STORE_LIST = 2001) ──
     void onStoreListReceived(QList<TopStoreInfoQt> stores);
+
+    // ── 1등 가게 새로고침(홈화면) (RES_HEARTBEAT = 1001) ──
+    void onHeartbeatReceived(QList<CategoryInfoQt> categories,
+                             QList<TopStoreInfoQt> topStores);
 
     // ── 매장 검색 결과 수신 (RES_SEARCH_STORE = 2117) ──
     void onSearchResultReceived(QList<TopStoreInfoQt> stores);
