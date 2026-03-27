@@ -1,6 +1,7 @@
 #include "mypagewidget.h"
 #include "ui_mypagewidget.h"
 #include "UserSession.h"
+#include "wowmembershipdialog.h"
 #include <QMessageBox>
 #include <QDebug>
 
@@ -67,7 +68,21 @@ void MyPageWidget::on_btnSettings_clicked()  { emit settingsRequested(); }
 
 void MyPageWidget::on_btnWow_clicked()
 {
-    QMessageBox::information(this, "준비 중", "와우 멤버십 화면은 준비 중입니다.");
+    WowMembershipDialog dialog(m_network, this);
+    
+    const UserSession &session = UserSession::instance();
+    WowUserData userData;
+    userData.userName = session.userName;
+    
+    // 🚀 현재 등급에 따라 상태 메시지 동적 설정
+    if(session.customerGrade == "wow") {
+        userData.membershipStatus = "와우 멤버십 이용 중";
+    } else {
+        userData.membershipStatus = "지금 가입하고 혜택을 받으세요!";
+    }
+
+    dialog.setUserInfo(userData);
+    dialog.exec(); 
 }
 
 void MyPageWidget::on_btnFaq_clicked()

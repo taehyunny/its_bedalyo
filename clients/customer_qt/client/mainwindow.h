@@ -17,7 +17,6 @@
 #include "cartwidget.h"
 #include "menuoption.h"
 #include "cartbarwidget.h"
-#include "ordercompletewidget.h"
 #include "menureview.h"
 #include "form.h"
 #include "deliverycompletewidget.h"
@@ -91,7 +90,6 @@ private:
     QList<CategoryInfoQt>   m_cachedCategories;
     QWidget                 *m_prevWidget = nullptr;
     DeliveryCompleteWidget  *m_deliveryCompleteWidget;
-    OrderCompleteWidget     *m_orderCompleteWidget;
 
     // CartBar 위치 관련 헬퍼
     void repositionCartBar();

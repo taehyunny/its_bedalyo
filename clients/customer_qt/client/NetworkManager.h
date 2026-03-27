@@ -157,6 +157,9 @@ public:
     void sendOrderHistoryRequest(const QString &userId);
     void sendOrderDetailRequest(const QString &orderId);
 
+    // 등급 변경 요청 전용 함수 추가
+    void sendGradeUpdate(const ReqGradeUpdateDTO &req);
+
 signals:
     void onConnected();
 
@@ -210,6 +213,8 @@ signals:
     void onCheckoutInfoReceived(int status, QString customerGrade,
                                 int deliveryFee, int minOrderAmount,
                                 QString pickupTime, QString cardNumber, QString accountNumber);
+
+    void onGradeUpdateResponse(int status, QString message);
 
 
 private slots:

@@ -17,7 +17,6 @@ SOURCES += \
     menucategori.cpp \
     menuoption.cpp \
     menureview.cpp \
-    ordercompletewidget.cpp \
     orderreceiptdialog.cpp \
     readylist.cpp \
     searchwidget.cpp \
@@ -29,7 +28,8 @@ SOURCES += \
     settingswidget.cpp \
     addresswidget.cpp \
     addressdetailwidget.cpp \
-    cartwidget.cpp
+    cartwidget.cpp \
+    wowmembershipdialog.cpp
 
 
 HEADERS += \
@@ -44,7 +44,6 @@ HEADERS += \
     menucategori.h \
     menuoption.h \
     menureview.h \
-    ordercompletewidget.h \
     orderreceiptdialog.h \
     readylist.h \
     searchwidget.h \
@@ -60,7 +59,8 @@ HEADERS += \
     settingswidget.h \
     addresswidget.h \
     addressdetailwidget.h \
-    cartwidget.h
+    cartwidget.h \
+    wowmembershipdialog.h
 b
 
 FORMS += \
@@ -73,7 +73,6 @@ FORMS += \
     menucategori.ui \
     menuoption.ui \
     menureview.ui \
-    ordercompletewidget.ui \
     orderreceiptdialog.ui \
     readylist.ui \
     searchwidget.ui \
@@ -86,6 +85,7 @@ FORMS += \
     addresswidget.ui \
     addressdetailwidget.ui \
     cartwidget.ui \
+    wowmembershipdialog.ui
 
 
 

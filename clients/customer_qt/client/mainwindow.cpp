@@ -26,7 +26,6 @@ MainWindow::MainWindow(QWidget *parent)
     , m_addressDetailWidget(new AddressDetailWidget(this))
     , m_cartWidget(new CartWidget(m_network, this))
     , m_menuOptionWidget(new menuoption(m_network, this))
-    , m_orderCompleteWidget(new OrderCompleteWidget(m_network, this))
     , m_formWidget(new Form(this))
     , m_deliveryCompleteWidget(new DeliveryCompleteWidget(m_network, this))
     , m_menureviewWidget(new menureview(m_network, this)) 
@@ -52,7 +51,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_addressDetailWidget);
     ui->stackedWidget->addWidget(m_menuOptionWidget);
     ui->stackedWidget->addWidget(m_cartWidget);
-    ui->stackedWidget->addWidget(m_orderCompleteWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
     ui->stackedWidget->addWidget(m_formWidget);
     ui->stackedWidget->addWidget(m_menureviewWidget);
