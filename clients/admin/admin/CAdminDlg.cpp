@@ -202,16 +202,33 @@ LRESULT CAdminDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         // 2. 새 채팅 메시지 수신
         else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG) // 9030
         {
-            // 서버가 requesterId 포함하면 채팅 요청, 아니면 채팅 메시지
-            if (resJson.contains("requesterId"))
+            // userId 또는 requesterId 포함 시 채팅 요청으로 처리
+            if (resJson.contains("userId") || resJson.contains("requesterId"))
                 m_tabChatDlg.AddChatRequest(resJson);
             else
                 m_tabChatDlg.AddChatMessage(resJson);
+        }
+        else if (pkt->cmdId == CmdID::RES_REQUEST_OK)
+        {
+            json resJson = json::parse(pkt->body);
+            int roomId = resJson.value("roomId", -1);
+            m_tabChatDlg.UpdateRoomId(m_tabChatDlg.GetSelectedRequesterId(), roomId);
+        }
+        // NOTIFY_MSG_TO_ADMIN (9033) - store/고객 메시지 수신
+        else if (pkt->cmdId == CmdID::NOTIFY_MSG_TO_ADMIN)
+        {
+            json resJson = json::parse(pkt->body);
+            m_tabChatDlg.AddChatMessage(resJson);
         }
         // 3. 기존 기능들
         else if (pkt->cmdId == CmdID::RES_ADMIN_ORDER_LIST)
         {
             m_tabRefundDlg.OnSearchResult(resJson);
+        }
+        else if (pkt->cmdId == CmdID::NOTIFY_MSG_TO_ADMIN)  // 9033
+        {
+            json resJson = json::parse(pkt->body);
+            m_tabChatDlg.AddChatMessage(resJson);
         }
         else if (pkt->cmdId == CmdID::RES_REVIEW_LIST)
         {

@@ -56,28 +56,55 @@ void CChatDlg::InitListCtrl()
 
 void CChatDlg::SetNetworkHelper(CNetworkHelper* pNet) { m_pNet = pNet; }
 
+
+void CChatDlg::UpdateRoomId(const std::string& requesterId, int roomId)
+{
+    for (int i = 0; i < m_listChatUsers.GetItemCount(); ++i)
+    {
+        auto* pData = reinterpret_cast<ChatUserData*>(m_listChatUsers.GetItemData(i));
+        if (pData && pData->requesterId == requesterId)
+        {
+            pData->roomId = roomId;
+            if (m_selectedRequesterId == requesterId)
+                m_selectedRoomId = roomId;
+            break;
+        }
+    }
+}
+
+std::string CChatDlg::GetSelectedRequesterId() const
+{
+    return m_selectedRequesterId;
+}
 void CChatDlg::AddChatRequest(const json& reqJson)
 {
-    std::string requesterId   = reqJson.value("requesterId",   "");
-    std::string requesterType = reqJson.value("requesterType", "");
+    // userId / requesterId 둘 다 대응
+    std::string requesterId = reqJson.contains("userId")
+        ? reqJson.value("userId", "")
+        : reqJson.value("requesterId", "");
 
-    OutputDebugStringA(("[AddChatRequest] called. requesterId=" + requesterId + "\n").c_str());
-    OutputDebugStringA(("[AddChatRequest] listHWND valid=" + std::to_string(::IsWindow(m_listChatUsers.GetSafeHwnd())) + "\n").c_str());
-
-    if (requesterId.empty()) { OutputDebugStringA("[AddChatRequest] requesterId empty, return\n"); return; }
-
-    // 중복 요청 방지
-    for (int i = 0; i < m_listChatUsers.GetItemCount(); ++i) {
-        auto* pData = reinterpret_cast<ChatUserData*>(m_listChatUsers.GetItemData(i));
-        if (pData && pData->requesterId == requesterId) { OutputDebugStringA("[AddChatRequest] duplicate, return\n"); return; }
+    // role(int) / requesterType(string) 둘 다 대응
+    std::string requesterType;
+    if (reqJson.contains("requesterType"))
+        requesterType = reqJson.value("requesterType", "");
+    else if (reqJson.contains("role"))
+    {
+        int role = reqJson.value("role", 0);
+        requesterType = (role == 1) ? "STORE_OWNER" : "CUSTOMER";
     }
 
-    CString strRequester = CA2W(requesterId.c_str(),   CP_UTF8);
-    CString strType      = CA2W(requesterType.c_str(), CP_UTF8);
+    if (requesterId.empty()) return;
+
+    // 중복 방지
+    for (int i = 0; i < m_listChatUsers.GetItemCount(); ++i) {
+        auto* pData = reinterpret_cast<ChatUserData*>(m_listChatUsers.GetItemData(i));
+        if (pData && pData->requesterId == requesterId) return;
+    }
+
+    CString strRequester = CA2W(requesterId.c_str(), CP_UTF8);
+    CString strType = CA2W(requesterType.c_str(), CP_UTF8);
 
     int nIdx = m_listChatUsers.InsertItem(m_listChatUsers.GetItemCount(), strRequester);
-    OutputDebugStringA(("[AddChatRequest] InsertItem result nIdx=" + std::to_string(nIdx) + "\n").c_str());
-
     if (nIdx >= 0)
     {
         m_listChatUsers.SetItemText(nIdx, 1, strType);
@@ -89,9 +116,9 @@ void CChatDlg::AddChatRequest(const json& reqJson)
 void CChatDlg::AddChatMessage(const json& msgJson)
 {
     std::string senderId = msgJson.value("senderId", "");
-    std::string message = msgJson.value("message", "");
+    std::string message = msgJson.value("content", ""); 
 
-    if (senderId.empty()) return;  // 가드 추가
+    if (senderId.empty() || senderId == "admin") return;
 
     if (senderId == m_selectedRequesterId)
     {
@@ -132,18 +159,18 @@ void CChatDlg::OnBnClickedBtnChatAccept()
     if (!m_pNet || m_selectedRequesterId.empty()) return;
 
     json body;
-    body["requesterId"]   = m_selectedRequesterId;
+    body["requesterId"] = m_selectedRequesterId;
     body["requesterType"] = m_selectedRequesterType;
-    body["result"]        = "ACCEPT";
+    body["result"] = "ACCEPT";
     m_pNet->Send(CmdID::RES_REQUEST_OK, body);
 
-    // 목록 상태 "상담중" 으로 변경, 버튼 비활성화
     int nIdx = m_listChatUsers.GetNextItem(-1, LVNI_SELECTED);
     if (nIdx != -1)
         m_listChatUsers.SetItemText(nIdx, 2, L"상담중");
 
     m_btnChatAccept.EnableWindow(FALSE);
     m_btnChatReject.EnableWindow(FALSE);
+    m_btnChatSend.EnableWindow(TRUE);   // ← 이 줄 추가
 }
 
 // =========================================================================
@@ -185,6 +212,7 @@ void CChatDlg::OnLvnItemchangedListChatUsers(NMHDR* pNMHDR, LRESULT* pResult)
         {
             m_selectedRequesterId   = pData->requesterId;
             m_selectedRequesterType = pData->requesterType;
+            m_selectedRoomId = pData->roomId;
         }
 
         // 아직 대기중인 항목만 수락/거절 활성화
@@ -201,15 +229,15 @@ void CChatDlg::OnLvnItemchangedListChatUsers(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CChatDlg::OnBnClickedBtnChatSend()
 {
-    if (!m_pNet || m_selectedRequesterId.empty()) return;
+    if (!m_pNet || m_selectedRequesterId.empty() || m_selectedRoomId == -1) return;
     CString strMsg;
     m_editChatMsg.GetWindowText(strMsg);
     if (strMsg.IsEmpty()) return;
 
     json body;
-    body["receiverId"] = m_selectedRequesterId;
-    body["senderId"]   = "admin";
-    body["message"]    = (const char*)CT2A(strMsg, CP_UTF8);
+    body["roomId"] = m_selectedRoomId;           
+    body["senderId"] = "admin";
+    body["content"] = (const char*)CT2A(strMsg, CP_UTF8); 
     m_pNet->Send(CmdID::REQ_CHAT_SEND, body);
 
     CString strLine;

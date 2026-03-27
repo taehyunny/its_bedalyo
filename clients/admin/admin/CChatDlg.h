@@ -22,6 +22,8 @@ public:
     void AddChatRequest(const json& reqJson);   // 새 상담 요청
     void AddChatMessage(const json& msgJson);   // 메시지 수신
     void RemoveChatUser(const json& reqJson);   // 상담 종료 (추가됨)
+    void        UpdateRoomId(const std::string& requesterId, int roomId);
+    std::string GetSelectedRequesterId() const;
 
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);
@@ -39,13 +41,14 @@ protected:
 private:
     // 내부 사용 구조체
     struct ChatUserData {
-        std::string requesterId;    // 서버 body의 "requesterId"
-        std::string requesterType;  // 서버 body의 "requesterType" (CUSTOMER / OWNER)
+        std::string requesterId;
+        std::string requesterType;
+        int roomId = -1;
     };
 
     void InitListCtrl();
     int  GetSelectedUserIndex();
-
+    int m_selectedRoomId = -1;
     CNetworkHelper* m_pNet = nullptr;
 
     std::string m_selectedRequesterId;

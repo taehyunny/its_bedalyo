@@ -402,7 +402,7 @@ void CTabOrderDlg::OnOrderAcceptResult(const json& resJson)
 // =========================================================
 void CTabOrderDlg::OnOrderRejectResult(const json& resJson)
 {
-    if (resJson.value("status", 0) == 200)
+    if (resJson.value("status", 0) == 0)
     {
         std::string orderId = resJson.value("orderId", "");
         if (!orderId.empty())

@@ -39,16 +39,14 @@ BOOL CChatRoomDlg::OnInitDialog()
 void CChatRoomDlg::AddMessage(const json& msgJson)
 {
     std::string senderId = msgJson.value("senderId", "");
-    std::string content = msgJson.value("content", "");  // ✅ "message" → "content"
+    std::string content = msgJson.value("content", "");
+
+    // 내가 보낸 메시지는 이미 로컬에 추가했으므로 skip
+    if (senderId == m_userId) return;
 
     CString strMsg = CA2W(content.c_str(), CP_UTF8);
-
     CString strLine;
-    if (senderId == m_userId)
-        strLine.Format(L"[나] %s", (LPCTSTR)strMsg);
-    else
-        strLine.Format(L"[관리자] %s", (LPCTSTR)strMsg);
-
+    strLine.Format(L"[관리자] %s", (LPCTSTR)strMsg);
     m_listChatLog.AddString(strLine);
     m_listChatLog.SetCurSel(m_listChatLog.GetCount() - 1);
 }

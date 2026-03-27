@@ -130,7 +130,7 @@ private:
                 break;
             }
 
-            // ✅ 빅엔디안 → 리틀엔디안 변환 (주석 해제)
+            // 빅엔디안 → 리틀엔디안 변환 (주석 해제)
             header.signature = ntohs(header.signature);
             header.cmdId = static_cast<CmdID>(ntohs(static_cast<uint16_t>(header.cmdId)));
             header.bodySize = ntohl(header.bodySize);
@@ -141,7 +141,7 @@ private:
 
             if (header.signature != 0x4543)
             {
-                // ✅ [수정] 시그니처 불일치 시 바디까지 소진 후 continue
+                // [수정] 시그니처 불일치 시 바디까지 소진 후 continue
                 // continue만 하면 바디 데이터가 소켓 버퍼에 남아 다음 헤더 읽기가 꼬임
                 OutputDebugStringA("[RecvLoop]  시그니처 불일치! 바디 소진 후 재시도\n");
                 if (header.bodySize > 0 && header.bodySize < 1024 * 1024) // 1MB 이하만 소진
