@@ -475,6 +475,7 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             session.storeName         = QString::fromStdString(dto.storeData.storeName);
             session.storeAddress      = QString::fromStdString(dto.storeData.storeAddress);
             session.deliveryTimeRange = QString::fromStdString(dto.storeData.deliveryTimeRange);
+            session.minOrderAmount    = dto.storeData.minOrderAmount;
 
             StoreDetailQt detail;
             detail.storeId           = dto.storeData.storeId;

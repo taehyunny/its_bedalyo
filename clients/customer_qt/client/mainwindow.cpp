@@ -6,7 +6,6 @@
 #include <QDebug>
 #include <QMessageBox>
 
-
 #include <QTimer>  // [임시 테스트용] 타이머 기능 추가! - 배달완료용
 
 MainWindow::MainWindow(QWidget *parent)
@@ -89,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // AddressWidget X버튼(backRequested) 연결 수정
     connect(m_addressWidget, &AddressWidget::backRequested, this, [this]() {
+        qDebug() << "[DEBUG] backRequested! m_prevWidget:" << m_prevWidget;
         if (m_prevWidget)
             ui->stackedWidget->setCurrentWidget(m_prevWidget);
         else
@@ -117,12 +117,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 이 connect는 밖으로 빼서 생성자에서 한 번만 연결
     connect(m_menureviewWidget, &menureview::backRequested, this, [=]() {
+        qDebug() << "메인윈도우: 리뷰 화면에서 메뉴 옵션 화면으로 돌아갑니다.";
         ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);
-    });
-
-    connect(m_menureviewWidget, &menureview::backRequested, this, [=]() {
-    qDebug() << "메인윈도우: 리뷰 화면에서 메뉴 옵션 화면으로 돌아갑니다.";
-    ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);
     });
 
     // AddressWidget의 완료 시그널 → CartWidget의 슬롯 연결
@@ -134,16 +130,6 @@ MainWindow::MainWindow(QWidget *parent)
             this, [this](const AddressItem &item) {
                 m_cartWidget->onAddressUpdated(item.address);
             });
-
-
-    connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, this, [=](const QString &id){
-
-        // 🚀 중요: 폼 위젯에 클릭한 주문의 ID를 먼저 저장합니다.
-        m_formWidget->setCurrentOrderId(id);
-
-        m_formWidget->updateOrderInfo(id, id, "상세 메뉴 내역...");
-        ui->stackedWidget->setCurrentWidget(m_formWidget);
-    });
 
     // 메뉴 옵션 선택 → 장바구니 담기
     connect(m_storeDetailWidget, &StoreDetailWidget::menuSelected,
@@ -198,19 +184,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_network, &NetworkManager::onOrderCreateReceived, 
             m_cartWidget, &CartWidget::onOrderCreateReceived);
 
-    // 주문 내역에서 상세 메뉴 요청 시 → 주문 완료 화면으로 전환
-    connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, this, [=](QString id){
-        m_formWidget->updateOrderInfo(id, "ORD-001", "상세 메뉴 내역..."); // form 데이터 채우기
-        ui->stackedWidget->setCurrentWidget(m_formWidget); // form.ui 화면으로 전환
-    });
-
     connect(m_formWidget, &Form::backRequested, this, [=]() {
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
-    });
-
-    connect(m_menuOptionWidget, &menuoption::reviewRequested, this, [this](int menuId) {
-    m_menureviewWidget->loadReviews(menuId);  // 서버 요청
-    ui->stackedWidget->setCurrentWidget(m_menureviewWidget);
     });
 
     connect(m_menuOptionWidget, &menuoption::reviewRequested, this, [=](int menuId) {
@@ -218,8 +193,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_menureviewWidget->clearReviews();
     ui->stackedWidget->setCurrentWidget(m_menureviewWidget); 
     });
-
-    
 
     // 주문 내역에서 상세 메뉴 요청 시 → 주문 완료 화면으로 전환
     connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, this, [=](QString id){
@@ -307,8 +280,11 @@ void MainWindow::onSettingsRequested(){ ui->stackedWidget->setCurrentWidget(m_se
 
 void MainWindow::onAddressRequested()
 {
+    static int callCount = 0;
+    qDebug() << "[DEBUG] onAddressRequested 호출 횟수:" << ++callCount
+             << "현재 화면:" << ui->stackedWidget->currentWidget()->objectName();
 
-    m_prevWidget = ui->stackedWidget->currentWidget();  // ← 현재 화면 기억
+    m_prevWidget = ui->stackedWidget->currentWidget();
     if (m_cartBar) m_cartBar->hide();
     m_addressWidget->loadData();
     ui->stackedWidget->setCurrentWidget(m_addressWidget);

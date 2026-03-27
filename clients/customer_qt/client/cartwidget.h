@@ -70,7 +70,7 @@ private:
     int     m_minOrderAmount = 0;
 
     // ── 포장/결제 서버 데이터 ──
-    QString m_pickupTime         = "15~25분";
+    QString m_pickupTime = "";
     QString m_pickupStoreAddress = "";
     QString m_cardNumber;     // 결제수단: 카드번호
     QString m_accountNumber;  // 결제수단: 계좌번호
@@ -112,4 +112,9 @@ private:
     bool isMinOrderMet()   const;
 
     QString m_riderRequest = "문 앞에 놔주세요 (초인종 O)";
+
+    int m_selectedDeliveryIndex = 0;
+    int m_originalDeliveryFee = 0;
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
 };

@@ -54,7 +54,7 @@ public:
     QString storeName;       // 가게명 (UI 표시용)
     QString storeAddress;      // 가게주소 (UI 표시용)
     QString deliveryTimeRange; // 배달 / 포장 시간
-    QString minOrderAmount;
+    int minOrderAmount = 0;
 
     // ── 메뉴 목록 ──
     QList<CartItemQt> items; // 담긴 메뉴 리스트
@@ -112,8 +112,8 @@ public:
         storeId   = -1;
         storeName.clear();
         storeAddress.clear();
-        storeAddress.clear();       // 추가
         deliveryTimeRange.clear();  // 추가
+        minOrderAmount = 0;
     }
 
     // ── 상태 조회 ──
