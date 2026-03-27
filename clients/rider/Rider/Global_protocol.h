@@ -176,8 +176,8 @@ enum class CmdID : uint16_t
     RES_DELIVERY_COMPLETE = 4011, // 사진 인증 완료 응답
     REQ_RIDER_ORDER_LIST = 4020,
     RES_RIDER_ORDER_LIST = 4021,
-    REQ_PICKUP = 4030,   // 라이더 픽업 완료 요청
-    RES_PICKUP = 4031,   // 픽업 완료 응답
+    REQ_PICKUP = 4002,   // 라이더 픽업 완료 요청
+    RES_PICKUP = 4003,   // 픽업 완료 응답
     // ---------------------------------------------------------
     // [5000번대] 관리자(Admin) 파트
     // ---------------------------------------------------------

@@ -61,10 +61,10 @@ BOOL COrderDetailDlg::OnInitDialog()
         switch (status)
         {
         case 0: strStatus = L"대기";   break;
-        case 1: strStatus = L"수락";   break;
-        case 2: strStatus = L"조리중"; break;
-        case 3: strStatus = L"배달중"; break;
-        case 4: strStatus = L"완료";   break;
+        case 8: strStatus = L"수락";   break;
+        case 1: strStatus = L"조리중"; break;
+        case 2: strStatus = L"배달중"; break;
+        case 3: strStatus = L"완료";   break;
         case 9: strStatus = L"거절";   break;
         default: strStatus = L"알 수 없음"; break;
         }
@@ -96,15 +96,15 @@ BOOL COrderDetailDlg::OnInitDialog()
                 OutputDebugStringW(L"\n");
 
                 // selectedOptions 값 출력
-                if (item.contains("selectedOptions"))
+                if (item.contains("options"))            
                 {
-                    std::string optStr = item["selectedOptions"].dump();
+                    std::string optStr = item["options"].dump();
                     CString strOpt = CA2W(optStr.c_str(), CP_UTF8);
-                    OutputDebugStringW(L"[DEBUG] selectedOptions = " + strOpt + L"\n");
+                    OutputDebugStringW(L"[DEBUG] options = " + strOpt + L"\n");
                 }
                 else
                 {
-                    OutputDebugStringW(L"[DEBUG] selectedOptions 키 없음!\n");
+                    OutputDebugStringW(L"[DEBUG] options 키 없음!\n");
                 }
             }
             OutputDebugStringW(L"[DEBUG] ===== items 배열 끝 =====\n");
@@ -123,33 +123,27 @@ BOOL COrderDetailDlg::OnInitDialog()
                 else
                     strMenu = toW(menuName);
 
-                // selectedOptions 안전하게 처리
                 CString strOptions = L"없음";
                 try
                 {
-                    if (item.contains("selectedOptions") &&
-                        !item["selectedOptions"].is_null() &&
-                        item["selectedOptions"].is_array())
+                    if (item.contains("options") &&       
+                        !item["options"].is_null() &&
+                        item["options"].is_array() &&
+                        !item["options"].empty())          
                     {
                         strOptions = L"";
-                        for (const auto& opt : item["selectedOptions"])
+                        for (const auto& opt : item["options"])
                         {
-                            std::string optName = opt.value("optionName", "");
-                            std::string optValue = opt.value("optionValue", "");
-                            int         optPrice = opt.value("optionPrice", 0);
+                            // 객체가 아닌 문자열로 바로 파싱
+                            std::string optName = opt.get<std::string>();
 
                             if (!strOptions.IsEmpty()) strOptions += L" / ";
-                            CString strOpt;
-                            strOpt.Format(L"%s:%s(+%d원)",
-                                (LPCTSTR)toW(optName),
-                                (LPCTSTR)toW(optValue),
-                                optPrice);
-                            strOptions += strOpt;
+                            strOptions += toW(optName);      
                         }
                         if (strOptions.IsEmpty()) strOptions = L"없음";
                     }
                 }
-                catch (...) { strOptions = L"없음"; }  //옵션 파싱 실패해도 계속 진행
+                catch (...) { strOptions = L"없음"; }
 
                 CString strQty, strUnitPrice, strTotal;
                 strQty.Format(L"%d개", quantity);
@@ -203,7 +197,7 @@ void COrderDetailDlg::PrintReceipt()
     m_staticStoreRequest.GetWindowText(strStoreReq);
     m_staticRiderRequest.GetWindowText(strRiderReq);
 
-    // ✅ OutputDebugStringW 사용 (한글 지원)
+    //  OutputDebugStringW 사용 (한글 지원)
     OutputDebugStringW(L"========================================\n");
     OutputDebugStringW(L"          이츠 배달료 영수증            \n");
     OutputDebugStringW(L"========================================\n");
