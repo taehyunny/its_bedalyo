@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "json.hpp" // 경로 확인 필수!
+#include "BaseDTO.h"
 
 using json = nlohmann::json;
 
