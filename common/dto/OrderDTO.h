@@ -197,7 +197,7 @@ struct OrderHistoryItemDTO // 주문 내역 리스트에서 각 주문을 나타
     std::string createdAt;        // 주문 생성 일시 (예: "2024-08-15 12:34:56")
     std::string deliveryPhotoUrl; // 배달 완료 사진 (영수증 대용)
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(OrderHistoryItemDTO,
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(OrderHistoryItemDTO,
                                    orderId, storeId, storeName, menuName, totalPrice, status, menuSummary, createdAt, deliveryPhotoUrl)
 };
 

@@ -13,6 +13,9 @@ class DeliveryCompleteWidget : public QWidget
     Q_OBJECT
 
 public:
+
+    void setOrderId(const QString &orderId) { m_orderId = orderId; }
+
     // 메인 프로젝트 환경에 맞게 NetworkManager를 받도록 설정
     explicit DeliveryCompleteWidget(NetworkManager *network, QWidget *parent = nullptr);
     ~DeliveryCompleteWidget();
@@ -26,8 +29,11 @@ private:
     // 별 모양을 업데이트하는 함수
     void updateStars(int rating);
 
+    QString m_orderId;
+
 signals:
-    void orderListRequested(); 
+    void orderListRequested();
+    void orderCompleted(const QString &orderId);
 };
 
 #endif // DELIVERYCOMPLETEWIDGET_H

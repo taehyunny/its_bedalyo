@@ -21,7 +21,7 @@ OrderReceiptDialog::OrderReceiptDialog(const ResOrderDetailDTO& data, QWidget* p
 {
     // 창 설정 (배경 흐리게, 흰색 바탕)
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
-    setFixedSize(380, 650);
+    setFixedWidth(340);
     setStyleSheet("QDialog { background-color: white; border-radius: 12px; } QLabel { color: #333333; }");
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
@@ -148,4 +148,15 @@ OrderReceiptDialog::OrderReceiptDialog(const ResOrderDetailDTO& data, QWidget* p
     mainLayout->addWidget(lblAddress);
 
     mainLayout->addStretch();
+}
+
+void OrderReceiptDialog::showEvent(QShowEvent *event)
+{
+    QDialog::showEvent(event);
+    if (parentWidget()) {
+        // 부모 기준 가운데 정렬
+        int x = (parentWidget()->width() - width()) / 2;
+        int y = (parentWidget()->height() - height()) / 2;
+        move(parentWidget()->mapToGlobal(QPoint(x, y)));
+    }
 }

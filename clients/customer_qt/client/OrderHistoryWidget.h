@@ -2,6 +2,7 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include <QMap>
 #include "NetworkManager.h"
 #include "readylist.h"
 #include "OrderHistoryCard.h"
@@ -39,6 +40,7 @@ public:
 
     void showPastOrdersTab(); // 과거 주문 내역 탭을 강제로 보여주는 함수
     void addPastOrderCard(const PastOrderInfo& info);
+    void moveToHistory(const QString &orderId, const QString &statusText);
 
 signals:
     void homeRequested();
@@ -57,10 +59,6 @@ private slots:
     void on_navOrder_clicked();
     void on_navMy_clicked();
 
-    // TODO: 서버 응답 슬롯
-    // void onOrderHistoryReceived(...);
-    // void onOrderListReceived(...);
-
 private:
     Ui::OrderHistoryWidget *ui;
     NetworkManager         *m_network;
@@ -70,7 +68,5 @@ private:
     // 탭 스타일 헬퍼
     void setTabActive(QPushButton *activeBtn, QPushButton *inactiveBtn);
 
-    // TODO: 주문 카드 DTO 확정 후 구현
-    // void buildHistoryList(const QList<OrderHistoryItem> &items);
-    // QWidget* makeOrderCard(const OrderHistoryItem &item);
+    QMap<QString, QStringList> m_pendingOrderData;
 };

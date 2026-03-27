@@ -24,7 +24,6 @@ MainWindow::MainWindow(QWidget* parent)
     , m_addressDetailWidget(new AddressDetailWidget(this))
     , m_cartWidget(new CartWidget(m_network, this))
     , m_menuOptionWidget(new menuoption(m_network, this))
-    , m_orderCompleteWidget(new OrderCompleteWidget(m_network, this))
     , m_formWidget(new Form(this))
     , m_deliveryCompleteWidget(new DeliveryCompleteWidget(m_network, this))
     , m_menureviewWidget(new menureview(m_network, this))
@@ -50,7 +49,6 @@ MainWindow::MainWindow(QWidget* parent)
     ui->stackedWidget->addWidget(m_addressDetailWidget);
     ui->stackedWidget->addWidget(m_menuOptionWidget);
     ui->stackedWidget->addWidget(m_cartWidget);
-    ui->stackedWidget->addWidget(m_orderCompleteWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
     ui->stackedWidget->addWidget(m_formWidget);
     ui->stackedWidget->addWidget(m_menureviewWidget);
@@ -161,9 +159,9 @@ MainWindow::MainWindow(QWidget* parent)
         });
     connect(m_menuOptionWidget, &menuoption::reviewRequested, this, [=](int menuId) {
         qDebug() << "메인윈도우: 리뷰 화면으로 전환합니다. 메뉴 ID:" << menuId;
-        m_menureviewWidget->clearReviews();
         ui->stackedWidget->setCurrentWidget(m_menureviewWidget);
-        });
+        m_menureviewWidget->loadReviews(menuId);  // ← 이 한 줄 추가
+    });
 
     // ── 리뷰 ──
     connect(m_menureviewWidget, &menureview::backRequested, this, [=]() {
@@ -193,7 +191,15 @@ MainWindow::MainWindow(QWidget* parent)
             m_formWidget->currentOrderId() == orderId) {
             m_formWidget->updateStatus(state);
         }
-        });
+        if (state == 3) {
+            m_deliveryCompleteWidget->setOrderId(orderId);
+            ui->stackedWidget->setCurrentWidget(m_deliveryCompleteWidget);
+        }
+        // ← 추가
+        if (state == 9) {
+            m_orderHistoryWidget->moveToHistory(orderId, "배달거절");
+        }
+    });
 
     // ── Form 화면 ──
     connect(m_formWidget, &Form::backRequested, this, [=]() {
@@ -201,11 +207,16 @@ MainWindow::MainWindow(QWidget* parent)
         });
 
     // ── 배달 완료 ──
+    connect(m_deliveryCompleteWidget, &DeliveryCompleteWidget::orderCompleted,
+            this, [this](const QString &orderId) {
+                m_orderHistoryWidget->getReadyList()->removeOrderCard(orderId);
+            });
+
     connect(m_deliveryCompleteWidget, &DeliveryCompleteWidget::orderListRequested, this, [this]() {
         m_orderHistoryWidget->loadData();
         m_orderHistoryWidget->showPastOrdersTab();
         ui->stackedWidget->setCurrentWidget(m_orderHistoryWidget);
-        });
+    });
 
     // ── 네트워크 ──
     connect(m_network, &NetworkManager::onMainHomeReceived, this, &MainWindow::onMainHomeReceived);

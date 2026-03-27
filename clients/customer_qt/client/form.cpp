@@ -1,6 +1,7 @@
 ﻿#include "form.h"
 #include "ui_form.h"
 #include "storeutils.h"
+#include <QMessageBox>
 // #include <QLocale> // 맨 위에 없다면 추가해 주세요 (천 단위 콤마용)
 
 Form::Form(QWidget *parent) :
@@ -34,6 +35,25 @@ Form::~Form()
 
 // 🚀 실시간 배달 상태 업데이트 (MainWindow에서 호출됨)
 void Form::updateStatus(int index) {
+    if (index == 9) {
+        // 경고 알림창 생성 (스택 메모리 사용으로 창이 닫히면 자동 소멸됨)
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setWindowTitle("주문 취소 알림");
+        msgBox.setText("매장에서 주문을 취소하였습니다.\n\n매장 사정으로 인해 부득이하게 취소되었습니다.\n결제하신 금액은 전액 환불 처리됩니다.");
+
+        // 사용자가 직접 누를 수 있는 맞춤형 버튼 추가
+        msgBox.addButton("홈으로 돌아가기", QMessageBox::AcceptRole);
+
+        // exec()를 호출하면 사용자가 버튼을 누를 때까지 코드 실행이 여기서 멈춰서 대기합니다.
+        msgBox.exec();
+
+        // 사용자가 '홈으로 돌아가기' 버튼을 눌러 팝업이 닫히면 아래 코드가 이어서 실행됩니다.
+        emit backRequested(); // 홈으로 돌아가는 신호 발생
+
+        return; // 아래의 스택 위젯 변경 로직은 타지 않고 함수 종료
+    }
+
     // 0:접수, 1:조리중, 2:배달중, 3:배달완료
     if (index >= 0 && index < ui->statusStackedWidget->count()) {
         ui->statusStackedWidget->setCurrentIndex(index);

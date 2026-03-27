@@ -30,4 +30,5 @@ protected:
 
 private:
     QString m_orderId; // 주문번호를 기억할 변수 추가
+    int m_status = 0;
 };

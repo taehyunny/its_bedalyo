@@ -36,6 +36,7 @@ void readylist::addOrderCard(const QString &orderId, const QString &storeName, c
 {
     // 1. 메인 카드 프레임
     QFrame *card = new QFrame(this);
+    card->setProperty("orderId", orderId);
     card->setStyleSheet("QFrame { background-color: white; border: 1px solid #eee; border-radius: 15px; }");
     QVBoxLayout *mainVLayout = new QVBoxLayout(card);
     mainVLayout->setContentsMargins(15, 15, 15, 15);
@@ -97,11 +98,6 @@ void readylist::addOrderCard(const QString &orderId, const QString &storeName, c
     // 최신 항목이 위로 오도록 추가 (Spacer 바로 위)
     ui->listContainer->insertWidget(ui->listContainer->count() - 1, card);
 
-    // 버튼 기능 (나중에 구현)
-    connect(detailBtn, &QPushButton::clicked, this, [=]() {
-        // 상세 페이지 전환 로직
-    });
-
     // 상세보기 버튼에 시그널 연결
     connect(detailBtn, &QPushButton::clicked, this, [=]() {
         emit orderDetailRequested(orderId); 
@@ -124,4 +120,29 @@ void readylist::updateCardStatus(const QString &orderId, int state) {
     }
 
     label->setText(statusText); // 화면의 글자가 실시간으로 바뀝니다!
+}
+
+void readylist::removeOrderCard(const QString &orderId)
+{
+    m_statusLabels.remove(orderId);
+
+    // listContainer에서 해당 orderId 카드 찾아서 삭제
+    for (int i = 0; i < ui->listContainer->count(); ++i) {
+        QLayoutItem *layoutItem = ui->listContainer->itemAt(i);
+        if (!layoutItem) continue;
+        QWidget *w = layoutItem->widget();
+        if (!w) continue;
+
+        // 카드 안의 statusLabel이 m_statusLabels에서 삭제된 것과 같으면 해당 카드
+        // orderId를 property로 저장하는 방식으로 찾기
+        if (w->property("orderId").toString() == orderId) {
+            ui->listContainer->removeItem(layoutItem);
+            delete w;
+            break;
+        }
+    }
+
+    if (m_statusLabels.isEmpty()) {
+        emit allCardsRemoved();
+    }
 }

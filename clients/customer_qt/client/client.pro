@@ -17,7 +17,6 @@ SOURCES += \
     menucategori.cpp \
     menuoption.cpp \
     menureview.cpp \
-    ordercompletewidget.cpp \
     orderreceiptdialog.cpp \
     readylist.cpp \
     searchwidget.cpp \
@@ -44,7 +43,6 @@ HEADERS += \
     menucategori.h \
     menuoption.h \
     menureview.h \
-    ordercompletewidget.h \
     orderreceiptdialog.h \
     readylist.h \
     searchwidget.h \
@@ -73,7 +71,6 @@ FORMS += \
     menucategori.ui \
     menuoption.ui \
     menureview.ui \
-    ordercompletewidget.ui \
     orderreceiptdialog.ui \
     readylist.ui \
     searchwidget.ui \

@@ -150,7 +150,7 @@ void NetworkManager::sendMenuReviewRequest(int menuId)
     qDebug() << "[NetworkManager] 메뉴 리뷰 요청 menuId:" << menuId;
     nlohmann::json j;
     j["menuId"] = menuId;
-    sendPacket(CmdID::REQ_REVIEW_LIST, j);  // ← CmdID는 서버 프로토콜 번호에 맞게 확인 필요
+    sendPacket(CmdID::REQ_MENU_REVIEW_LIST, j);  // ← CmdID는 서버 프로토콜 번호에 맞게 확인 필요
 }
 
 // ── 주소 저장 요청 (REQ_ADDRESS_SAVE = 2070) ──
@@ -515,45 +515,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 
             emit onStoreDetailReceived(detail);
 
-        // ============================================================
-        // [핵심 추가] 메뉴 옵션 수신 (RES_MENU_OPTION)
-        //
-        // 서버 JSON 예시:
-        // {
-        //   "status": 200,
-        //   "menuId": 5,
-        //   "optionGroups": [
-        //     {
-        //       "groupId": 1,
-        //       "groupName": "디저트 선택",
-        //       "isRequired": true,
-        //       "options": [
-        //         { "optionId": 1, "optionName": "세트포테이토", "additionalPrice": 0 },
-        //         { "optionId": 2, "optionName": "포테이토(L)", "additionalPrice": 500 }
-        //       ]
-        //     }
-        //   ]
-        // }
-        // ============================================================
-
-        }  else if (cmdId == CmdID::RES_REVIEW_LIST) {
-
-            int status = j.value("status", 0);
-            if (status != 200) {
-                qWarning() << "[NetworkManager] 메뉴 리뷰 수신 실패 status:" << status;
-                return;
-            }
-            int menuId = j.value("menuId", 0);
-            QList<ReviewDTO> reviews;
-            if (j.contains("reviewList") && j["reviewList"].is_array()) {
-                for (const auto &r : j["reviewList"]) {
-                    ReviewDTO dto = r.get<ReviewDTO>();
-                    reviews.append(dto);
-                }
-            }
-            qDebug() << "[NetworkManager] 메뉴 리뷰 수신 개수:" << reviews.size();
-            emit onMenuReviewsReceived(menuId, reviews);
-
         } else if (cmdId == CmdID::RES_MENU_OPTION) {
             qDebug() << "[NetworkManager] RES_MENU_OPTION 수신 raw:" << QString::fromUtf8(body);
 
@@ -656,25 +617,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                                        QString::fromStdString(dto.orderId));
 
         
-        } else if (cmdId == CmdID::RES_MENU_OPTION) {
-            qDebug() << "[NetworkManager] 옵션 데이터 해석 시작";
-            
-            try {
-                int menuId = j.at("menuId").get<int>();
-                std::vector<OptionGroup> stdGroups = j.at("optionGroups").get<std::vector<OptionGroup>>();
-                
-                QList<OptionGroup> qGroups;
-                for(const auto& g : stdGroups) {
-                    qGroups.append(g);
-                }
-
-                qDebug() << "[NetworkManager] 옵션 그룹 수:" << qGroups.size();
-                emit onMenuOptionsReceived(menuId, qGroups);
-                
-            } catch(const std::exception &e) {
-                qWarning() << "[NetworkManager] MenuOption 내부 파싱 에러:" << e.what();
-            }
-
         } else if (cmdId == CmdID::RES_DELIVERY_COMPLETE) { // 4011번 수신
         qDebug() << "[NetworkManager] 🏍️ 배달 완료 전용 신호(4011) 수신!";
         

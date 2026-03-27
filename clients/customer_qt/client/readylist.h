@@ -19,6 +19,7 @@ public:
 
 signals:
     void orderDetailRequested(const QString &orderId); // 상세보기가 눌렸음을 알리는 시그널
+    void allCardsRemoved();
 
 public slots:
     // 가게이름, 상태, 메뉴목록(문자열), 합계금액을 인자로 받음
@@ -27,6 +28,7 @@ public slots:
     
     
     void updateCardStatus(const QString &orderId, int state);
+    void removeOrderCard(const QString &orderId);
 
 private:
     Ui::readylist *ui;

@@ -8,6 +8,7 @@
 #include <QVBoxLayout>
 #include <QScroller>
 #include <QMessageBox>
+#include <QPalette>
 #include "PaymentDTO.h"
 
 // ============================================================
@@ -30,88 +31,77 @@ OrderHistoryWidget::OrderHistoryWidget(NetworkManager *network, QWidget *parent)
 
     // 🚀 1. 과거 주문 내역(2081) 수신 시 카드 그리기
     connect(m_network, &NetworkManager::onOrderHistoryReceived, this, [this](const ResOrderHistoryDTO &resDto){
+        qDebug() << "[OrderHistory] status:" << resDto.status
+                 << "count:" << resDto.historyList.size();
+        // 기존 카드 전체 삭제
         QLayoutItem *child;
         while ((child = ui->historyListLayout->takeAt(0)) != nullptr) {
             delete child->widget();
             delete child;
         }
 
-        if (resDto.status == 200 && !resDto.historyList.empty()) {
+        if ((resDto.status == 200 || resDto.status == 0) && !resDto.historyList.empty()) {
             for (const auto& itemData : resDto.historyList) {
                 OrderHistoryCard* card = new OrderHistoryCard(itemData, this);
-
-                // 🚀 카드를 클릭하면 영수증 요청 쏘기 연결!
-                connect(card, &OrderHistoryCard::receiptRequested, m_network, &NetworkManager::sendOrderDetailRequest);
-
-                ui->historyListLayout->insertWidget(0, card);
+                connect(card, &OrderHistoryCard::receiptRequested,
+                        m_network, &NetworkManager::sendOrderDetailRequest);
+                // ui->historyListLayout->insertWidget(0, card);
+                ui->historyListLayout->addWidget(card);
             }
-            ui->historyEmptyIcon->hide();
-            ui->historyEmptyLabel->hide();
+            // 빈 상태 숨기고 스크롤 영역 표시
+            ui->historyEmptyWidget->hide();
+            ui->historyScrollArea->show();
         } else {
-            ui->historyEmptyIcon->show();
-            ui->historyEmptyLabel->show();
+            // 빈 상태 표시하고 스크롤 영역 숨기기
+            ui->historyEmptyWidget->show();
+            ui->historyScrollArea->hide();
         }
-    }); // <--- 아까 이 부분의 괄호가 꼬였던 겁니다!
-
+    });
     // 🚀 2. 영수증 상세 데이터(2087) 수신 시 팝업 띄우기
     connect(m_network, &NetworkManager::onOrderDetailReceived, this, [this](const ResOrderDetailDTO &resDto){
         if (resDto.status == 200 || resDto.status == 0) {
-        //     OrderReceiptDialog dialog(resDto, this);
-        //     dialog.exec(); // 모달 팝업 실행
+            QWidget *topParent = window();
+            QWidget *overlay = new QWidget(topParent);
+            overlay->setAutoFillBackground(true);
+            QPalette pal = overlay->palette();
+            pal.setColor(QPalette::Window, QColor(0, 0, 0, 150));
+            overlay->setPalette(pal);
+            overlay->setGeometry(0, 0, topParent->width(), topParent->height());
+            overlay->show();
+            overlay->raise();
 
-            // 수정: 힙 메모리에 동적 할당하여 '비모달'로 띄우기
-            OrderReceiptDialog *dialog = new OrderReceiptDialog(resDto, this);
-            dialog->setAttribute(Qt::WA_DeleteOnClose); // 창 닫으면 메모리 자동 해제
-            dialog->show(); // exec() 대신 show()를 쓰면 뒤쪽 클릭이 가능해집니다!
+            OrderReceiptDialog *dialog = new OrderReceiptDialog(resDto, topParent);
+            dialog->setAttribute(Qt::WA_DeleteOnClose);
+            connect(dialog, &QDialog::finished, overlay, &QWidget::deleteLater);
+            dialog->show();
+            dialog->raise();
         }
     });
-
-// });
 
     // ── ReadyList 셋업 ──
     m_readyList = new readylist(ui->pagePending);
 
-    if (ui->pagePending->layout() != nullptr) {
-        QVBoxLayout *pendingLayout = qobject_cast<QVBoxLayout*>(ui->pagePending->layout());
-        if(pendingLayout) {
-            pendingLayout->setContentsMargins(0, 0, 0, 0);
-            pendingLayout->setSpacing(0);
-            pendingLayout->insertWidget(0, m_readyList);
-        }
-    } else {
-        QVBoxLayout *layout = new QVBoxLayout(ui->pagePending);
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->addWidget(m_readyList);
+    QVBoxLayout *pendingLayout = qobject_cast<QVBoxLayout*>(ui->pagePending->layout());
+    if (pendingLayout) {
+        pendingLayout->insertWidget(0, m_readyList);
     }
-
-    // ── TODO: 서버 응답 연결 ──
-    // connect(m_network, &NetworkManager::onOrderHistoryReceived,
-    //         this, &OrderHistoryWidget::onOrderHistoryReceived);
-    // connect(m_network, &NetworkManager::onOrderListReceived,
-    //         this, &OrderHistoryWidget::onOrderListReceived);
-
-
-   m_readyList = new readylist(ui->pagePending);
-
-   if (ui->pagePending->layout() != nullptr) {
-        QVBoxLayout *pendingLayout = qobject_cast<QVBoxLayout*>(ui->pagePending->layout());
-        if(pendingLayout) {
-            pendingLayout->setContentsMargins(0, 0, 0, 0); 
-            pendingLayout->setSpacing(0); // 🚀 이 줄을 추가해서 간격도 0으로 만드세요!
-            
-            pendingLayout->insertWidget(0, m_readyList); // 최상단에 꽂아 넣기
-        }
-    } else {
-        QVBoxLayout *layout = new QVBoxLayout(ui->pagePending);
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->addWidget(m_readyList);
-    }
-
-    m_readyList->hide();
 
     // ── 초기 탭: 준비중 활성화 ──
     ui->tabStack->setCurrentWidget(ui->pagePending);
     setTabActive(ui->tabPending, ui->tabHistory);
+
+    m_readyList->hide();
+    ui->historyEmptyWidget->show();
+    ui->historyScrollArea->hide();
+
+    // historyScrollArea가 네비바를 밀지 않도록 크기 정책 설정
+    ui->historyScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    connect(m_readyList, &readylist::allCardsRemoved, this, [this]() {
+        m_readyList->hide();
+        ui->pendingIcon->show();
+        ui->btnGoHistory->show();
+    });
 }
 
 void OrderHistoryWidget::addPendingOrder(const QString &orderId, const QString &storeName, const QString &menuSummary, int totalPrice)
@@ -131,6 +121,8 @@ void OrderHistoryWidget::addPendingOrder(const QString &orderId, const QString &
         menuSummary,
         StoreUtils::formatWon(totalPrice)
     );
+
+    m_pendingOrderData[orderId] = {storeName, menuSummary, QString::number(totalPrice)};
 }
 
 OrderHistoryWidget::~OrderHistoryWidget() { delete ui; }
@@ -220,4 +212,29 @@ void OrderHistoryWidget::showPastOrdersTab()
         // 버튼을 실제로 클릭한 효과를 줍니다
         ui->tabHistory->click();
     }
+}
+
+void OrderHistoryWidget::moveToHistory(const QString &orderId, const QString &statusText)
+{
+    // 1. 준비중에서 카드 삭제
+    m_readyList->removeOrderCard(orderId);
+
+    // 2. 저장해둔 데이터 꺼내기
+    QStringList data = m_pendingOrderData.value(orderId, {"알 수 없는 가게", "", "0"});
+    m_pendingOrderData.remove(orderId);
+
+    // 3. 과거주문내역 카드 생성
+    OrderHistoryItemDTO dto;
+    dto.orderId     = orderId.toStdString();
+    dto.storeName   = data[0].toStdString();
+    dto.menuSummary = data[1].toStdString();
+    dto.totalPrice  = data[2].toInt();
+    dto.status      = 9; // 거절
+    dto.createdAt   = "";
+    dto.menuName    = statusText.toStdString(); // "배달거절" 표시용
+
+    OrderHistoryCard *card = new OrderHistoryCard(dto, this);
+    ui->historyEmptyWidget->hide();
+    ui->historyScrollArea->show();
+    ui->historyListLayout->insertWidget(0, card);
 }

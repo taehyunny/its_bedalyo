@@ -18,7 +18,8 @@ DeliveryCompleteWidget::DeliveryCompleteWidget(NetworkManager *network, QWidget 
     connect(ui->btnStar5, &QPushButton::clicked, this, [this]() { updateStars(5); });
     //  등록하기 버튼을 누르면 화면 전환 신호를 쏩니다.
     connect(ui->btnRegister, &QPushButton::clicked, this, [this]() {
-        emit orderListRequested(); 
+        emit orderCompleted(m_orderId); // ← 추가: 준비중 목록에서 카드 삭제용
+        emit orderListRequested();
     });
 
 }
