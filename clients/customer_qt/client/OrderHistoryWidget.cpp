@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QScroller>
+#include <QMessageBox>
 #include "PaymentDTO.h"
 
 // ============================================================
@@ -37,10 +38,10 @@ OrderHistoryWidget::OrderHistoryWidget(NetworkManager *network, QWidget *parent)
         if (resDto.status == 200 && !resDto.historyList.empty()) {
             for (const auto& itemData : resDto.historyList) {
                 OrderHistoryCard* card = new OrderHistoryCard(itemData, this);
-                
+
                 // 🚀 카드를 클릭하면 영수증 요청 쏘기 연결!
                 connect(card, &OrderHistoryCard::receiptRequested, m_network, &NetworkManager::sendOrderDetailRequest);
-                
+
                 ui->historyListLayout->insertWidget(0, card);
             }
             ui->historyEmptyIcon->hide();
@@ -54,10 +55,17 @@ OrderHistoryWidget::OrderHistoryWidget(NetworkManager *network, QWidget *parent)
     // 🚀 2. 영수증 상세 데이터(2087) 수신 시 팝업 띄우기
     connect(m_network, &NetworkManager::onOrderDetailReceived, this, [this](const ResOrderDetailDTO &resDto){
         if (resDto.status == 200 || resDto.status == 0) {
-            OrderReceiptDialog dialog(resDto, this);
-            dialog.exec(); // 모달 팝업 실행
+        //     OrderReceiptDialog dialog(resDto, this);
+        //     dialog.exec(); // 모달 팝업 실행
+
+            // 수정: 힙 메모리에 동적 할당하여 '비모달'로 띄우기
+            OrderReceiptDialog *dialog = new OrderReceiptDialog(resDto, this);
+            dialog->setAttribute(Qt::WA_DeleteOnClose); // 창 닫으면 메모리 자동 해제
+            dialog->show(); // exec() 대신 show()를 쓰면 뒤쪽 클릭이 가능해집니다!
         }
     });
+
+// });
 
     // ── ReadyList 셋업 ──
     m_readyList = new readylist(ui->pagePending);
@@ -65,7 +73,7 @@ OrderHistoryWidget::OrderHistoryWidget(NetworkManager *network, QWidget *parent)
     if (ui->pagePending->layout() != nullptr) {
         QVBoxLayout *pendingLayout = qobject_cast<QVBoxLayout*>(ui->pagePending->layout());
         if(pendingLayout) {
-            pendingLayout->setContentsMargins(0, 0, 0, 0); 
+            pendingLayout->setContentsMargins(0, 0, 0, 0);
             pendingLayout->setSpacing(0);
             pendingLayout->insertWidget(0, m_readyList);
         }
@@ -76,7 +84,7 @@ OrderHistoryWidget::OrderHistoryWidget(NetworkManager *network, QWidget *parent)
     }
 
     m_readyList->hide();
-    
+
     // ── 초기 탭: 준비중 활성화 ──
     ui->tabStack->setCurrentWidget(ui->pagePending);
     setTabActive(ui->tabPending, ui->tabHistory);
@@ -84,16 +92,16 @@ OrderHistoryWidget::OrderHistoryWidget(NetworkManager *network, QWidget *parent)
 
 void OrderHistoryWidget::addPendingOrder(const QString &orderId, const QString &storeName, const QString &menuSummary, int totalPrice)
 {
-//    Q_UNUSED(orderId);
+    //    Q_UNUSED(orderId);
 
     // 실제 ui 파일에 존재하는 객체명으로 숨김 처리
     ui->pendingIcon->hide();
     ui->btnGoHistory->hide();
-    
+
     m_readyList->show();
-    
+
     // readylist에 카드 추가
-   m_readyList->addOrderCard(orderId, storeName, "가게접수", menuSummary, QString::number(totalPrice) + "원");
+    m_readyList->addOrderCard(orderId, storeName, "가게접수", menuSummary, QString::number(totalPrice) + "원");
 }
 
 OrderHistoryWidget::~OrderHistoryWidget() { delete ui; }
@@ -108,9 +116,10 @@ void OrderHistoryWidget::loadData()
     ui->tabStack->setCurrentWidget(ui->pagePending);
     setTabActive(ui->tabPending, ui->tabHistory);
 
-    // 🚀 [빠른 테스트용] 강제로 아이디 주입! (테스트 끝나면 꼭 지우세요)
+    // 🚀 [어제 넣은 테스트 코드]
+    // 로그인 안 했을 때 userId가 비어있으면 강제로 "asdf"라는 아이디를 넣어줌
     if (UserSession::instance().userId.isEmpty()) {
-        UserSession::instance().userId = "asdf"; // DB에 실제로 있는 고객 아이디로 적어주세요!
+        UserSession::instance().userId = "asdf"; // 이 부분이 핵심!
     }
 
     qDebug() << "[OrderHistoryWidget] loadData() - userId:"
@@ -156,7 +165,7 @@ void OrderHistoryWidget::setTabActive(QPushButton *activeBtn, QPushButton *inact
         "  font-size:15px; font-weight:bold; color:#111111;"
         "  padding:0; margin:0;"
         "}"
-    );
+        );
     inactiveBtn->setStyleSheet(
         "QPushButton {"
         "  background:transparent; border:none;"
@@ -164,7 +173,7 @@ void OrderHistoryWidget::setTabActive(QPushButton *activeBtn, QPushButton *inact
         "  font-size:15px; font-weight:bold; color:#aaaaaa;"
         "  padding:0; margin:0;"
         "}"
-    );
+        );
 }
 
 // ============================================================
@@ -185,7 +194,7 @@ void OrderHistoryWidget::updateOrderState(const QString &orderId, int state) {
 void OrderHistoryWidget::showPastOrdersTab()
 {
     if (ui->tabHistory) {
-        // 버튼을 실제로 클릭한 효과를 줍니다 
-        ui->tabHistory->click(); 
+        // 버튼을 실제로 클릭한 효과를 줍니다
+        ui->tabHistory->click();
     }
 }
