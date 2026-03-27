@@ -116,12 +116,6 @@ void OrderHistoryWidget::loadData()
     ui->tabStack->setCurrentWidget(ui->pagePending);
     setTabActive(ui->tabPending, ui->tabHistory);
 
-    // 🚀 [어제 넣은 테스트 코드]
-    // 로그인 안 했을 때 userId가 비어있으면 강제로 "asdf"라는 아이디를 넣어줌
-    if (UserSession::instance().userId.isEmpty()) {
-        UserSession::instance().userId = "asdf"; // 이 부분이 핵심!
-    }
-
     qDebug() << "[OrderHistoryWidget] loadData() - userId:"
              << UserSession::instance().userId;
 

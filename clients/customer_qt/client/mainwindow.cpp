@@ -184,12 +184,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
 
     connect(m_network, &NetworkManager::onDeliveryCompleteReceived, this, &MainWindow::handleDeliveryComplete);
-    // [임시 테스트용] 프로그램 실행 1초(1000ms) 뒤에 강제로 배달 완료 함수를 실행합니다
-    // TODO: UI 작업 다 끝나면 이 부분은 꼭 지워주세요!!!
-    QTimer::singleShot(1000, this, [this]() {
-        qDebug() << "[테스트] 1초 경과! 배달 완료 창을 강제로 엽니다.";
-        handleDeliveryComplete("TEST_ORDER_999"); // 우리가 예전에 만들어둔 그 함수를 강제 호출
-    });
 }
 
 MainWindow::~MainWindow() { delete ui; }
