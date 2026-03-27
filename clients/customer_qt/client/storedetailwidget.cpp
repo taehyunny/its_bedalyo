@@ -21,7 +21,7 @@ StoreDetailWidget::StoreDetailWidget(NetworkManager *network, QWidget *parent)
     QScroller::grabGesture(ui->scrollArea, QScroller::LeftMouseButtonGesture);
     QScroller::grabGesture(ui->scrollArea_Reviews, QScroller::LeftMouseButtonGesture);
 
-    loadDummyReviews();
+    // loadDummyReviews();
 
     connect(m_network, &NetworkManager::onStoreDetailReceived,
             this, &StoreDetailWidget::onStoreDetailReceived);
@@ -47,6 +47,7 @@ void StoreDetailWidget::onStoreDetailReceived(StoreDetailQt detail)
     if(m_lastStoreData) delete m_lastStoreData;
     m_lastStoreData = new StoreDetailQt(detail);
 
+    m_currentStoreName = detail.storeName;
     ui->lblStoreName->setText(detail.storeName);
 
     double averageRating = 0.0;
@@ -71,10 +72,10 @@ void StoreDetailWidget::onStoreDetailReceived(StoreDetailQt detail)
                            .arg(averageRating, 0, 'f', 1)
                            .arg(reviewTotalCount));
 
-    ui->lblDeliveryStats->setText(QString("배달 %1 | 최소주문 %2원 | 배달비 %3")
-                                  .arg(detail.deliveryTimeRange)
-                                  .arg(detail.minOrderAmount)
-                                  .arg(detail.deliveryFees));
+    ui->lblDeliveryStats->setText(QString("배달 %1 | 최소주문 %2 | 배달비 %3")
+                                      .arg(detail.deliveryTimeRange)
+                                      .arg(StoreUtils::formatWon(detail.minOrderAmount))
+                                      .arg(detail.deliveryFees));
 
     populatePhotoReviewBar(detail.reviews);
 
@@ -232,12 +233,12 @@ QWidget* StoreDetailWidget::makeReviewCard(const ReviewQt& review)
     ratingLayout->addStretch();
     mainLayout->addLayout(ratingLayout);
 
-    if (!review.orderedMenus.isEmpty()) {
-        QLabel* lblMenu = new QLabel("주문메뉴  " + review.orderedMenus);
-        lblMenu->setStyleSheet("font-size: 13px; color: #666666; font-weight: bold;");
-        lblMenu->setWordWrap(true);
-        mainLayout->addWidget(lblMenu);
-    }
+    // if (!review.orderedMenus.isEmpty()) {
+    //     QLabel* lblMenu = new QLabel("주문메뉴  " + review.orderedMenus);
+    //     lblMenu->setStyleSheet("font-size: 13px; color: #666666; font-weight: bold;");
+    //     lblMenu->setWordWrap(true);
+    //     mainLayout->addWidget(lblMenu);
+    // }
 
     QLabel* lblContent = new QLabel(review.comment);
     lblContent->setStyleSheet("font-size: 15px; color: #333333; line-height: 1.5; margin-top: 5px;");
@@ -269,31 +270,31 @@ QWidget* StoreDetailWidget::makeReviewCard(const ReviewQt& review)
     return card;
 }
 
-void StoreDetailWidget::loadDummyReviews()
-{
-    QList<ReviewQt> dummyList;
+// void StoreDetailWidget::loadDummyReviews()
+// {
+//     QList<ReviewQt> dummyList;
 
-    ReviewQt r1;
-    r1.reviewId = 1;
-    r1.userId = "김철수";
-    r1.rating = 5;
-    r1.createdAt = "3일 전";
-    r1.orderedMenus = "황태콩나물국밥(공기밥 포함)";
-    r1.comment = "너무 맛있게 잘 먹었습니다! 다음에도 꼭 여기서 시킬게요.";
-    r1.ownerReply = "안녕하세요, 현대옥 광주화정점입니다. 리뷰 남겨 주셔서 감사합니다.";
-    dummyList.append(r1);
+//     ReviewQt r1;
+//     r1.reviewId = 1;
+//     r1.userId = "김철수";
+//     r1.rating = 5;
+//     r1.createdAt = "3일 전";
+//     r1.orderedMenus = "황태콩나물국밥(공기밥 포함)";
+//     r1.comment = "너무 맛있게 잘 먹었습니다! 다음에도 꼭 여기서 시킬게요.";
+//     r1.ownerReply = "안녕하세요, 현대옥 광주화정점입니다. 리뷰 남겨 주셔서 감사합니다.";
+//     dummyList.append(r1);
 
-    ReviewQt r2;
-    r2.reviewId = 2;
-    r2.userId = "김영희";
-    r2.rating = 5;
-    r2.createdAt = "4일 전";
-    r2.orderedMenus = "얼큰돼지국밥(공기밥 포함) · 얼큰돼지국밥(공기밥 포함)";
-    r2.comment = "남편이 어제 술먹고 해장한다고 지난번 시켰던곳 맛있었다고 주문요청해서 배달시켰네요~^^";
-    dummyList.append(r2);
+//     ReviewQt r2;
+//     r2.reviewId = 2;
+//     r2.userId = "김영희";
+//     r2.rating = 5;
+//     r2.createdAt = "4일 전";
+//     r2.orderedMenus = "얼큰돼지국밥(공기밥 포함) · 얼큰돼지국밥(공기밥 포함)";
+//     r2.comment = "남편이 어제 술먹고 해장한다고 지난번 시켰던곳 맛있었다고 주문요청해서 배달시켰네요~^^";
+//     dummyList.append(r2);
 
-    renderReviews(dummyList);
-}
+//     renderReviews(dummyList);
+// }
 
 void StoreDetailWidget::on_btnStoreInfo_clicked()
 {

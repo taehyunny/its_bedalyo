@@ -22,8 +22,20 @@ SearchResultWidget::SearchResultWidget(NetworkManager *network, QWidget *parent)
     connect(ui->btnBack, &QPushButton::clicked,
             this, &SearchResultWidget::on_btnBack_clicked);
 
-    // 검색 버튼은 UI 장식용 — 기능 없음
-    ui->btnSearch->setEnabled(false);
+    // 검색 버튼
+    ui->btnSearch->setEnabled(true);
+
+    // 검색버튼 클릭 시 재검색
+    connect(ui->btnSearch, &QPushButton::clicked, this, [this]() {
+        QString kw = ui->searchEdit->text().trimmed();
+        if (!kw.isEmpty()) search(kw);
+    });
+
+    // 엔터키로도 재검색
+    connect(ui->searchEdit, &QLineEdit::returnPressed, this, [this]() {
+        QString kw = ui->searchEdit->text().trimmed();
+        if (!kw.isEmpty()) search(kw);
+    });
 
     // ── 서버 응답 연결 ──
     connect(m_network, &NetworkManager::onSearchResultReceived,
@@ -101,23 +113,32 @@ void SearchResultWidget::showEmpty()
 // 클릭은 카드 내부 투명 QPushButton 오버레이로 처리
 // eventFilter 없이 람다로 storeSelected emit
 // ============================================================
+// 기존 vl 레이아웃을 QGridLayout으로 교체해서 겹치게 만들기
 QWidget* SearchResultWidget::makeStoreCard(const TopStoreInfoQt &store)
 {
     QWidget *card = new QWidget();
     card->setStyleSheet("background:#ffffff; border-radius:8px;");
 
-    QVBoxLayout *vl = new QVBoxLayout(card);
+    // ── 기존 vl 대신 QGridLayout 사용 ──
+    QGridLayout *grid = new QGridLayout(card);
+    grid->setContentsMargins(0, 0, 0, 0);
+    grid->setSpacing(0);
+
+    // 내용 위젯 (이미지 + 정보)
+    QWidget *content = new QWidget();
+    content->setAttribute(Qt::WA_TransparentForMouseEvents); // 클릭 투과
+    QVBoxLayout *vl = new QVBoxLayout(content);
     vl->setContentsMargins(0, 0, 0, 0);
     vl->setSpacing(0);
 
-    // 썸네일 이미지 (이모지 플레이스홀더)
+    // 썸네일
     QLabel *imgLabel = new QLabel();
     imgLabel->setFixedHeight(180);
     imgLabel->setAlignment(Qt::AlignCenter);
     imgLabel->setStyleSheet(
         QString("background-color:%1; font-size:48px; border-radius:8px 8px 0 0;")
             .arg(StoreUtils::placeholderColor(store.category))
-    );
+        );
     imgLabel->setText(StoreUtils::categoryEmoji(store.category));
     vl->addWidget(imgLabel);
 
@@ -128,29 +149,25 @@ QWidget* SearchResultWidget::makeStoreCard(const TopStoreInfoQt &store)
     il->setContentsMargins(14, 10, 14, 14);
     il->setSpacing(4);
 
-    // 카테고리 뱃지
     QLabel *catLabel = new QLabel(store.category);
     catLabel->setStyleSheet(
         "font-size:11px; color:#1565c0; background:#e8f0ff;"
         "border-radius:4px; padding:2px 8px; font-weight:bold;"
-    );
+        );
     catLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
 
-    // 매장명
     QLabel *nameLabel = new QLabel(store.storeName.isEmpty() ? "-" : store.storeName);
     nameLabel->setStyleSheet("font-size:17px; font-weight:bold; color:#111111;");
 
-    // 별점·배달비·시간
     QLabel *metaLabel = new QLabel(
         QString("⭐ %1 (%2)  ·  %3  ·  %4")
             .arg(store.rating, 0, 'f', 1)
             .arg(store.reviewCount)
             .arg(StoreUtils::formatDeliveryFee(store.deliveryFee))
             .arg(store.deliveryTimeRange)
-    );
+        );
     metaLabel->setStyleSheet("font-size:13px; color:#555555;");
 
-    // 최소주문
     QLabel *minLabel = new QLabel("최소주문 " + StoreUtils::formatWon(store.minOrderAmount));
     minLabel->setStyleSheet("font-size:12px; color:#888888;");
 
@@ -160,19 +177,22 @@ QWidget* SearchResultWidget::makeStoreCard(const TopStoreInfoQt &store)
     il->addWidget(minLabel);
     vl->addWidget(info);
 
-    // ── 카드 전체를 덮는 클릭 버튼 (투명 오버레이) ──
-    // eventFilter 없이 람다로 클릭 처리
-    QPushButton *clickOverlay = new QPushButton(card);
+    // ── 오버레이 버튼 ──
+    QPushButton *clickOverlay = new QPushButton();
     clickOverlay->setStyleSheet(
         "QPushButton { background:transparent; border:none; }"
         "QPushButton:hover { background:rgba(0,0,0,0.03); }"
         "QPushButton:pressed { background:rgba(0,0,0,0.07); }"
-    );
+        );
     clickOverlay->setCursor(Qt::PointingHandCursor);
-    clickOverlay->raise();
+    clickOverlay->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    clickOverlay->setMinimumSize(1, 1);
+
+    // content와 overlay를 같은 칸(0,0)에 겹쳐서 배치
+    grid->addWidget(content,      0, 0);
+    grid->addWidget(clickOverlay, 0, 0);
 
     connect(clickOverlay, &QPushButton::clicked, this, [this, storeId = store.storeId]() {
-        // TODO: REQ_RESEARCH_ADD(2112) 카테고리 점수 올리기 (서버팀 DTO 확정 후)
         emit storeSelected(storeId);
     });
 

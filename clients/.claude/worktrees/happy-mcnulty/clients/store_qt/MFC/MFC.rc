@@ -1,0 +1,595 @@
+// Microsoft Visual C++ generated resource script.
+//
+#pragma code_page(65001)
+
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "targetver.h"
+#include "afxres.h"
+#include "verrsrc.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 한국어(대한민국) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""targetver.h""\r\n"
+    "#include ""afxres.h""\r\n"
+    "#include ""verrsrc.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)\r\n"
+    "LANGUAGE 18, 1\r\n"
+    "#include ""res\\MFC.rc2""\r\n"
+    "#include ""l.KOR\\afxres.rc""\r\n"
+    "#if !defined(_AFXDLL)\r\n"
+    "#include ""l.KOR\\afxribbon.rc""\r\n"
+    "#endif\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\MFC.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MFC_DIALOG DIALOGEX 0, 0, 320, 200
+STYLE DS_SETFONT | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+FONT 12, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    CTEXT           "It's 배달료",IDC_STATIC,14,18,291,9
+    LTEXT           "ID",IDC_STATIC,94,59,12,8
+    LTEXT           "PW",IDC_STATIC,94,76,12,8
+    EDITTEXT        IDC_EDIT1,120,58,78,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT2,120,75,78,12,ES_PASSWORD | ES_AUTOHSCROLL
+    PUSHBUTTON      "회원가입",IDC_BUTTON2,120,92,35,11
+    PUSHBUTTON      "나가기",IDCANCEL,162,92,35,11
+    PUSHBUTTON      "로그인",IDC_BUTTON1,205,58,33,30
+END
+
+IDD_MAIN_MENU DIALOGEX 0, 0, 241, 154
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 24, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Static",IDC_STATIC_STATUS,131,13,39,15
+    CONTROL         "",IDC_TAB_STATUS_SET,"SysTabControl32",0x0,7,34,227,111
+    LTEXT           "Static",IDC_STATIC_NAMEBAR,8,12,83,16
+    GROUPBOX        "",IDC_STATIC_UPBAR,7,7,227,23
+    PUSHBUTTON      "고객센터",IDC_BTN_CHAT_REQUEST,195,12,35,12
+END
+
+IDD_SIGNUP DIALOGEX 0, 0, 346, 198
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_VSCROLL | WS_SYSMENU
+CAPTION "Dialog"
+FONT 12, "Microsoft YaHei", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "완료",IDOK,223,174,50,14
+    PUSHBUTTON      "뒤로가기",IDCANCEL,279,174,50,14
+    CTEXT           "Its_Bedalyo",IDC_STATIC,102,10,150,11
+    LTEXT           "ID",IDC_ID,29,34,8,8
+    EDITTEXT        IDC_EDIT_USER_ID,42,32,79,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PWEdit,42,52,79,14,ES_PASSWORD | ES_AUTOHSCROLL
+    LTEXT           "PW",IDC_STATIC,26,54,11,8
+    LTEXT           "PW 확인",IDC_STATIC,12,75,25,8
+    EDITTEXT        IDC_REPWEdit,42,72,79,14,ES_PASSWORD | ES_AUTOHSCROLL
+    PUSHBUTTON      "중복 확인",IDC_BtnIDCHECK,124,32,30,14
+    LTEXT           "이름",IDC_STATIC,23,96,14,8
+    LTEXT           "전화번호",IDC_STATIC,11,114,26,8
+    EDITTEXT        IDC_NAMEEDIT,42,93,79,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PHONE,42,113,79,14,ES_AUTOHSCROLL
+    LTEXT           "매장명",IDC_STATIC,188,35,20,8
+    EDITTEXT        IDC_STORENAME,210,33,105,14,ES_AUTOHSCROLL
+    LTEXT           "카테고리",IDC_CATEGORY,181,74,27,8
+    LTEXT           "사업자 번호",IDC_STATIC,173,95,35,8
+    EDITTEXT        IDC_STOREID,211,92,94,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "인증",IDC_BTNSTORECHECK,307,93,23,14
+    LTEXT           "",IDC_IDCHECK,42,19,112,9
+    LTEXT           "",IDC_STOREID_CHECK,191,117,133,9
+    COMBOBOX        IDC_COMBO_CATEGORY,211,73,48,107,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " - 제외 ",IDC_STATIC,121,116,23,8
+    LTEXT           "매장 주소",IDC_STATIC_STORE_ADDRESS,179,56,29,8
+    EDITTEXT        IDC_EDIT_STOREADDRESS,210,52,105,14,ES_AUTOHSCROLL
+END
+
+IDD_TAB_STORE DIALOGEX 0, 0, 461, 235
+STYLE DS_SETFONT | WS_CHILD | WS_BORDER | WS_VSCROLL | WS_SYSMENU
+FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "저장",IDC_BTN_SAVE,344,201,50,14
+    PUSHBUTTON      "변경 취소",IDC_BTN_CANCEL,397,201,50,14
+    LTEXT           "매장명",IDC_STATIC,7,14,32,8
+    LTEXT           "카테고리",IDC_STATIC,7,36,32,8
+    LTEXT           "매장 주소",IDC_STATIC,7,64,32,8
+    LTEXT           "사업자 번호",IDC_STATIC,7,91,39,8
+    LTEXT           "조리시간",IDC_STATIC,7,114,32,8
+    LTEXT           "최소 주문 금액",IDC_STATIC,7,135,50,8
+    LTEXT           "영업 시간",IDC_STATIC,7,157,32,8
+    LTEXT           "영업 상태",IDC_STATIC,7,195,32,8
+    EDITTEXT        IDC_EDIT_STORE_NAME,49,11,114,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_NAME,168,11,24,14
+    COMBOBOX        IDC_COMBO_CATEGORY,49,34,58,30,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_CATEGORY,114,34,24,14
+    EDITTEXT        IDC_EDIT_STORE_ADDRESS,49,60,168,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_ADDRESS,217,61,24,14
+    EDITTEXT        IDC_EDIT_STORE_BIZNUM,49,88,168,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_COOK_TIME,49,111,57,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MIN_ORDER,69,132,75,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_OPEN_TIME,51,154,61,14,ES_AUTOHSCROLL
+    LTEXT           "-",IDC_STATIC,120,157,8,8
+    EDITTEXT        IDC_EDIT_CLOSE_TIME,134,154,61,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "영업 중",IDC_BTN_STORE_OPEN,51,182,50,34
+    PUSHBUTTON      "영업 종료",IDC_BTN_STORE_CLOSE,118,183,50,34
+    LTEXT           "이름",IDC_STATIC,252,14,16,8
+    LTEXT           "전화번호",IDC_STATIC,252,39,30,8
+    LTEXT           "정산 계좌",IDC_STATIC,252,63,32,8
+    LTEXT           "승인 상태",IDC_STATIC,252,86,32,8
+    LTEXT           "승인 여부",IDC_STATIC_APPROVAL,304,86,32,8
+    EDITTEXT        IDC_EDIT_OWNER_NAME,304,11,57,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_OWNER_NAME,371,11,24,14
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_OWNER_PHONE,424,32,24,14
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_ACCOUNT,424,60,24,14
+    EDITTEXT        IDC_EDIT_OWNER_PHONE,304,32,114,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_ACCOUNT,304,60,114,14,ES_AUTOHSCROLL
+    LTEXT           "배달료",IDC_STATIC,142,114,18,8
+    EDITTEXT        IDC_EDIT_DELIVERY_FEE,166,111,50,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "수정",IDC_BTN_EDIT_DELIVERY,217,111,24,14
+END
+
+IDD_TAB_ORDER DIALOGEX 0, 0, 538, 239
+STYLE DS_SETFONT | WS_CHILD | WS_BORDER | WS_SYSMENU
+FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_LIST_ORDER,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,29,524,168
+    PUSHBUTTON      "주문 수락",IDC_BTN_ORDER_ACCEPT,21,9,54,18
+    PUSHBUTTON      "주문 거절",IDC_BTN_ORDER_REJECT,89,10,56,18
+    COMBOBOX        IDC_COMBO_REJECT_REASON,220,200,310,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "거절 사유 :",IDC_STATIC,181,203,37,8
+    EDITTEXT        IDC_EDIT_REJECT_REASON,220,215,310,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "새로고침",IDC_BTN_REFRESH,469,10,56,18
+    PUSHBUTTON      "목록 삭제",IDC_BTN_DELETE,406,10,56,18
+END
+
+IDD_ORDER_DETAIL DIALOGEX 0, 0, 407, 263
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 9, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "영수증 출력",IDC_BTN_PRINT_RECEIPT,293,242,50,14
+    PUSHBUTTON      "닫기",IDC_BTN_DETAIL_CLOSE,347,242,50,14
+    LTEXT           "주문 번호 :",IDC_STATIC,14,14,27,8
+    LTEXT           "Static",IDC_STATIC_ORDER_ID,51,14,74,8
+    LTEXT           "배달 주소 :",IDC_STATIC,14,26,31,8
+    LTEXT           "주문 상태 :",IDC_STATIC,221,15,32,8
+    LTEXT           "총 금액 :",IDC_STATIC,294,227,27,8
+    LTEXT           "주문 메뉴 목록",IDC_STATIC,14,39,46,11
+    LTEXT           "상태",IDC_STATIC_ORDER_STATUS,273,15,27,8
+    LTEXT           "배달 주소 :",IDC_STATIC_ORDER_ADDRESS,51,26,137,8
+    CONTROL         "",IDC_LIST_ORDER_ITEMS,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,15,47,376,86
+    LTEXT           "총 금액",IDC_STATIC_ORDER_PRICE,329,227,63,8
+    LTEXT           "주문 시각 :",IDC_STATIC,221,28,28,8
+    LTEXT           "주문 시각",IDC_STATIC_ORDER_TIME,260,28,38,8
+    LTEXT           "사장님 요청사항",IDC_STATIC,15,136,51,8
+    LTEXT           "Static",IDC_STORE_REQUEST,16,148,373,28
+    LTEXT           "라이더 요청사항",IDC_STATIC,16,189,51,8
+    LTEXT           "Static",IDC_RIDER_REQUEST,16,202,376,22
+END
+
+IDD_TAB_REVIEW DIALOGEX 0, 0, 411, 193
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 12, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "답글 등록",IDC_BTN_REPLY_SUBMIT,354,172,50,14
+    CONTROL         "",IDC_LIST_REVIEW,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,397,84
+    EDITTEXT        IDC_EDIT_REPLY,7,100,397,69,ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL
+    LTEXT           "답글 내용 :",IDC_STATIC,7,92,28,8
+    PUSHBUTTON      "새로고침",IDC_BTN_REVIEW_REFRESH,294,172,50,14
+END
+
+IDD_TAB_SALES DIALOGEX 0, 0, 450, 239
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 11, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "조회 기간 :",IDC_STATIC,16,14,28,8
+    CONTROL         "",IDC_DATETIMEPICKER_START,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,46,11,85,15
+    LTEXT           "~",IDC_STATIC,143,16,8,8
+    CONTROL         "",IDC_DATETIMEPICKER_END,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,161,11,85,15
+    PUSHBUTTON      "조회",IDC_BTN_SALES_SEARCH,255,11,39,15
+    LTEXT           "매출 합계 :",IDC_STATIC,16,35,28,8
+    LTEXT           "Static",IDC_STATIC_TOTAL_SALES,48,35,80,11
+    LTEXT           "주문 수 :",IDC_STATIC,163,35,22,8
+    LTEXT           "Static",IDC_STATIC_TOTAL_ORDER,200,34,80,8
+    LTEXT           "정산 예정액 :",IDC_STATIC,163,59,33,8
+    LTEXT           "Static",IDC_STATIC_NET_SALES,200,58,80,8
+    LTEXT           "수수료 :",IDC_STATIC,16,58,21,8
+    LTEXT           "Static",IDC_STATIC_COMMISSION,40,58,80,11
+    CONTROL         "",IDC_LIST_TOP_MENU,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,92,440,82
+    LTEXT           "인기 메뉴 TOP 3",IDC_STATIC,15,78,45,8
+END
+
+IDD_TAB_SETTLEMENT DIALOGEX 0, 0, 424, 187
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 12, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "조회 기간 :",IDC_STATIC,16,15,30,8
+    CONTROL         "",IDC_DATETIMEPICKER_SET_START,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,54,13,76,13
+    CONTROL         "",IDC_DATETIMEPICKER_SET_END,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,154,13,76,13
+    LTEXT           "~",IDC_STATIC,140,17,8,8
+    PUSHBUTTON      "조회",IDC_BTN_SETTLEMENT_SEARCH,247,13,29,14
+    LTEXT           "정산 예정 금액",IDC_STATIC,18,42,37,8
+    LTEXT           "정산 완료 금액",IDC_STATIC,147,42,37,8
+    LTEXT           "Static",IDC_STATIC_PENDING_AMOUNT,18,57,84,8
+    LTEXT           "Static",IDC_STATIC_COMPLETED_AMOUNT,147,57,91,8
+    CONTROL         "",IDC_LIST_SETTLEMENT,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,86,410,72
+    LTEXT           "정산 내역",IDC_STATIC,18,76,25,8
+END
+
+IDD_TAB_MENU DIALOGEX 0, 0, 422, 189
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 12, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "메뉴 추가",IDC_BTN_MENU_ADD,25,8,35,14
+    PUSHBUTTON      "메뉴 수정",IDC_BTN_MENU_EDIT,67,8,35,14
+    PUSHBUTTON      "메뉴 삭제",IDC_BTN_MENU_DELETE,111,8,35,14
+    PUSHBUTTON      "품절 처리",IDC_BTN_MENU_SOLDOUT,155,8,35,14
+    CONTROL         "",IDC_LIST_MENU,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,16,24,390,157
+END
+
+IDD_MENU_EDIT DIALOGEX 0, 0, 352, 204
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_SYSMENU
+FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "저장",IDOK,239,183,50,14
+    PUSHBUTTON      "취소",IDCANCEL,295,183,50,14
+    LTEXT           "메뉴명",IDC_STATIC,25,23,18,8
+    LTEXT           "가격",IDC_STATIC,25,46,12,8
+    LTEXT           "카테고리",IDC_STATIC,25,68,23,8
+    LTEXT           "설명",IDC_STATIC,25,95,12,8
+    EDITTEXT        IDC_EDIT_MENU_NAME,52,20,173,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MENU_PRICE,52,44,104,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MENU_CAT,52,66,102,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MENU_DESC,52,92,285,80,ES_MULTILINE | ES_AUTOHSCROLL
+    CONTROL         "인기 메뉴",IDC_CHK_POPULAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,276,22,40,10
+    PUSHBUTTON      "옵션 관리",IDC_OPTION_EDIT,184,66,50,14
+END
+
+IDD_MENU_OPTION DIALOGEX 0, 0, 327, 262
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "확인",IDOK,211,241,50,14
+    PUSHBUTTON      "취소",IDCANCEL,270,241,50,14
+    LTEXT           "옵션 그룹명",IDC_STATIC,20,18,30,8
+    EDITTEXT        IDC_EDIT_OPT_GROUP_NAME,56,15,76,14,ES_AUTOHSCROLL
+    CONTROL         "필수",IDC_CHK_OPT_REQUIRED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,141,17,27,10
+    PUSHBUTTON      "그룹 추가",IDC_BTN_OPT_GROUP_ADD,20,36,50,14
+    PUSHBUTTON      "그룹 삭제",IDC_BTN_OPT_GROUP_DEL,78,36,50,14
+    CONTROL         "",IDC_LIST_OPT_GROUP,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,20,55,285,71
+    LTEXT           "옵션명",IDC_STATIC,20,137,18,8
+    LTEXT           "가격",IDC_STATIC,165,137,12,8
+    EDITTEXT        IDC_EDIT_OPT_ITEM_NAME,42,134,85,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_OPT_ITEM_PRICE,184,134,85,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "옵션 추가",IDC_BTN_OPT_ITEM_ADD,20,154,50,14
+    PUSHBUTTON      "옵션 삭제",IDC_BTN_OPT_ITEM_DEL,78,154,50,14
+    CONTROL         "",IDC_LIST_OPT_ITEM,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,21,172,283,65
+END
+
+IDD_CHAT_ROOM DIALOGEX 0, 0, 320, 280
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "고객센터 채팅"
+FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    LISTBOX         IDC_LIST_CHAT_ROOM,7,7,306,210,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_CHAT_ROOM_MSG,7,222,240,30,ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL
+    PUSHBUTTON      "전송",IDC_BTN_CHAT_ROOM_SEND,252,222,61,30
+    PUSHBUTTON      "채팅 종료",IDC_BTN_CHAT_ROOM_CLOSE,7,257,61,16
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041204B0"
+        BEGIN
+            VALUE "CompanyName", "TODO: <회사 이름>"
+            VALUE "FileDescription", "MFC"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "MFC.exe"
+            VALUE "LegalCopyright", "TODO: (c) <회사 이름>.  All rights reserved."
+            VALUE "OriginalFilename", "MFC.exe"
+            VALUE "ProductName", "TODO: <제품 이름>"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x412, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_MFC_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 313
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
+
+    IDD_MAIN_MENU, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 234
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 145
+    END
+
+    IDD_SIGNUP, DIALOG
+    BEGIN
+        LEFTMARGIN, 8
+        RIGHTMARGIN, 332
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 191
+    END
+
+    IDD_TAB_STORE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 217
+    END
+
+    IDD_TAB_ORDER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 531
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 232
+    END
+
+    IDD_ORDER_DETAIL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 400
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 256
+    END
+
+    IDD_TAB_REVIEW, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 404
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_TAB_SALES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 447
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
+
+    IDD_TAB_SETTLEMENT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 417
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 180
+    END
+
+    IDD_TAB_MENU, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 415
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 182
+    END
+
+    IDD_MENU_EDIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 345
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 197
+    END
+
+    IDD_MENU_OPTION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 320
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 255
+    END
+
+    IDD_CHAT_ROOM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 313
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 273
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_MFC_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_MAIN_MENU AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_SIGNUP AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TAB_STORE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TAB_ORDER AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_ORDER_DETAIL AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TAB_REVIEW AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TAB_SALES AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TAB_SETTLEMENT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TAB_MENU AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_MENU_EDIT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_MENU_OPTION AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_CHAT_ROOM AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_ABOUTBOX            "MFC 정보(&A)..."
+END
+
+#endif    // 한국어(대한민국) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE 18, 1
+#include "res\MFC.rc2"
+#include "l.KOR\afxres.rc"
+#if !defined(_AFXDLL)
+#include "l.KOR\afxribbon.rc"
+#endif
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

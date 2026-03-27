@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SettingsWidget</class>
+ <widget class="QWidget" name="SettingsWidget">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>390</width><height>844</height></rect>
+  </property>
+  <property name="windowTitle"><string>설정</string></property>
+  <property name="styleSheet">
+   <string notr="true">QWidget#SettingsWidget { background-color: #f5f5f5; }</string>
+  </property>
+
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing"><number>0</number></property>
+   <property name="leftMargin"><number>0</number></property>
+   <property name="topMargin"><number>0</number></property>
+   <property name="rightMargin"><number>0</number></property>
+   <property name="bottomMargin"><number>0</number></property>
+
+   <!-- 헤더 -->
+   <item>
+    <widget class="QWidget" name="headerWidget">
+     <property name="minimumHeight"><number>56</number></property>
+     <property name="maximumHeight"><number>56</number></property>
+     <property name="styleSheet">
+      <string notr="true">QWidget#headerWidget { background:#ffffff; border-bottom:1px solid #eeeeee; }</string>
+     </property>
+     <layout class="QHBoxLayout" name="headerLayout">
+      <property name="leftMargin"><number>12</number></property>
+      <property name="topMargin"><number>0</number></property>
+      <property name="rightMargin"><number>12</number></property>
+      <property name="bottomMargin"><number>0</number></property>
+      <property name="spacing"><number>0</number></property>
+      <item>
+       <widget class="QPushButton" name="btnBack">
+        <property name="minimumSize"><size><width>36</width><height>36</height></size></property>
+        <property name="maximumSize"><size><width>36</width><height>36</height></size></property>
+        <property name="text"><string>←</string></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton{background:transparent;border:none;font-size:20px;color:#222222;}QPushButton:hover{color:#1565c0;}</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelTitle">
+        <property name="text"><string>설정</string></property>
+        <property name="alignment"><set>Qt::AlignCenter</set></property>
+        <property name="styleSheet">
+         <string notr="true">font-size:17px; font-weight:bold; color:#111111;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="headerSpacer">
+        <property name="minimumSize"><size><width>36</width><height>36</height></size></property>
+        <property name="maximumSize"><size><width>36</width><height>36</height></size></property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- 설정 메뉴 -->
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable"><bool>true</bool></property>
+     <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+     <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+     <property name="styleSheet"><string notr="true">QScrollArea{background:#f5f5f5;border:none;}</string></property>
+     <widget class="QWidget" name="scrollContents">
+      <property name="styleSheet"><string notr="true">QWidget#scrollContents{background:#f5f5f5;}</string></property>
+      <layout class="QVBoxLayout" name="scrollLayout">
+       <property name="spacing"><number>0</number></property>
+       <property name="leftMargin"><number>0</number></property>
+       <property name="topMargin"><number>8</number></property>
+       <property name="rightMargin"><number>0</number></property>
+       <property name="bottomMargin"><number>0</number></property>
+
+       <!-- 계정 섹션 -->
+       <item>
+        <widget class="QWidget" name="menuCard">
+         <property name="styleSheet"><string notr="true">QWidget#menuCard{background:#ffffff;}</string></property>
+         <layout class="QVBoxLayout" name="menuCardLayout">
+          <property name="spacing"><number>0</number></property>
+          <property name="leftMargin"><number>0</number></property>
+          <property name="topMargin"><number>0</number></property>
+          <property name="rightMargin"><number>0</number></property>
+          <property name="bottomMargin"><number>0</number></property>
+
+          <!-- 섹션 타이틀 -->
+          <item>
+           <widget class="QLabel" name="labelAccountSection">
+            <property name="text"><string>계정</string></property>
+            <property name="styleSheet">
+             <string notr="true">font-size:12px;color:#888888;padding:12px 20px 8px 20px;background:#ffffff;</string>
+            </property>
+           </widget>
+          </item>
+
+          <!-- 로그아웃 -->
+          <item>
+           <widget class="QPushButton" name="btnLogout">
+            <property name="text"><string>🚪  로그아웃</string></property>
+            <property name="minimumHeight"><number>56</number></property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton{background:#ffffff;border:none;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;font-size:15px;color:#222222;text-align:left;padding-left:20px;}QPushButton:hover{background:#f9f9f9;}QPushButton:pressed{background:#f0f0f0;}</string>
+            </property>
+           </widget>
+          </item>
+
+         </layout>
+        </widget>
+       </item>
+
+       <item>
+        <widget class="QFrame" name="gap1">
+         <property name="minimumHeight"><number>8</number></property>
+         <property name="maximumHeight"><number>8</number></property>
+         <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+         <property name="styleSheet"><string notr="true">background:#f5f5f5;</string></property>
+        </widget>
+       </item>
+
+       <!-- 탈퇴 섹션 -->
+       <item>
+        <widget class="QWidget" name="withdrawCard">
+         <property name="styleSheet"><string notr="true">QWidget#withdrawCard{background:#ffffff;}</string></property>
+         <layout class="QVBoxLayout" name="withdrawCardLayout">
+          <property name="spacing"><number>0</number></property>
+          <property name="leftMargin"><number>0</number></property>
+          <property name="topMargin"><number>0</number></property>
+          <property name="rightMargin"><number>0</number></property>
+          <property name="bottomMargin"><number>0</number></property>
+
+          <!-- 회원탈퇴 -->
+          <item>
+           <widget class="QPushButton" name="btnWithdraw">
+            <property name="text"><string>회원탈퇴</string></property>
+            <property name="minimumHeight"><number>56</number></property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton{background:#ffffff;border:none;font-size:15px;color:#e53935;text-align:left;padding-left:20px;}QPushButton:hover{background:#fff5f5;}QPushButton:pressed{background:#ffebee;}</string>
+            </property>
+           </widget>
+          </item>
+
+         </layout>
+        </widget>
+       </item>
+
+       <item>
+        <spacer name="bottomSpacer">
+         <property name="orientation"><enum>Qt::Vertical</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+        </spacer>
+       </item>
+
+      </layout>
+     </widget>
+    </widget>
+   </item>
+
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

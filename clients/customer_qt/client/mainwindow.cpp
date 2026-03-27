@@ -1,8 +1,12 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
+#include "build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/ui_mainwindow.h"
 #include "ui_mainwindow.h"
 #include "UserSession.h"
+#include "OrderHistoryCard.h"
 #include <QDebug>
 #include <QMessageBox>
+
+#include <QTimer>  // [임시 테스트용] 타이머 기능 추가! - 배달완료용
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -23,6 +27,9 @@ MainWindow::MainWindow(QWidget *parent)
     , m_cartWidget(new CartWidget(m_network, this))
     , m_menuOptionWidget(new menuoption(m_network, this))
     , m_orderCompleteWidget(new OrderCompleteWidget(m_network, this))
+    , m_formWidget(new Form(this))
+    , m_deliveryCompleteWidget(new DeliveryCompleteWidget(m_network, this))
+    , m_menureviewWidget(new menureview(m_network, this)) 
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -47,6 +54,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(m_cartWidget);
     ui->stackedWidget->addWidget(m_orderCompleteWidget);
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
+    ui->stackedWidget->addWidget(m_formWidget);
+    ui->stackedWidget->addWidget(m_menureviewWidget);
+    ui->stackedWidget->addWidget(m_deliveryCompleteWidget);
 
     connect(m_loginWidget, &LoginWidget::loginSuccess, this, &MainWindow::onLoginSuccess);
     connect(m_homeWidget, &HomeWidget::categorySelected, this, &MainWindow::onCategorySelected);
@@ -75,7 +85,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_settingsWidget, &SettingsWidget::backRequested, this, &MainWindow::onMypageRequested);
     connect(m_settingsWidget, &SettingsWidget::logoutRequested, this, &MainWindow::onLogoutRequested);
     connect(m_homeWidget, &HomeWidget::addressRequested, this, &MainWindow::onAddressRequested);
-    connect(m_addressWidget, &AddressWidget::backRequested, this, &MainWindow::onBackToHome);
+
+    // AddressWidget X버튼(backRequested) 연결 수정
+    connect(m_addressWidget, &AddressWidget::backRequested, this, [this]() {
+        qDebug() << "[DEBUG] backRequested! m_prevWidget:" << m_prevWidget;
+        if (m_prevWidget)
+            ui->stackedWidget->setCurrentWidget(m_prevWidget);
+        else
+            ui->stackedWidget->setCurrentWidget(m_homeWidget);
+    });
+
     connect(m_addressWidget, &AddressWidget::addressSelected, this, &MainWindow::onAddressSelected);
     connect(m_addressWidget, &AddressWidget::addressDetailRequested, this, &MainWindow::onAddressDetailRequested);
     connect(m_addressWidget, &AddressWidget::addressEditRequested, this, &MainWindow::onAddressEditRequested);
@@ -86,6 +105,31 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_homeWidget, &HomeWidget::storeSelected, this, &MainWindow::onStoreSelected);
     connect(m_storeDetailWidget, &StoreDetailWidget::backRequested, this, &MainWindow::onStoreDetailBack);
     connect(m_network, &NetworkManager::onMainHomeReceived, this, &MainWindow::onMainHomeReceived);
+    
+    connect(m_network, &NetworkManager::onOrderStateChanged, this, [=](int state, QString orderId) {
+        m_orderHistoryWidget->updateOrderState(orderId, state);
+        if (ui->stackedWidget->currentWidget() == m_formWidget &&
+            m_formWidget->currentOrderId() == orderId) {
+            m_formWidget->updateStatus(state);
+        }
+        // ← connect 중첩 제거
+    });
+
+    // 이 connect는 밖으로 빼서 생성자에서 한 번만 연결
+    connect(m_menureviewWidget, &menureview::backRequested, this, [=]() {
+        qDebug() << "메인윈도우: 리뷰 화면에서 메뉴 옵션 화면으로 돌아갑니다.";
+        ui->stackedWidget->setCurrentWidget(m_menuOptionWidget);
+    });
+
+    // AddressWidget의 완료 시그널 → CartWidget의 슬롯 연결
+    connect(m_addressWidget, &AddressWidget::addressSelected,
+            m_cartWidget,    &CartWidget::onAddressUpdated);
+
+    // AddressDetailWidget → CartWidget 연결 (상세 주소 수정 완료 시)
+    connect(m_addressDetailWidget, &AddressDetailWidget::completed,
+            this, [this](const AddressItem &item) {
+                m_cartWidget->onAddressUpdated(item.address);
+            });
 
     // 메뉴 옵션 선택 → 장바구니 담기
     connect(m_storeDetailWidget, &StoreDetailWidget::menuSelected,
@@ -109,7 +153,8 @@ MainWindow::MainWindow(QWidget *parent)
                 if (CartSession::instance().storeId == -1)
                     CartSession::instance().storeId = m_storeDetailWidget->currentStoreId();
 
-                CartSession::instance().storeName = m_storeDetailWidget->currentStoreName();
+                if (!m_storeDetailWidget->currentStoreName().isEmpty())
+                    CartSession::instance().storeName = m_storeDetailWidget->currentStoreName();
                 CartSession::instance().addItem(item);
                 m_homeWidget->updateCartBar();
                 m_storeDetailWidget->updateCartBar();
@@ -128,18 +173,53 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_cartWidget, &CartWidget::orderSuccess, this, &MainWindow::onOrderSuccess);
 
     // 기존 연결을 끊습니다 (Qt 매크로 방식을 사용하여 private 접근 제한을 우회합니다)
-    disconnect(m_network, SIGNAL(onOrderCreateReceived(int,QString,QString)), 
-               m_cartWidget, SLOT(onOrderCreateReceived(int,QString,QString)));
+    disconnect(m_network, &NetworkManager::onOrderCreateReceived,
+               m_cartWidget, &CartWidget::onOrderCreateReceived);
 
     // 메인 화면이 신호를 가장 먼저 가로채도록 연결합니다
     connect(m_network, &NetworkManager::onOrderCreateReceived, 
             this, &MainWindow::onNetworkOrderCreated);
 
     // 장바구니 화면이 그다음으로 신호를 받도록 다시 연결해 줍니다 (private 접근 제한 우회)
-    connect(m_network, SIGNAL(onOrderCreateReceived(int,QString,QString)), 
-            m_cartWidget, SLOT(onOrderCreateReceived(int,QString,QString)));
+    connect(m_network, &NetworkManager::onOrderCreateReceived, 
+            m_cartWidget, &CartWidget::onOrderCreateReceived);
+
+    connect(m_formWidget, &Form::backRequested, this, [=]() {
+    ui->stackedWidget->setCurrentWidget(m_homeWidget);
+    });
+
+    connect(m_menuOptionWidget, &menuoption::reviewRequested, this, [=](int menuId) {
+    qDebug() << "메인윈도우: 리뷰 화면으로 전환합니다. 메뉴 ID:" << menuId;
+    m_menureviewWidget->clearReviews();
+    ui->stackedWidget->setCurrentWidget(m_menureviewWidget); 
+    });
+
+    // 주문 내역에서 상세 메뉴 요청 시 → 주문 완료 화면으로 전환
+    connect(m_orderHistoryWidget->getReadyList(), &readylist::orderDetailRequested, this, [=](QString id){
+        m_formWidget->updateOrderInfo(id, "ORD-001", "상세 메뉴 내역..."); // form 데이터 채우기
+        ui->stackedWidget->setCurrentWidget(m_formWidget); // form.ui 화면으로 전환
+    });
+
+    //  배달 완료 화면에서 '등록하기'를 누르면 주문 내역 화면으로 이동
+    connect(m_deliveryCompleteWidget, &DeliveryCompleteWidget::orderListRequested, this, [this]() {
+    
+    // 화면 갱신 및 탭 이동
+    m_orderHistoryWidget->loadData(); 
+    m_orderHistoryWidget->showPastOrdersTab(); 
+    ui->stackedWidget->setCurrentWidget(m_orderHistoryWidget);
+});
+
+    // 검색 결과 화면 -> 매장 화면
+    connect(m_searchResultWidget, &SearchResultWidget::storeSelected,
+            this, &MainWindow::onStoreSelected);
+
+    // 마이 이츠 주소 관리 => 주소 관리 화면
+    connect(m_myPageWidget, &MyPageWidget::addressRequested,
+            this, &MainWindow::onAddressRequested);
 
     m_network->connectToServer(AppConfig::SERVER_IP, AppConfig::SERVER_PORT);
+
+    connect(m_network, &NetworkManager::onDeliveryCompleteReceived, this, &MainWindow::handleDeliveryComplete);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -200,6 +280,12 @@ void MainWindow::onSettingsRequested(){ ui->stackedWidget->setCurrentWidget(m_se
 
 void MainWindow::onAddressRequested()
 {
+    static int callCount = 0;
+    qDebug() << "[DEBUG] onAddressRequested 호출 횟수:" << ++callCount
+             << "현재 화면:" << ui->stackedWidget->currentWidget()->objectName();
+
+    m_prevWidget = ui->stackedWidget->currentWidget();
+    if (m_cartBar) m_cartBar->hide();
     m_addressWidget->loadData();
     ui->stackedWidget->setCurrentWidget(m_addressWidget);
 }
@@ -208,7 +294,13 @@ void MainWindow::onAddressSelected(const QString &address)
 {
     UserSession::instance().address = address;
     m_homeWidget->setAddress(address);
-    ui->stackedWidget->setCurrentWidget(m_homeWidget);
+    m_cartWidget->onAddressUpdated(address);
+    // 이전 화면으로 복귀
+    if (m_prevWidget)
+        ui->stackedWidget->setCurrentWidget(m_prevWidget);
+    else
+        ui->stackedWidget->setCurrentWidget(m_homeWidget);
+    // showCartBarForHome();
 }
 
 void MainWindow::onAddressDetailRequested(const QString &roadAddr)
@@ -229,6 +321,7 @@ void MainWindow::onAddressDetailCompleted(const AddressItem &item)
     if (item.addressId <= 0 || item.isDefault) {
         UserSession::instance().address = item.address;
         m_homeWidget->setAddress(item.address);
+        m_cartWidget->onAddressUpdated(item.address);
     }
     ui->stackedWidget->setCurrentWidget(m_addressWidget);
 }
@@ -249,7 +342,7 @@ void MainWindow::onFavoriteRequested() { /* TODO */ }
 
 void MainWindow::onStoreSelected(int storeId)
 {
-    m_previousWidget = ui->stackedWidget->currentWidget();
+    m_prevWidget = ui->stackedWidget->currentWidget();
     m_storeDetailWidget->loadStoreData(storeId);
     m_storeDetailWidget->updateCartBar();
     ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
@@ -258,12 +351,12 @@ void MainWindow::onStoreSelected(int storeId)
 void MainWindow::onStoreDetailBack()
 {
     // 장바구니 바 갱신
-    if (m_previousWidget == m_homeWidget)
+    if (m_prevWidget == m_homeWidget)
         m_homeWidget->updateCartBar();
-    else if (m_previousWidget == m_menuWidget)
+    else if (m_prevWidget == m_menuWidget)
         m_storeDetailWidget->updateCartBar(); // 카테고리에서 왔으면 cartBar 유지
 
-    QWidget *target = m_previousWidget ? m_previousWidget : m_homeWidget;
+    QWidget *target = m_prevWidget ? m_prevWidget : m_homeWidget;
     ui->stackedWidget->setCurrentWidget(target);
 }
 
@@ -279,35 +372,59 @@ void MainWindow::onCartClose()
     ui->stackedWidget->setCurrentWidget(m_storeDetailWidget);
 }
 
-// 신규 슬롯: CartWidget이 세션을 비우기 전에 실행되어 데이터를 안전하게 보존합니다.
 void MainWindow::onNetworkOrderCreated(int status, QString message, QString orderId)
 {
     Q_UNUSED(message)
 
-    if (status == 200) {
-        // 기존 뷰 초기화
-        m_orderCompleteWidget->clearMenuItems();
-
-        // 세션이 삭제되기 직전이므로, 모든 데이터를 정상적으로 가져올 수 있습니다.
-        m_orderCompleteWidget->setOrderData(
-            orderId,
-            CartSession::instance().storeName,
-            UserSession::instance().address
-        );
-
-        // 장바구니 메뉴 내역 복사
-        for (const CartItemQt &item : CartSession::instance().items) {
-            m_orderCompleteWidget->addMenuItem(item.quantity, item.menuName);
+    if (status == 200 || status == 0) {
+        // 1. 장바구니 요약 텍스트 만들기 (예: "짜장면 외 1건")
+        QString menuSummary = ""; 
+        if(!CartSession::instance().items.isEmpty()) {
+            int extraCount = CartSession::instance().items.size() - 1;
+            menuSummary = CartSession::instance().items[0].menuName + 
+                          (extraCount > 0 ? QString(" 외 %1건").arg(extraCount) : "");
         }
+
+        // --- 2. 주문 내역(준비중) 목록에 데이터 세팅 ---
+        QString storeName = CartSession::instance().storeName;
+        int totalPrice = CartSession::instance().totalPrice();
+
+        // 🚀 [추가] Form(영수증) 화면에 결제한 데이터 채워넣기!
+        m_formWidget->setCurrentOrderId(orderId);
+        m_formWidget->updateOrderInfo(storeName, orderId, menuSummary); // 가게명, 주문번호, 요약
+        m_formWidget->updateAddress(UserSession::instance().address);   // 배달 주소
+        m_formWidget->updateStatus(0);                                  // 상태를 '가게접수(0)'로 초기화
+
+        // 장바구니에 있던 메뉴들을 Form 화면 영수증에 한 줄씩 추가
+        m_formWidget->clearMenuItems();
+        for (const CartItemQt &item : CartSession::instance().items) {
+            // 수량에 따른 가격 계산 (단가 * 수량)
+            int itemTotalPrice = item.unitPrice * item.quantity;
+            m_formWidget->addMenuItem(item.menuName, item.quantity, itemTotalPrice);
+        }
+        
+        // 진짜 orderId와 안전하게 빼둔 데이터를 사용해 목록에 추가!
+        m_orderHistoryWidget->addPendingOrder(orderId, storeName, menuSummary, totalPrice);
     }
 }
 
 void MainWindow::onOrderSuccess()
 {
+    // 장바구니 비우기 (이미 Form과 목록에 데이터를 다 옮겨 담았으므로 비워도 안전함!)
     CartSession::instance().clear();
     m_homeWidget->updateCartBar();
-    ui->stackedWidget->setCurrentWidget(m_orderCompleteWidget);
+    
+    // 🚀 [수정] 결제 완료 화면(m_orderCompleteWidget) 대신 우리가 만든 Form 화면으로 휙 이동!
+    ui->stackedWidget->setCurrentWidget(m_formWidget);
 }
+
+void MainWindow::handleDeliveryComplete(const QString &orderId)
+{
+    qDebug() << "[MainWindow] 픽업/배달 완료 감지! 화면 전환 시작. 주문번호:" << orderId;
+
+    ui->stackedWidget->setCurrentWidget(m_deliveryCompleteWidget);
+}
+
 
 void MainWindow::showLogin() { ui->stackedWidget->setCurrentWidget(m_loginWidget); }
 void MainWindow::showHome()  { ui->stackedWidget->setCurrentWidget(m_homeWidget); }

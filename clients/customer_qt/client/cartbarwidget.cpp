@@ -32,7 +32,7 @@ void CartBarWidget::updateCartUI()
             QString("  %1   카트 보기").arg(count));
 
         QLocale locale(QLocale::Korean);
-        ui->labelCartPrice->setText(locale.toString(price) + "원");
+        ui->labelCartPrice->setText(StoreUtils::formatWon(price));
         ui->labelCartSubtext->setText(QString("담은 메뉴 %1개").arg(count));
 
         this->show();

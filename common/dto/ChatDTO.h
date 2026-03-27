@@ -24,7 +24,7 @@ struct ReqChatSendDTO
     int roomId;           // 몇 번 방에 보내는가?
     std::string senderId; // 보내는 사람 ID
     std::string content;  // "단무지 많이 주세요!"git
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqChatSendDTO, roomId, senderId, content)
+
 };
 
 // 💬 2093: 메시지 전송 확인 응답 (보낸 사람에게)

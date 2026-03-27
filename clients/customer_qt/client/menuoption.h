@@ -23,6 +23,7 @@ public:
 signals:
     void backRequested();
     void selectedMenuFinished(CartItemQt item);
+    void reviewRequested(int menuId);
 
 private slots:
     void onMenuOptionDataReceived(int menuId, QList<OptionGroup> groups);
@@ -30,6 +31,10 @@ private slots:
     void onDecreaseQty();
     void onAddToCart();
     void onBackClicked();
+
+protected:
+    // 🚀 마우스 클릭 이벤트를 감지하기 위한 함수 선언
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
     void buildOptionUI(const QList<OptionGroup> &groups);
@@ -48,4 +53,6 @@ private:
     // 필수 옵션 그룹 → 에러 라벨 매핑
     QMap<QButtonGroup*, QLabel*> m_errorLabels;
 };
+
+
 #endif

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QMainWindow>
 #include "NetworkManager.h"
 #include "config.h"
@@ -18,6 +18,10 @@
 #include "menuoption.h"
 #include "cartbarwidget.h"
 #include "ordercompletewidget.h"
+#include "menureview.h"
+#include "form.h"
+#include "deliverycompletewidget.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -62,29 +66,32 @@ private slots:
     
     // CartWidget이 데이터를 비우기 전에 가로챌 함수
     void onNetworkOrderCreated(int status, QString message, QString orderId);
+    void handleDeliveryComplete(const QString &orderId); // 4011번 수신 시 실행될 슬롯
 
 private:
-    Ui::MainWindow        *ui;
-    NetworkManager        *m_network;
-    LoginWidget           *m_loginWidget;
-    HomeWidget            *m_homeWidget;
-    menucategori          *m_menuWidget;
-    SearchWidget          *m_searchWidget;
-    SearchResultWidget    *m_searchResultWidget;
-    OrderHistoryWidget    *m_orderHistoryWidget;
-    MyPageWidget          *m_myPageWidget;
-    StoreDetailWidget     *m_storeDetailWidget;
-    PolicyWidget          *m_policyWidget;
-    SettingsWidget        *m_settingsWidget;
-    AddressWidget         *m_addressWidget;
-    AddressDetailWidget   *m_addressDetailWidget;
-    CartWidget            *m_cartWidget;
-    menuoption            *m_menuOptionWidget;
-    CartBarWidget         *m_cartBar = nullptr; // MainWindow가 직접 소유
-    OrderCompleteWidget   *m_orderCompleteWidget;
-
-    QList<CategoryInfoQt> m_cachedCategories;
-    QWidget              *m_previousWidget = nullptr;
+    Ui::MainWindow          *ui;
+    NetworkManager          *m_network;
+    LoginWidget             *m_loginWidget;
+    HomeWidget              *m_homeWidget;
+    menucategori            *m_menuWidget;
+    SearchWidget            *m_searchWidget;
+    SearchResultWidget      *m_searchResultWidget;
+    OrderHistoryWidget      *m_orderHistoryWidget;
+    MyPageWidget            *m_myPageWidget;
+    StoreDetailWidget       *m_storeDetailWidget;
+    PolicyWidget            *m_policyWidget;
+    SettingsWidget          *m_settingsWidget;
+    AddressWidget           *m_addressWidget;
+    AddressDetailWidget     *m_addressDetailWidget;
+    CartWidget              *m_cartWidget;
+    menuoption              *m_menuOptionWidget;
+    Form                    *m_formWidget;
+    menureview              *m_menureviewWidget;
+    CartBarWidget           *m_cartBar = nullptr; // MainWindow가 직접 소유
+    QList<CategoryInfoQt>   m_cachedCategories;
+    QWidget                 *m_prevWidget = nullptr;
+    DeliveryCompleteWidget  *m_deliveryCompleteWidget;
+    OrderCompleteWidget     *m_orderCompleteWidget;
 
     // CartBar 위치 관련 헬퍼
     void repositionCartBar();

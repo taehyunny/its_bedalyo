@@ -24,6 +24,7 @@ _deps/
 #  Visual Studio / VS Code
 # ------------------------------------------
 .vs/
+.claude/
 *.suo
 *.user
 *.userosscache

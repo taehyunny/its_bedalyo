@@ -1,8 +1,11 @@
 ﻿#include "NetworkManager.h"
 #include "json.hpp"
+#include "cartsession.h"
 #include <QDebug>
 #include <QDataStream>
+#include <QString>      // 필수
 #include <cstring>
+#include <cstdint>      // uint16_t 사용을 위해 필수
 
 NetworkManager::NetworkManager(QObject *parent)
     : QObject(parent)
@@ -140,6 +143,14 @@ void NetworkManager::sendMenuOptionRequest(int menuId)
     nlohmann::json j;
     j["menuId"] = menuId;
     sendPacket(CmdID::REQ_MENU_OPTION, j);
+}
+
+void NetworkManager::sendMenuReviewRequest(int menuId)
+{
+    qDebug() << "[NetworkManager] 메뉴 리뷰 요청 menuId:" << menuId;
+    nlohmann::json j;
+    j["menuId"] = menuId;
+    sendPacket(CmdID::REQ_REVIEW_LIST, j);  // ← CmdID는 서버 프로토콜 번호에 맞게 확인 필요
 }
 
 // ── 주소 저장 요청 (REQ_ADDRESS_SAVE = 2070) ──
@@ -308,13 +319,22 @@ void NetworkManager::handleReadyRead()
 // ============================================================
 void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
 {
+   QString jsonStr = QString::fromUtf8(body);
+
+   //  // 2. 로그 출력 (uint16_t 대신 int로 캐스팅하여 호환성 높임)
+    qDebug() << "==========================================";
+    qDebug() << "[DEBUG] 수신된 명령어 ID (CmdID):" << (int)cmdId;
+    qDebug() << "[DEBUG] 수신된 데이터 크기:" << body.size() << "bytes";
+    qDebug() << "[DEBUG] 수신된 JSON 원문:" << jsonStr;
+    qDebug() << "==========================================";
+
+
     try {
         nlohmann::json j = nlohmann::json::parse(body.constData());
 
         // ── 로그인 응답 ──
         if (cmdId == CmdID::RES_LOGIN) {
             AuthResDTO dto = j.get<AuthResDTO>();
-            qDebug() << "[Login] phoneNumber:" << QString::fromStdString(dto.phoneNumber);
             emit onLoginResponse(dto.status,
                                  QString::fromStdString(dto.message),
                                  QString::fromStdString(dto.userName),
@@ -338,7 +358,35 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                                       QString::fromStdString(dto.message),
                                       dto.isAvailable);
 
-        } else if (cmdId == CmdID::RES_CATEGORY) {
+        }  else if (cmdId == CmdID::RES_MENU_REVIEW_LIST) {
+            qDebug() << "[NetworkManager] 리뷰 데이터 해석 시작";
+            
+            try {
+                // 1. JSON에서 menuId와 reviews 배열을 추출합니다.
+                // 서버 JSON 구조가 {"menuId": 1, "reviews": [...]} 라고 가정합니다.
+                int menuId = j.at("menuId").get<int>();
+                
+                // std::vector<ReviewDTO> 형태로 먼저 파싱 (json.hpp 기능 활용)
+                std::vector<ReviewDTO> stdReviews = j.at("reviews").get<std::vector<ReviewDTO>>();
+                
+                // 2. Qt의 시그널 전송을 위해 QList로 변환합니다.
+                QList<ReviewDTO> qReviews;
+                for(const auto& r : stdReviews) {
+                    qReviews.append(r);
+                }
+
+                qDebug() << "[NetworkManager] 리뷰 수신 성공! MenuID:" << menuId << ", 개수:" << qReviews.size();
+
+                // 3. 시그널 발생 - 이 신호를 menureview 위젯이나 MainWindow에서 받아 화면을 갱신합니다.
+                emit onMenuReviewsReceived(menuId, qReviews);
+                
+            } catch(const std::exception &e) {
+
+                qWarning() << "[NetworkManager] MenuReview 내부 파싱 에러:" << e.what();
+                qWarning() << "[NetworkManager] 수신된 원문 확인 필요:" << jsonStr;
+            }
+            
+            }else if (cmdId == CmdID::RES_CATEGORY) {
             MainHomeResDTO dto = j.get<MainHomeResDTO>();
 
             QList<CategoryInfoQt> categories;
@@ -422,6 +470,13 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 return;
             }
 
+            auto& session = CartSession::instance();
+            session.storeId           = dto.storeData.storeId;
+            session.storeName         = QString::fromStdString(dto.storeData.storeName);
+            session.storeAddress      = QString::fromStdString(dto.storeData.storeAddress);
+            session.deliveryTimeRange = QString::fromStdString(dto.storeData.deliveryTimeRange);
+            session.minOrderAmount    = dto.storeData.minOrderAmount;
+
             StoreDetailQt detail;
             detail.storeId           = dto.storeData.storeId;
             detail.storeName         = QString::fromStdString(dto.storeData.storeName);
@@ -480,6 +535,25 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
         //   ]
         // }
         // ============================================================
+
+        }  else if (cmdId == CmdID::RES_REVIEW_LIST) {
+
+            int status = j.value("status", 0);
+            if (status != 200) {
+                qWarning() << "[NetworkManager] 메뉴 리뷰 수신 실패 status:" << status;
+                return;
+            }
+            int menuId = j.value("menuId", 0);
+            QList<ReviewDTO> reviews;
+            if (j.contains("reviewList") && j["reviewList"].is_array()) {
+                for (const auto &r : j["reviewList"]) {
+                    ReviewDTO dto = r.get<ReviewDTO>();
+                    reviews.append(dto);
+                }
+            }
+            qDebug() << "[NetworkManager] 메뉴 리뷰 수신 개수:" << reviews.size();
+            emit onMenuReviewsReceived(menuId, reviews);
+
         } else if (cmdId == CmdID::RES_MENU_OPTION) {
             qDebug() << "[NetworkManager] RES_MENU_OPTION 수신 raw:" << QString::fromUtf8(body);
 
@@ -515,9 +589,28 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                      << "menuId:" << menuId;
             emit onMenuOptionsReceived(menuId, groups);
 
+        } 
+        
+        else if (cmdId == CmdID::NOTIFY_ORDER_STATE) { // 🚀 9010번 실시간 알림 구간
+        qDebug() << "[NetworkManager] 주문 상태 변경 알림(9010) 수신";
+
+            try {
+            // 1. 서버가 보낸 JSON에서 정보 추출
+            int state = j.at("state").get<int>(); // 0:접수, 1:조리중, 2:배달중, 3:배달완료
+            QString orderId = QString::fromStdString(j.at("orderId").get<std::string>());
+
+            qDebug() << "[NetworkManager] 주문번호:" << orderId << " -> 변경된 상태:" << state;
+
+            // 2. MainWindow가 들을 수 있게 시그널 발생
+            emit onOrderStateChanged(state, orderId);
+
+            } catch (const std::exception &e) {
+                qWarning() << "[NetworkManager] 9010번 파싱 에러:" << e.what();
+            }
+    
         } else if (cmdId == CmdID::RES_ADDRESS_SAVE) {
-            ResAddressSaveDTO dto = j.get<ResAddressSaveDTO>();
-            emit onAddressSaveReceived(dto.status, dto.addressId);
+                ResAddressSaveDTO dto = j.get<ResAddressSaveDTO>();
+                emit onAddressSaveReceived(dto.status, dto.addressId);
 
         } else if (cmdId == CmdID::RES_ADDRESS_LIST) {
             ResAddressListDTO dto = j.get<ResAddressListDTO>();
@@ -551,7 +644,10 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
             emit onCheckoutInfoReceived(dto.status,
                                         QString::fromStdString(dto.customerGrade),
                                         dto.deliveryFee,
-                                        dto.minOrderAmount);
+                                        dto.minOrderAmount,
+                                        QString::fromStdString(dto.pickupTime),
+                                        QString::fromStdString(dto.cardNumber),
+                                        QString::fromStdString(dto.accountNumber));
 
         } else if (cmdId == CmdID::RES_ORDER_CREATE) {
             OrderCreateResDTO dto = j.get<OrderCreateResDTO>();
@@ -579,6 +675,40 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 qWarning() << "[NetworkManager] MenuOption 내부 파싱 에러:" << e.what();
             }
 
+        } else if (cmdId == CmdID::RES_DELIVERY_COMPLETE) { // 4011번 수신
+        qDebug() << "[NetworkManager] 🏍️ 배달 완료 전용 신호(4011) 수신!";
+        
+        int status = j.value("status", 0);
+        
+        // 배달 완료된 주문번호 추출 (서버에서 "orderId" 키로 보낸다고 가정)
+        QString orderId = QString::fromStdString(j.value("orderId", "")); 
+
+        if (status == 0 || status == 200) {
+            // MainWindow에게 배달 완료를 알림
+            emit onDeliveryCompleteReceived(orderId);
+        } else {
+            qWarning() << "[NetworkManager] 배달 완료 처리 실패 status:" << status;
+        }
+
+        // 서버에서 영수증 상세 데이터(2087)가 왔을 때
+        } else if (cmdId == CmdID::RES_ORDER_DETAIL) { 
+            qDebug() << "[NetworkManager] 영수증 상세 데이터(2087) 수신!";
+            try {
+                ResOrderDetailDTO dto = j.get<ResOrderDetailDTO>();
+                emit onOrderDetailReceived(dto);
+            } catch(const std::exception &e) {
+                qWarning() << "2087 파싱 에러:" << e.what();
+            }
+
+        } else if (cmdId == CmdID::RES_ORDER_HISTORY) { // 2081 수신
+            qDebug() << "[NetworkManager] 과거 주문 내역 응답(2081) 수신!";
+            try {
+                ResOrderHistoryDTO dto = j.get<ResOrderHistoryDTO>();
+                emit onOrderHistoryReceived(dto);
+            } catch(const std::exception &e) {
+                qWarning() << "2081 파싱 에러:" << e.what();
+            }
+
         // ── 여기서부터는 기존 else if 체인과 맞춰서 닫힙니다 ──
         } else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"
@@ -599,4 +729,22 @@ void NetworkManager::handleConnected()
 void NetworkManager::handleError(QAbstractSocket::SocketError err)
 {
     qWarning() << "[NetworkManager] 소켓 에러:" << err << "-" << m_socket->errorString();
+}
+
+void NetworkManager::sendOrderHistoryRequest(const QString &userId)
+{
+    qDebug() << "[NetworkManager] 과거 주문 내역 요청(2080) userId:" << userId;
+    ReqOrderHistoryDTO dto;
+    dto.userId = userId.toStdString();
+    
+    nlohmann::json j = dto;
+    sendPacket(CmdID::REQ_ORDER_HISTORY, j);
+}
+
+void NetworkManager::sendOrderDetailRequest(const QString &orderId)
+{
+    qDebug() << "[NetworkManager] 주문 상세 영수증 요청(2086) orderId:" << orderId;
+    nlohmann::json j;
+    j["orderId"] = orderId.toStdString(); 
+    sendPacket(CmdID::REQ_ORDER_DETAIL, j);
 }
