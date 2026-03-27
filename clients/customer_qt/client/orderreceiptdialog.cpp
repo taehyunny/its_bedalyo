@@ -45,26 +45,40 @@ OrderReceiptDialog::OrderReceiptDialog(const ResOrderDetailDTO& data, QWidget* p
     mainLayout->addLayout(topLayout);
     mainLayout->addWidget(createLine());
 
-    // 2. 가게 이름 & 날짜
+    // 2. 가게 이름 & 주문번호/일시 정보
     QLabel* lblStore = new QLabel(QString::fromStdString(data.storeName));
     lblStore->setStyleSheet("font-size: 20px; font-weight: bold; color: #111111;");
     lblStore->setAlignment(Qt::AlignCenter);
-
-    QLabel* lblDate = new QLabel("주문번호:\n" + QString::fromStdString(data.createdAt));
-    lblDate->setStyleSheet("font-size: 14px; color: #555555;");
-    lblDate->setAlignment(Qt::AlignCenter);
-
     mainLayout->addWidget(lblStore);
-    mainLayout->addWidget(lblDate);
+
+    // 주문번호(orderId)와 일시(createdAt)를 정확히 매칭
+    QLabel* lblOrderInfo = new QLabel(QString("주문번호: %1\n주문일시: %2")
+                                      .arg(QString::fromStdString(data.orderId))   // ORD-... 형태
+                                      .arg(QString::fromStdString(data.createdAt))); // 날짜/시간 형태
+    lblOrderInfo->setStyleSheet("font-size: 13px; color: #777777;");
+    lblOrderInfo->setAlignment(Qt::AlignCenter);
+    mainLayout->addWidget(lblOrderInfo);
     mainLayout->addSpacing(10);
 
-    // 3. 메뉴 리스트 출력
+    // 3. 메뉴 리스트 출력 부분 수정
     for (const auto& item : data.items) {
         QHBoxLayout* itemRow = new QHBoxLayout();
-        QString menuName = QString::fromStdString(item.selectedOptions.value("menuName", "알 수 없는 메뉴"));
+        
+        // [수정] 서버 DTO 구조(OrderDTO.h)에 맞춰 menuName을 가져옵니다.
+        QString menuName = "알 수 없는 메뉴";
+        
+        // OrderItemDTO에는 menuName 멤버가 직접 존재합니다.
+        if (!item.menuName.empty()) {
+            menuName = QString::fromStdString(item.menuName);
+        } 
+        // 만약 menuName이 비어있다면 selectedOptions 내부를 마지막으로 확인
+        else if (item.selectedOptions.contains("menuName") && item.selectedOptions["menuName"].is_string()) {
+            menuName = QString::fromStdString(item.selectedOptions["menuName"].get<std::string>());
+        }
 
         QLabel* nameLabel = new QLabel(menuName);
         nameLabel->setStyleSheet("font-size: 15px;");
+        nameLabel->setWordWrap(true);
 
         // 가격 계산 (단가 * 수량)
         QLabel* priceLabel = new QLabel(StoreUtils::formatWon(item.unitPrice * item.quantity));
@@ -74,6 +88,18 @@ OrderReceiptDialog::OrderReceiptDialog(const ResOrderDetailDTO& data, QWidget* p
         itemRow->addWidget(nameLabel);
         itemRow->addWidget(priceLabel);
         mainLayout->addLayout(itemRow);
+
+        // 메뉴 밑에 "└ 옵션들" 표시
+        if (!item.options.empty()) {
+            QString optText = " └ ";
+            for (const auto& opt : item.options) {
+                optText += QString::fromStdString(opt) + ", ";
+            }
+            optText.chop(2); // 마지막 쉼표 제거
+            QLabel* lblOpt = new QLabel(optText);
+            lblOpt->setStyleSheet("font-size: 13px; color: #888888; margin-left: 10px;");
+            mainLayout->addWidget(lblOpt);
+        }
     }
     mainLayout->addWidget(createLine());
 
@@ -91,14 +117,24 @@ OrderReceiptDialog::OrderReceiptDialog(const ResOrderDetailDTO& data, QWidget* p
         mainLayout->addLayout(row);
     };
 
-    addSummaryRow("주문금액", StoreUtils::formatWon(data.totalMenuPrice));
-    addSummaryRow("배달비", StoreUtils::formatWon(data.deliveryFee));
+    mainLayout->addWidget(createLine());
+    addSummaryRow("주문금액", QLocale(QLocale::Korean).toString(data.totalMenuPrice) + "원");
+    addSummaryRow("배달비", QLocale(QLocale::Korean).toString(data.deliveryFee) + "원");
+
+    // 할인 금액이 0보다 클 때만 영수증에 표시
+    if (data.wowDiscount > 0) {
+        addSummaryRow("와우회원 할인", "-" + QLocale(QLocale::Korean).toString(data.wowDiscount) + "원");
+    }
+    if (data.couponDiscount > 0) {
+        addSummaryRow("쿠폰 할인", "-" + QLocale(QLocale::Korean).toString(data.couponDiscount) + "원");
+    }
+
     mainLayout->addWidget(createLine());
 
     // 5. 총 결제 금액
-    addSummaryRow(QString::fromStdString(data.paymentMethod) + " 결제", QLocale(QLocale::Korean).toString(data.totalPrice) + "원");
+    addSummaryRow(QString::fromStdString(data.paymentMethod), QLocale(QLocale::Korean).toString(data.totalPrice) + "원");
     mainLayout->addSpacing(10);
-    addSummaryRow("총 결제금액", StoreUtils::formatWon(data.totalPrice), true); // 볼드 처리
+    addSummaryRow("총 결제금액", QLocale(QLocale::Korean).toString(data.totalPrice) + "원", true); // 볼드 강조
     mainLayout->addSpacing(20);
 
     // 6. 배달 주소
