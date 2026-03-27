@@ -147,9 +147,32 @@ LRESULT CAdminDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 
     CString strUnicodeBody = CA2W(pkt->body.c_str(), CP_UTF8);
 
+    uint16_t cmdRaw = static_cast<uint16_t>(pkt->cmdId);
     CString dbgLog;
-    dbgLog.Format(L"[DEBUG RECV] ID: %d, Body: %s\n", pkt->cmdId, (LPCTSTR)strUnicodeBody);
+    dbgLog.Format(L"[DEBUG RECV] ID: %u, Body: %s\n", (unsigned)cmdRaw, (LPCTSTR)strUnicodeBody);
     OutputDebugString(dbgLog);
+
+    // try 블록 밖에서 먼저 분기 처리
+    if (cmdRaw == static_cast<uint16_t>(CmdID::NOTIFY_ADMIN_CHAT_REQ))
+    {
+        OutputDebugStringA("[DEBUG] NOTIFY_ADMIN_CHAT_REQ branch (pre-try)\n");
+        try {
+            json resJson = json::parse(pkt->body);
+            m_tabChatDlg.AddChatRequest(resJson);
+
+            if (m_tabCtrl.GetCurSel() != 0) {
+                m_tabCtrl.SetCurSel(0);
+                NMHDR nmhdr = { m_tabCtrl.GetSafeHwnd(), (UINT_PTR)IDC_TAB, TCN_SELCHANGE };
+                SendMessage(WM_NOTIFY, IDC_TAB, (LPARAM)&nmhdr);
+            }
+        }
+        catch (const std::exception& e) {
+            CString s; s.Format(L"[ERROR] 9040 parse: %S\n", e.what());
+            OutputDebugString(s);
+        }
+        delete pkt;
+        return 0;
+    }
 
     try {
         json resJson = json::parse(pkt->body);
@@ -165,32 +188,25 @@ LRESULT CAdminDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
                 m_tabBlackDlg.SetNetworkHelper(&m_net);
 
                 m_btnConnectOff.EnableWindow(TRUE);
-                m_staticServerAddress.SetWindowText(L" 서버 연결됨");
-                MessageBox(L"관리자 인증 완료.", L"연결 성공", MB_OK);
+                // MessageBox 제거 → 재진입(re-entrant) 문제 방지
+                m_staticServerAddress.SetWindowText(L" 서버 연결됨 (관리자 인증 완료)");
             }
             else
             {
                 m_net.Disconnect();
                 m_btnConnect.EnableWindow(TRUE);
                 m_staticServerAddress.SetWindowText(L" 인증 실패");
-                MessageBox(L"관리자 인증에 실패했습니다.", L"오류", MB_ICONERROR);
             }
         }
-        // 1. 채팅 요청 (사장님이 고객센터 버튼 눌렀을 때)
-        else if (pkt->cmdId == CmdID::REQ_CHAT_CONNECT)
-        {
-            m_tabChatDlg.AddChatRequest(resJson);
-
-            if (m_tabCtrl.GetCurSel() != 0) {
-                m_tabCtrl.SetCurSel(0);
-                NMHDR nmhdr = { m_tabCtrl.GetSafeHwnd(), (UINT_PTR)IDC_TAB, TCN_SELCHANGE };
-                SendMessage(WM_NOTIFY, IDC_TAB, (LPARAM)&nmhdr);
-            }
-        }
+        // 1. 채팅 요청은 pre-try 블록에서 처리 (위에서 return)
         // 2. 새 채팅 메시지 수신
-        else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG)
+        else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG) // 9030
         {
-            m_tabChatDlg.AddChatMessage(resJson);
+            // 서버가 requesterId 포함하면 채팅 요청, 아니면 채팅 메시지
+            if (resJson.contains("requesterId"))
+                m_tabChatDlg.AddChatRequest(resJson);
+            else
+                m_tabChatDlg.AddChatMessage(resJson);
         }
         // 3. 기존 기능들
         else if (pkt->cmdId == CmdID::RES_ADMIN_ORDER_LIST)

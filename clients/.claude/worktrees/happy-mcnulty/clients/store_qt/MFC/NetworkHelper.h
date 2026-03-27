@@ -14,6 +14,14 @@
 using json = nlohmann::json;
 
 #define WM_PACKET_RECEIVED  (WM_USER + 100)
+#pragma pack(push, 1)
+struct PacketHeader
+{                                // 모든 패킷의 맨 앞에 위치하여 데이터의 이정표 역할을 함
+    uint16_t signature = 0x4543; // 기본값 할당 ('E','C' - Eats Connect)
+    CmdID cmdId;                 // 명령어 ID (어떤 파트의 어떤 요청인지 식별)
+    uint32_t bodySize;           // 뒤따라오는 JSON 바디의 실제 크기 (바이트 단위)
+};
+#pragma pack(pop) // [주의] DTO 선언 전에 반드시 pack 설정을 해제해야 함!
 
 struct ReceivedPacket
 {

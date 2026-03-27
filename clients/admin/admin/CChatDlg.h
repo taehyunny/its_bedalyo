@@ -30,6 +30,8 @@ protected:
     virtual void OnCancel() override {}
 
     afx_msg void OnBnClickedBtnChatSend();
+    afx_msg void OnBnClickedBtnChatAccept();
+    afx_msg void OnBnClickedBtnChatReject();
     afx_msg void OnLvnItemchangedListChatUsers(NMHDR* pNMHDR, LRESULT* pResult);
 
     DECLARE_MESSAGE_MAP()
@@ -37,8 +39,8 @@ protected:
 private:
     // 내부 사용 구조체
     struct ChatUserData {
-        std::string userId;
-        int         storeId;
+        std::string requesterId;    // 서버 body의 "requesterId"
+        std::string requesterType;  // 서버 body의 "requesterType" (CUSTOMER / OWNER)
     };
 
     void InitListCtrl();
@@ -46,12 +48,13 @@ private:
 
     CNetworkHelper* m_pNet = nullptr;
 
-    // 멤버 변수 선언 (오류 해결의 핵심)
-    std::string m_selectedUserId;
-    int         m_selectedStoreId = 0;
+    std::string m_selectedRequesterId;
+    std::string m_selectedRequesterType;
 
     CListCtrl   m_listChatUsers;    // IDC_LIST_CHAT_USERS
     CListBox    m_listChatLog;      // IDC_LIST_CHAT_LOG
     CEdit       m_editChatMsg;      // IDC_EDIT_CHAT_MSG
     CButton     m_btnChatSend;      // IDC_BTN_CHAT_SEND
+    CButton     m_btnChatAccept;    // 동적 생성 - 수락
+    CButton     m_btnChatReject;    // 동적 생성 - 거절
 };

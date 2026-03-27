@@ -200,6 +200,8 @@ enum class CmdID : uint16_t
 
     REQ_ADMIN_ORDER_LIST = 5020, // 주문 내역 검색 (관리자용, 고객 2050과 별도)
     RES_ADMIN_ORDER_LIST = 5021, // 주문 내역 응답
+    REQ_CHAT_ROOM_LIST = 5022, // 관리자 채팅방 목록 요청
+    RES_CHAT_ROOM_LIST = 5023, // 관리자 채팅방 목록 응답  
 
     REQ_RIDER_COUNT = 5030, // 출근한 라이더 수 요청
     RES_RIDER_COUNT = 5031, // 출근한 라이더 수 응답
@@ -222,18 +224,8 @@ enum class CmdID : uint16_t
     NOTIFY_ADMIN_CHAT_REQ = 9040,
 };
 
-// =========================================================================
-// 2. 패킷 헤더 (1바이트 정렬 강제)
-// =========================================================================
-#pragma pack(push, 1)
-struct PacketHeader
-{                                // 모든 패킷의 맨 앞에 위치하여 데이터의 이정표 역할을 함
-    uint16_t signature = 0x4543;              // 기본값 할당 ('E','C' - Eats Connect)
-    CmdID    cmdId = CmdID::REQ_HEARTBEAT; // 명령어 ID (어떤 파트의 어떤 요청인지 식별)
-    uint32_t bodySize = 0;                    // 뒤따라오는 JSON 바디의 실제 크기 (바이트 단위)
-};
-#pragma pack(pop) // [주의] DTO 선언 전에 반드시 pack 설정을 해제해야 함!
-
+// PacketHeader는 NetworkHelper.h에 정의되어 있습니다.
+//
 enum class SignupResult
 {
     SUCCESS = 1,

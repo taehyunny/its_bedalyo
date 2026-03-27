@@ -259,10 +259,31 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     {
         json resJson = json::parse(pkt->body);
         int status = resJson.value("status", 0);
+        int roomId = resJson.value("roomId", -1);
 
-        if (status == 200 || status == 202)
+        if (status == 202)
         {
-            // 대기 메시지만 표시, 채팅창은 열지 않음
+            // 대기 중
+            MessageBox(
+                L"관리자에게 요청을 보냈습니다.\n수락 시 채팅창이 자동으로 열립니다.",
+                L"고객센터", MB_OK | MB_ICONINFORMATION);
+        }
+        else if (status == 200 && roomId != -1)
+        {
+            // 수락됨 - 채팅창 오픈
+            if (!m_pChatRoomDlg)
+            {
+                std::string userId = (const char*)CT2A(m_ownerName, CP_UTF8);
+                m_pChatRoomDlg = new CChatRoomDlg(m_pNet, userId, this);
+                m_pChatRoomDlg->Create(IDD_CHAT_ROOM, this);
+            }
+            m_pChatRoomDlg->SetRoomId(roomId);
+            m_pChatRoomDlg->ShowWindow(SW_SHOW);
+            m_btnChatRequest.EnableWindow(FALSE);
+        }
+        else if (status == 200 && roomId == -1)
+        {
+            // 관리자 있지만 대기 중 (roomId 아직 미배정)
             MessageBox(
                 L"관리자에게 요청을 보냈습니다.\n수락 시 채팅창이 자동으로 열립니다.",
                 L"고객센터", MB_OK | MB_ICONINFORMATION);
@@ -276,7 +297,6 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
             m_btnChatRequest.SetWindowText(L"고객센터");
         }
     }
-
         //  RES_REQUEST_OK (5000) - 관리자 수락 시 채팅창 오픈
     else if (pkt->cmdId == CmdID::RES_REQUEST_OK)
     {

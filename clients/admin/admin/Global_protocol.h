@@ -190,6 +190,8 @@ enum class CmdID : uint16_t
 
     REQ_ADMIN_ORDER_LIST = 5020, // 주문 내역 검색 (관리자용, 고객 2050과 별도)
     RES_ADMIN_ORDER_LIST = 5021, // 주문 내역 응답
+    REQ_CHAT_ROOM_LIST = 5022, // 관리자 채팅방 목록 요청  
+    RES_CHAT_ROOM_LIST = 5023, // 관리자 채팅방 목록 응답  
 
     REQ_RIDER_COUNT = 5030, // 출근한 라이더 수 요청
     RES_RIDER_COUNT = 5031, // 출근한 라이더 수 응답
@@ -201,13 +203,15 @@ enum class CmdID : uint16_t
     RES_REVIEW_DELETE_NO = 5051, // 악성 리뷰 삭제 비동의
     REQ_ADMIN_INIT = 5090,  // 관리자 백그라운드 인증 요청
     RES_ADMIN_INIT = 5091,  // 관리자 인증 완료 응답
+
     // ---------------------------------------------------------
     // [9000번대] 서버 푸시 알림 (Server Broadcast)
     // ---------------------------------------------------------
     NOTIFY_NEW_ORDER = 9000,     // 서버 -> 사장님: 새 주문 발생 알림
     NOTIFY_ORDER_STATE = 9010,   // 서버 -> 고객: 조리 시작, 배달 출발 등 상태 변경 알림
     NOTIFY_DELIVERY_CALL = 9020, // 서버 -> 라이더들: 주변 매장의 새 배달 콜 알림
-    NOTIFY_CHAT_MSG = 9030,      // 서버 -> 고객: 관리자 채팅 메시지 수신 알림
+    NOTIFY_CHAT_MSG = 9030,          // 서버 -> 고객/사장님: 관리자 채팅 메시지 수신 알림
+    NOTIFY_ADMIN_CHAT_REQ = 9040,    // 서버 -> 관리자: 사장님의 1:1 채팅 요청 알림
 };
 
 // =========================================================================
