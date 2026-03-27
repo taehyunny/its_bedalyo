@@ -315,7 +315,6 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         std::string orderId = resJson.value("orderId", "");
         int state = resJson.value("state", 0);
 
-        // state: 3 = 배달중, 4 = 배달완료
         CString strStatus;
         switch (state)
         {
