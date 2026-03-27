@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <string>
 #include "json.hpp"
 
@@ -36,7 +36,8 @@ struct ReqGradeUpdateDTO
 {
     std::string userId;
     std::string grade; // 변경할 등급 (예: "wow", "일반")
-    int action;        // 1: 신규 구독,
+    int action;        // 1: 신규 구독, 2: 해지 예약(is_active=0)
+
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqGradeUpdateDTO, userId, grade, action)
 };
 

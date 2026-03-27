@@ -4,9 +4,11 @@
 // 🙋‍♂️ 2090: 채팅방 입장 요청 (주문 번호 기반)
 struct ReqChatConnectDTO
 {
-    std::string userId;  // 요청하는 사람 (고객 or 사장님)
-    std::string orderId; // 어떤 주문 건에 대한 채팅인지 식별
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqChatConnectDTO, userId, orderId)
+    std::string userId; // 채팅 대상 고객 ID
+    int storeId;        // 매장 ID
+
+    // 🚀 매크로에서도 꼭 맞춰주세요!
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqChatConnectDTO, userId, storeId)
 };
 
 // 🙋‍♂️ 2091: 채팅방 입장 응답
@@ -23,8 +25,8 @@ struct ReqChatSendDTO
 {
     int roomId;           // 몇 번 방에 보내는가?
     std::string senderId; // 보내는 사람 ID
-    std::string content;  // "단무지 많이 주세요!"git
-
+    std::string content;  // "단무지 많이 주세요!"
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReqChatSendDTO, roomId, senderId, content)
 };
 
 // 💬 2093: 메시지 전송 확인 응답 (보낸 사람에게)
