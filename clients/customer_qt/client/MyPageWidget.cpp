@@ -81,7 +81,7 @@ void MyPageWidget::on_btnWow_clicked()
         userData.membershipStatus = "지금 가입하고 혜택을 받으세요!";
     }
 
-    dialog.setUserInfo(userData);
+    // dialog.setUserInfo(userData);
     dialog.exec(); 
 }
 

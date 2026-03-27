@@ -36,6 +36,7 @@ private:
     Ui::WowMembershipDialog *ui;
     // ✅ 네트워크 매니저를 저장할 변수 추가
     NetworkManager *m_network;
+    void updateUI();
 };
 
 #endif

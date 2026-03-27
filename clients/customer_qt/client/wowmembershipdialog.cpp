@@ -19,6 +19,29 @@ WowMembershipDialog::WowMembershipDialog(NetworkManager *network, QWidget *paren
     // ✅ 서버 응답 시그널이 오면 내 handleResponse 함수를 실행해라!
     connect(m_network, &NetworkManager::onGradeUpdateResponse, 
             this, &WowMembershipDialog::handleResponse);
+
+    // 🚀 창이 열릴 때 내 아이디와 등급을 바로 표시!
+    updateUI();
+}
+
+// 🚀 내 정보와 등급 상태를 UI에 그려주는 함수 구현
+void WowMembershipDialog::updateUI()
+{
+    const UserSession &session = UserSession::instance();
+    
+    // 아이디 표시 (예: asdf님)
+    ui->lblUserName->setText(session.userId + "님"); // ✅ lblName -> lblUserName 으로 변경!
+
+    // 등급 표시
+    if (session.customerGrade == "와우" || session.customerGrade == "wow") {
+        ui->lblStatus->setText("등급: 와우");
+        // 와우 회원이면 파란색 굵은 글씨로 강조
+        ui->lblStatus->setStyleSheet("font-size: 14px; font-weight: bold; color: #007BFF;"); 
+    } else {
+        ui->lblStatus->setText("등급: 일반\n지금 가입하고 혜택을 받으세요!");
+        // 일반 회원이면 기본 회색 글씨
+        ui->lblStatus->setStyleSheet("font-size: 14px; color: #555555;"); 
+    }
 }
 
 // 2. ✅ 실제 알림창을 띄우는 함수 추가
@@ -26,24 +49,24 @@ void WowMembershipDialog::handleResponse(int status, QString message)
 {
     qDebug() << "[UI] 서버 응답 처리 중... 상태:" << status;
 
-    // 1. 서버가 보내는 성공 코드인 200을 조건에 추가합니다.
-    if (status == 200 || status == 0) { 
-        
-        // 2. 🚀 핵심: DB가 바뀌었으니, 내 프로그램(로컬)의 등급 정보도 바꿔줍니다.
+    if (status == 200 || status == 0) {
         UserSession &session = UserSession::instance();
-        
+
         if (session.customerGrade == "와우" || session.customerGrade == "wow") {
-            session.customerGrade = "일반";
+            session.customerGrade = "일반"; 
+            QMessageBox::information(this, "해지 완료", "멤버십이 정상적으로 해지되었습니다.");
         } else {
-            session.customerGrade = "와우";
+            session.customerGrade = "와우"; 
+            QMessageBox::information(this, "가입 완료", "멤버십 가입이 완료되었습니다!");
         }
 
-        // 서버에서 보내준 메시지를 그대로 띄워줍니다 ("이제 배달비가 0원입니다" 등)
-        QMessageBox::information(this, "성공", message); 
-        this->accept(); // 확인 누르면 창 닫기
+        // 🚀 DB 변경 후 바로 화면을 새로고침!
+        updateUI(); 
+
+        // ❌ this->accept(); <-- 이 줄을 삭제해야 창이 닫히지 않고 변경된 모습을 바로 볼 수 있습니다!
         
     } else {
-        QMessageBox::warning(this, "오류", "변경 실패: " + message);
+        QMessageBox::warning(this, "오류", "요청 실패: " + message);
     }
 }
 
@@ -53,13 +76,13 @@ WowMembershipDialog::~WowMembershipDialog()
 }
 
 // 🚀 데이터를 동적으로 설정하는 함수 구현 (하드코딩 제거)
-void WowMembershipDialog::setUserInfo(const WowUserData &data)
-{
-    ui->lblUserName->setText(data.userName + "님");
-    ui->lblStatus->setText(data.membershipStatus);
+// void WowMembershipDialog::setUserInfo(const WowUserData &data)
+// {
+//     ui->lblUserName->setText(data.userName + "님");
+//     ui->lblStatus->setText(data.membershipStatus);
     
-    // ui->lblProfileIcon->setPixmap(QPixmap(data.profilePicPath)); // 필요 시 이미지 설정
-}
+//     // ui->lblProfileIcon->setPixmap(QPixmap(data.profilePicPath)); // 필요 시 이미지 설정
+// }
 
 // 🚀 버튼 클릭 슬롯 구현
 void WowMembershipDialog::on_btnBack_clicked()
