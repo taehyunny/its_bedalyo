@@ -112,23 +112,42 @@ void CChatDlg::AddChatRequest(const json& reqJson)
         m_listChatUsers.SetItemData(nIdx, (DWORD_PTR)new ChatUserData{ requesterId, requesterType });
     }
 }
-
+void CChatDlg::RemoveChatUserByRoomId(int roomId)
+{
+    for (int i = 0; i < m_listChatUsers.GetItemCount(); ++i)
+    {
+        auto* pData = reinterpret_cast<ChatUserData*>(m_listChatUsers.GetItemData(i));
+        if (pData && pData->roomId == roomId)
+        {
+            if (m_selectedRequesterId == pData->requesterId)
+            {
+                m_selectedRequesterId.clear();
+                m_selectedRequesterType.clear();
+                m_selectedRoomId = -1;
+                m_listChatLog.ResetContent();
+                m_btnChatSend.EnableWindow(FALSE);
+                m_btnChatAccept.EnableWindow(FALSE);
+                m_btnChatReject.EnableWindow(FALSE);
+            }
+            delete pData;
+            m_listChatUsers.DeleteItem(i);
+            break;
+        }
+    }
+}
 void CChatDlg::AddChatMessage(const json& msgJson)
 {
     std::string senderId = msgJson.value("senderId", "");
-    std::string message = msgJson.value("content", ""); 
+    std::string message = msgJson.value("content", "");  // content 키 사용
 
-    if (senderId.empty() || senderId == "admin") return;
+    if (senderId.empty() || message.empty()) return;
 
-    if (senderId == m_selectedRequesterId)
-    {
-        CString strSender = CA2W(senderId.c_str(), CP_UTF8);
-        CString strMessage = CA2W(message.c_str(), CP_UTF8);
-        CString strLine;
-        strLine.Format(L"[%s] %s", (LPCTSTR)strSender, (LPCTSTR)strMessage);
-        m_listChatLog.AddString(strLine);
-        m_listChatLog.SetCurSel(m_listChatLog.GetCount() - 1);
-    }
+    CString strSender = CA2W(senderId.c_str(), CP_UTF8);
+    CString strMessage = CA2W(message.c_str(), CP_UTF8);
+    CString strLine;
+    strLine.Format(L"[%s] %s", (LPCTSTR)strSender, (LPCTSTR)strMessage);
+    m_listChatLog.AddString(strLine);
+    m_listChatLog.SetCurSel(m_listChatLog.GetCount() - 1);
 }
 
 // 오류 C2039 해결: 클래스 멤버로 구현
@@ -169,8 +188,8 @@ void CChatDlg::OnBnClickedBtnChatAccept()
         m_listChatUsers.SetItemText(nIdx, 2, L"상담중");
 
     m_btnChatAccept.EnableWindow(FALSE);
-    m_btnChatReject.EnableWindow(FALSE);
-    m_btnChatSend.EnableWindow(TRUE);   // ← 이 줄 추가
+    m_btnChatReject.EnableWindow(TRUE);
+    m_btnChatSend.EnableWindow(TRUE); 
 }
 
 // =========================================================================
@@ -180,22 +199,40 @@ void CChatDlg::OnBnClickedBtnChatReject()
 {
     if (!m_pNet || m_selectedRequesterId.empty()) return;
 
-    json body;
-    body["requesterId"]   = m_selectedRequesterId;
-    body["requesterType"] = m_selectedRequesterType;
-    body["result"]        = "REJECT";
-    m_pNet->Send(CmdID::RES_REQUEST_NO, body);
-
-    // 목록에서 제거
+    CString strStatus;
     int nIdx = m_listChatUsers.GetNextItem(-1, LVNI_SELECTED);
     if (nIdx != -1)
+        strStatus = m_listChatUsers.GetItemText(nIdx, 2);
+
+    if (strStatus == L"대기중")
     {
-        delete reinterpret_cast<ChatUserData*>(m_listChatUsers.GetItemData(nIdx));
-        m_listChatUsers.DeleteItem(nIdx);
+        // 요청 거절
+        json body;
+        body["requesterId"] = m_selectedRequesterId;
+        body["requesterType"] = m_selectedRequesterType;
+        body["result"] = "REJECT";
+        m_pNet->Send(CmdID::RES_REQUEST_NO, body);
+
+        if (nIdx != -1)
+        {
+            delete reinterpret_cast<ChatUserData*>(m_listChatUsers.GetItemData(nIdx));
+            m_listChatUsers.DeleteItem(nIdx);
+        }
+    }
+    else if (strStatus == L"상담중")
+    {
+        // 채팅 종료
+        if (m_selectedRoomId != -1)
+        {
+            json body;
+            body["roomId"] = m_selectedRoomId;
+            m_pNet->Send(CmdID::REQ_CHAT_CLOSE, body);
+        }
     }
 
     m_selectedRequesterId.clear();
     m_selectedRequesterType.clear();
+    m_selectedRoomId = -1;
     m_btnChatAccept.EnableWindow(FALSE);
     m_btnChatReject.EnableWindow(FALSE);
     m_btnChatSend.EnableWindow(FALSE);
@@ -219,7 +256,7 @@ void CChatDlg::OnLvnItemchangedListChatUsers(NMHDR* pNMHDR, LRESULT* pResult)
         CString strStatus = m_listChatUsers.GetItemText(nIdx, 2);
         bool bPending = (strStatus == L"대기중");
         m_btnChatAccept.EnableWindow(bPending);
-        m_btnChatReject.EnableWindow(bPending);
+        m_btnChatReject.EnableWindow(TRUE);
         m_btnChatSend.EnableWindow(!bPending); // 상담중일 때만 전송 가능
 
         m_listChatLog.ResetContent();

@@ -242,6 +242,13 @@ LRESULT CAdminDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         {
             m_tabRefundDlg.OnCancelResult(resJson);
         }
+        else if (pkt->cmdId == CmdID::NOTIFY_CHAT_EXIT)
+        {
+            json resJson = json::parse(pkt->body);
+            int roomId = resJson.value("roomId", -1);
+            m_tabChatDlg.RemoveChatUserByRoomId(roomId);
+            MessageBox(L"채팅이 종료되었습니다.", L"상담 종료", MB_OK | MB_ICONINFORMATION);
+        }
     }
 
     catch (const std::exception& e) {

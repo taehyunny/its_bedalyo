@@ -192,7 +192,7 @@ enum class CmdID : uint16_t
     // ---------------------------------------------------------
     RES_REQUEST_OK = 5000,        // 1대1 문의 요청 동의
     RES_REQUEST_NO = 5001,        // 1대1 문의 요청 비동의
-
+    NOTIFY_CHAT_EXIT = 5002,      // 1대1 문의 종료
     REQ_REFUND = 5010, // 환불 요청
     REQ_CANCEL = 5011, // 취소 요청
     RES_REFUND = 5012, // 환불 요청 응답

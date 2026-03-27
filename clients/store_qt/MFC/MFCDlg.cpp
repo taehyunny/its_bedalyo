@@ -214,6 +214,7 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
                     closeTime, ownerName, ownerPhone, accountNumber,
                     approvalStatus,
                     deliveryFee,
+                    m_strId,
                     this
                     );
                     mainDlg.DoModal();

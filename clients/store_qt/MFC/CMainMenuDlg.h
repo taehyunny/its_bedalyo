@@ -21,7 +21,7 @@ public:
         const CString& minOrder, const CString& openTime,
         const CString& closeTime, const CString& ownerName,
         const CString& ownerPhone, const CString& accountNumber,
-        const CString& approvalStatus, int deliveryFee,
+        const CString& approvalStatus, int deliveryFee, const CString& loginId,
         CWnd* pParent = nullptr);
 
     // ✅ 소멸자 선언 추가
@@ -55,6 +55,7 @@ private:
     CString         m_ownerPhone;
     CString         m_accountNumber;
     CString         m_approvalStatus;
+    CString         m_loginId;
     int             m_deliveryFee = 0;
 
     // ── 탭 다이얼로그 ───────────────────────────────────────

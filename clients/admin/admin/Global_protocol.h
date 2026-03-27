@@ -122,7 +122,7 @@ enum class CmdID : uint16_t
     RES_CHAT_CONNECT = 2091, // 채팅방 입장 응답
     REQ_CHAT_SEND = 2092,    // 메시지 전송 요청 (WebSocket 방식 검토 필요)
     RES_CHAT_SEND = 2093,    // 메시지 전송 응답
-
+    REQ_CHAT_CLOSE = 2098,
     // 마이페이지 (2100 ~ 2109)
     REQ_MY_INFO = 2100, // 마이페이지 통합 정보 요청 (리뷰수, 주문수, 즐겨찾기수, 좋아요수)
     RES_MY_INFO = 2101, // 마이페이지 통합 정보 응답
@@ -213,7 +213,9 @@ enum class CmdID : uint16_t
     NOTIFY_CHAT_MSG = 9030,          // 서버 -> 고객/사장님: 관리자 채팅 메시지 수신 알림
     NOTIFY_CHAT_ROOM_OPENED = 9031, //: 관리자가 채팅을 수락했을 때 사장님 / 고객 앱으로 전송되는 알림입니다. (이걸 받아야 채팅창이 활성화됩니다!)
     NOTIFY_MSG_TO_USER = 9032, // : 관리자가 보낸 메시지를 사장님 / 고객이 받을 때 사용하는 ID입니다.
+
     NOTIFY_MSG_TO_ADMIN = 9033, // : 반대로 사장님 / 고객이 보낸 메시지를 관리자가 받을 때 사용합니다.
+    NOTIFY_CHAT_EXIT = 5002, // 서버 → 양쪽: 채팅방 종료 알림
     NOTIFY_ADMIN_CHAT_REQ = 9040
 };
 

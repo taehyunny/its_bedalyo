@@ -57,7 +57,7 @@ void CChatRoomDlg::AddMessage(const json& msgJson)
 void CChatRoomDlg::OnBnClickedBtnChatRoomSend()
 {
     if (!m_pNet) return;
-    if (m_roomId == -1)  // ✅ roomId 없으면 전송 불가
+    if (m_roomId == -1)  //  roomId 없으면 전송 불가
     {
         MessageBox(L"채팅방이 아직 준비되지 않았습니다.", L"알림", MB_OK);
         return;
@@ -67,7 +67,7 @@ void CChatRoomDlg::OnBnClickedBtnChatRoomSend()
     m_editChatMsg.GetWindowText(strMsg);
     if (strMsg.IsEmpty()) return;
 
-    // ✅ roomId 사용, "content" 키 사용
+    //  roomId 사용, "content" 키 사용
     json body;
     body["roomId"] = m_roomId;
     body["senderId"] = m_userId;
@@ -89,6 +89,12 @@ void CChatRoomDlg::OnBnClickedBtnChatRoomSend()
 // =========================================================
 void CChatRoomDlg::OnBnClickedBtnChatRoomClose()
 {
+    if (m_pNet && m_roomId != -1)
+    {
+        json body;
+        body["roomId"] = m_roomId;
+        m_pNet->Send(CmdID::REQ_CHAT_CLOSE, body);
+    }
     ShowWindow(SW_HIDE);
 }
 

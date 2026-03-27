@@ -15,7 +15,7 @@ CMainMenuDlg::CMainMenuDlg(int storeId, CNetworkHelper* pNet,
     const CString& closeTime, const CString& ownerName,
     const CString& ownerPhone, const CString& accountNumber,
     const CString& approvalStatus,
-    int deliveryFee,
+    int deliveryFee, const CString& loginId,
     CWnd* pParent)
     : CDialogEx(IDD_MAIN_MENU, pParent)
     , m_storeId(storeId), m_pNet(pNet), m_storeName(storeName)
@@ -26,6 +26,7 @@ CMainMenuDlg::CMainMenuDlg(int storeId, CNetworkHelper* pNet,
     , m_ownerPhone(ownerPhone), m_accountNumber(accountNumber)
     , m_approvalStatus(approvalStatus)
     , m_deliveryFee(deliveryFee)
+    , m_loginId(loginId)
 {
 }
 
@@ -250,7 +251,7 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 
         if (!m_pChatRoomDlg)
         {
-            std::string userId = (const char*)CT2A(m_ownerName, CP_UTF8);
+            std::string userId = (const char*)CT2A(m_loginId, CP_UTF8);
             m_pChatRoomDlg = new CChatRoomDlg(m_pNet, userId, this);
             m_pChatRoomDlg->Create(IDD_CHAT_ROOM, this);
         }
@@ -369,17 +370,19 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         // orderId로 리스트 탐색 후 상태 변경
         m_tabOrderDlg.UpdateOrderStatus(orderId, strStatus);
     }
-    // [새로 추가] 서버에서 채팅 종료 통보를 보냈을 때 (예: CmdID::NOTIFY_CHAT_EXIT)
-    //else if (pkt->cmdId == CmdID::NOTIFY_CHAT_EXIT)
-    //{
-    //    if (m_pChatRoomDlg && ::IsWindow(m_pChatRoomDlg->GetSafeHwnd()))
-    //    {
-    //        m_pChatRoomDlg->ShowWindow(SW_HIDE);
-    //        MessageBox(L"관리자에 의해 상담이 종료되었습니다.", L"알림", MB_OK | MB_ICONINFORMATION);
-    //    }
-    //    m_btnChatRequest.EnableWindow(TRUE);
-    //    m_btnChatRequest.SetWindowText(L"고객센터");
-    //}
+    else if (pkt->cmdId == CmdID::NOTIFY_CHAT_EXIT)
+    {
+        if (m_pChatRoomDlg && ::IsWindow(m_pChatRoomDlg->GetSafeHwnd()))
+            m_pChatRoomDlg->ShowWindow(SW_HIDE);
+
+        delete m_pChatRoomDlg;
+        m_pChatRoomDlg = nullptr;
+
+        m_btnChatRequest.EnableWindow(TRUE);
+        m_btnChatRequest.SetWindowText(L"고객센터");
+        MessageBox(L"채팅이 종료되었습니다.", L"상담 종료", MB_OK | MB_ICONINFORMATION);
+        }
+
 
     delete pkt;
     return 0;
@@ -396,7 +399,7 @@ void CMainMenuDlg::OnBnClickedBtnChatRequest()
 
         json body;
         body["storeId"] = m_storeId;
-        body["userId"] = (const char*)CT2A(m_ownerName, CP_UTF8);
+        body["userId"] = (const char*)CT2A(m_loginId, CP_UTF8);
 
         std::string dumped = body.dump();
         CString strUnicodeSend = CA2W(dumped.c_str(), CP_UTF8);

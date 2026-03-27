@@ -22,8 +22,9 @@ public:
     void AddChatRequest(const json& reqJson);   // 새 상담 요청
     void AddChatMessage(const json& msgJson);   // 메시지 수신
     void RemoveChatUser(const json& reqJson);   // 상담 종료 (추가됨)
-    void        UpdateRoomId(const std::string& requesterId, int roomId);
+    void UpdateRoomId(const std::string& requesterId, int roomId);
     std::string GetSelectedRequesterId() const;
+    void RemoveChatUserByRoomId(int roomId);
 
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);

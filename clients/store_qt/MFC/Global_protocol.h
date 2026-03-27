@@ -128,6 +128,7 @@ enum class CmdID : uint16_t
     RES_GRADE_UPDATE = 2095, // 등급 변경 응답 (업그레이드/다운그레이드 구분 없이 같은 CmdID로 처리)
     REQ_GRADE_NOW = 2096,    // 현재 등급 요청
     RES_GRADE_NOW = 2097,    // 현재 등급 응답
+    REQ_CHAT_CLOSE = 2098,
     // 마이페이지 (2100 ~ 2109)
     REQ_MY_INFO = 2100,      // 마이페이지 통합 정보 요청 (리뷰수, 주문수, 즐겨찾기수, 좋아요수)
     RES_MY_INFO = 2101,      // 마이페이지 통합 정보 응답
@@ -224,6 +225,7 @@ enum class CmdID : uint16_t
     NOTIFY_CHAT_ROOM_OPENED =9031, //: 관리자가 채팅을 수락했을 때 사장님 / 고객 앱으로 전송되는 알림입니다. (이걸 받아야 채팅창이 활성화됩니다!)
     NOTIFY_MSG_TO_USER = 9032, // : 관리자가 보낸 메시지를 사장님 / 고객이 받을 때 사용하는 ID입니다.
     NOTIFY_MSG_TO_ADMIN = 9033, // : 반대로 사장님 / 고객이 보낸 메시지를 관리자가 받을 때 사용합니다.
+    NOTIFY_CHAT_EXIT = 5002, // 서버 → 양쪽: 채팅방 종료 알림
     NOTIFY_ADMIN_CHAT_REQ = 9040 //
 };
 
