@@ -165,7 +165,8 @@ LRESULT CMFCDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     GetDlgItem(IDC_BUTTON1)->EnableWindow(TRUE);
     if (pkt->cmdId == CmdID::RES_LOGIN)
     {
-        MessageBox(CA2W(pkt->body.c_str(), CP_UTF8), L"body 전체", MB_OK);
+        // 테스트용 디버그 팝업
+        //MessageBox(CA2W(pkt->body.c_str(), CP_UTF8), L"body 전체", MB_OK);
 
         try
         {
