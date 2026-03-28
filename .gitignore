@@ -24,6 +24,8 @@ _deps/
 #  Visual Studio / VS Code
 # ------------------------------------------
 .vs/
+.claude/
+common/
 *.suo
 *.user
 *.userosscache
@@ -161,6 +163,7 @@ $RECYCLE.BIN/
 config.ini
 secrets.*
 credentials.*
+clients/customer_qt/client/config.h
 
 
 # ------------------------------------------

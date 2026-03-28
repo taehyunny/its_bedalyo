@@ -1,50 +1,98 @@
-#pragma once
+﻿#pragma once
 #include <QMainWindow>
-#include "NetworkManager.h" // 통신 전담 클래스
-#include "LoginWidget.h"    // 로그인/회원가입 화면
+#include "NetworkManager.h"
+#include "config.h"
+#include "loginwidget.h"
+#include "homewidget.h"
+#include "menucategori.h"
+#include "searchwidget.h"
+#include "searchresultwidget.h"
+#include "orderhistorywidget.h"
+#include "mypagewidget.h"
+#include "storedetailwidget.h"
+#include "policywidget.h"
+#include "settingswidget.h"
+#include "addresswidget.h"
+#include "addressdetailwidget.h"
+#include "cartwidget.h"
+#include "menuoption.h"
+#include "cartbarwidget.h"
+#include "menureview.h"
+#include "form.h"
+#include "deliverycompletewidget.h"
 
-// ============================================================
-// MainWindow
-// 역할: 전체 화면 전환을 관리하는 최상위 컨테이너
-//
-// 구조:
-//   - QStackedWidget(stackedWidget)으로 각 화면을 페이지처럼 관리
-//   - NetworkManager를 생성하고 각 Widget에 포인터로 주입
-//   - 로그인 성공 시 다음 화면(HomeWidget 등)으로 전환
-//
-// 화면 추가 방법:
-//   1. HomeWidget.h/cpp/ui 생성
-//   2. 멤버 변수 추가: HomeWidget *m_homeWidget;
-//   3. 생성자에서: ui->stackedWidget->addWidget(m_homeWidget);
-//   4. 전환 시: ui->stackedWidget->setCurrentWidget(m_homeWidget);
-// ============================================================
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
-    // NetworkManager::onConnected 수신 → 상태 라벨 "✅ 서버 연결됨" 표시
-    void onConnected();
+    void showLogin();
+    void showHome();
 
-    // LoginWidget::loginSuccess 수신 → 다음 화면으로 전환
-    // 현재는 상태 라벨 업데이트만 (HomeWidget 구현 후 화면 전환으로 교체)
-    void onLoginSuccess(QString userName);
+private slots:
+    void onLoginSuccess();
+    void onLogoutRequested();
+    void onCategorySelected(int categoryId, const QString &categoryName);
+    void onBackToHome();
+    void onSearchRequested();
+    void onSearchExecuted(const QString &keyword);
+    void onOrderListRequested();
+    void onMypageRequested();
+    void onFavoriteRequested();
+    void onStoreSelected(int storeId);
+    void onPolicyRequested();
+    void onSettingsRequested();
+    void onAddressRequested();
+    void onAddressSelected(const QString &address);
+    void onAddressDetailRequested(const QString &roadAddr);
+    void onAddressEditRequested(const AddressItem &item);
+    void onAddressDetailCompleted(const AddressItem &item);
+    void onAddressDeleteRequested(int addressId);
+    void onMainHomeReceived(QList<CategoryInfoQt> categories,
+                            QList<TopStoreInfoQt> topStores);
+    void onCartRequested();
+    void onCartClose();
+    void onStoreDetailBack();
+    void onOrderSuccess();
+    
+    // CartWidget이 데이터를 비우기 전에 가로챌 함수
+    void onNetworkOrderCreated(int status, QString message, QString orderId);
+    void handleDeliveryComplete(const QString &orderId); // 4011번 수신 시 실행될 슬롯
 
 private:
-    Ui::MainWindow *ui;         // mainwindow.ui 기반 UI 객체
-    NetworkManager *m_network;  // 통신 전담 객체 (모든 Widget이 공유)
-    LoginWidget    *m_loginWidget; // 로그인/회원가입 화면
+    Ui::MainWindow          *ui;
+    NetworkManager          *m_network;
+    LoginWidget             *m_loginWidget;
+    HomeWidget              *m_homeWidget;
+    menucategori            *m_menuWidget;
+    SearchWidget            *m_searchWidget;
+    SearchResultWidget      *m_searchResultWidget;
+    OrderHistoryWidget      *m_orderHistoryWidget;
+    MyPageWidget            *m_myPageWidget;
+    StoreDetailWidget       *m_storeDetailWidget;
+    PolicyWidget            *m_policyWidget;
+    SettingsWidget          *m_settingsWidget;
+    AddressWidget           *m_addressWidget;
+    AddressDetailWidget     *m_addressDetailWidget;
+    CartWidget              *m_cartWidget;
+    menuoption              *m_menuOptionWidget;
+    Form                    *m_formWidget;
+    menureview              *m_menureviewWidget;
+    CartBarWidget           *m_cartBar = nullptr; // MainWindow가 직접 소유
+    QList<CategoryInfoQt>   m_cachedCategories;
+    QWidget                 *m_prevWidget = nullptr;
+    DeliveryCompleteWidget  *m_deliveryCompleteWidget;
 
-    // ── 향후 화면 추가 시 여기에 멤버 변수 추가 ──
-    // HomeWidget    *m_homeWidget;
-    // OrderWidget   *m_orderWidget;
-    // MyPageWidget  *m_myPageWidget;
+    // CartBar 위치 관련 헬퍼
+    void repositionCartBar();
+    void showCartBarForHome();  // 홈 화면용 (navBar 위에 배치)
+    void showCartBarForStore(); // 가게상세용 (맨 아래 배치, navBar 없음)
 };
