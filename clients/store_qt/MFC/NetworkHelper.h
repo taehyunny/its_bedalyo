@@ -15,6 +15,17 @@ using json = nlohmann::json;
 
 #define WM_PACKET_RECEIVED  (WM_USER + 100)
 
+// PacketHeader는 NetworkHelper에서만 사용하므로 여기에 정의
+// (Global_protocol.h의 json.hpp include가 #pragma pack 스택에 영향을 줄 수 있어 분리)
+#pragma pack(push, 1)
+struct PacketHeader
+{
+    uint16_t signature = 0x4543;
+    CmdID    cmdId     = CmdID::REQ_HEARTBEAT;
+    uint32_t bodySize  = 0;
+};
+#pragma pack(pop)
+
 struct ReceivedPacket
 {
     CmdID       cmdId = CmdID::REQ_HEARTBEAT;

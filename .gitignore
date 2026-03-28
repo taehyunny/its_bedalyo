@@ -25,6 +25,7 @@ _deps/
 # ------------------------------------------
 .vs/
 .claude/
+common/
 *.suo
 *.user
 *.userosscache

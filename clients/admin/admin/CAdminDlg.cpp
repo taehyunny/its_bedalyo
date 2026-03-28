@@ -33,7 +33,7 @@ BOOL CAdminDlg::OnInitDialog()
     CString strAddr;
     CString strIp = CA2W(m_serverIp.c_str(), CP_UTF8);
     strAddr.Format(L"서버: %s : %d", (LPCTSTR)strIp, m_serverPort);
-    m_staticServerAddress.SetWindowText(strAddr);
+    //m_staticServerAddress.SetWindowText(strAddr);
 
     // 연결 해제 버튼 초기 비활성화
     m_btnConnectOff.EnableWindow(FALSE);
@@ -93,7 +93,7 @@ void CAdminDlg::OnBnClickedBtnConnect()
 
     // ✅ 버튼은 RES_ADMIN_INIT 수신 후 활성화 (아직 비활성)
     m_btnConnect.EnableWindow(FALSE);
-    m_staticServerAddress.SetWindowText(L"⏳ 인증 중...");
+    m_staticServerAddress.SetWindowText(L" 인증 중...");
 }
 
 // =========================================================
@@ -109,7 +109,7 @@ void CAdminDlg::OnBnClickedBtnConnectOff()
     CString strAddr;
     CString strIp = CA2W(m_serverIp.c_str(), CP_UTF8);
     strAddr.Format(L"서버: %s : %d", (LPCTSTR)strIp, m_serverPort);
-    m_staticServerAddress.SetWindowText(strAddr);
+    m_staticServerAddress.SetWindowText(L"연결 해제");
 }
 
 // =========================================================
@@ -147,9 +147,32 @@ LRESULT CAdminDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
 
     CString strUnicodeBody = CA2W(pkt->body.c_str(), CP_UTF8);
 
+    uint16_t cmdRaw = static_cast<uint16_t>(pkt->cmdId);
     CString dbgLog;
-    dbgLog.Format(L"[DEBUG RECV] ID: %d, Body: %s\n", pkt->cmdId, (LPCTSTR)strUnicodeBody);
+    dbgLog.Format(L"[DEBUG RECV] ID: %u, Body: %s\n", (unsigned)cmdRaw, (LPCTSTR)strUnicodeBody);
     OutputDebugString(dbgLog);
+
+    // try 블록 밖에서 먼저 분기 처리
+    if (cmdRaw == static_cast<uint16_t>(CmdID::NOTIFY_ADMIN_CHAT_REQ))
+    {
+        OutputDebugStringA("[DEBUG] NOTIFY_ADMIN_CHAT_REQ branch (pre-try)\n");
+        try {
+            json resJson = json::parse(pkt->body);
+            m_tabChatDlg.AddChatRequest(resJson);
+
+            if (m_tabCtrl.GetCurSel() != 0) {
+                m_tabCtrl.SetCurSel(0);
+                NMHDR nmhdr = { m_tabCtrl.GetSafeHwnd(), (UINT_PTR)IDC_TAB, TCN_SELCHANGE };
+                SendMessage(WM_NOTIFY, IDC_TAB, (LPARAM)&nmhdr);
+            }
+        }
+        catch (const std::exception& e) {
+            CString s; s.Format(L"[ERROR] 9040 parse: %S\n", e.what());
+            OutputDebugString(s);
+        }
+        delete pkt;
+        return 0;
+    }
 
     try {
         json resJson = json::parse(pkt->body);
@@ -165,37 +188,47 @@ LRESULT CAdminDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
                 m_tabBlackDlg.SetNetworkHelper(&m_net);
 
                 m_btnConnectOff.EnableWindow(TRUE);
-                m_staticServerAddress.SetWindowText(L" 서버 연결됨");
-                MessageBox(L"관리자 인증 완료.", L"연결 성공", MB_OK);
+                // MessageBox 제거 → 재진입(re-entrant) 문제 방지
+                m_staticServerAddress.SetWindowText(L" 서버 연결됨 (관리자 인증 완료)");
             }
             else
             {
                 m_net.Disconnect();
                 m_btnConnect.EnableWindow(TRUE);
                 m_staticServerAddress.SetWindowText(L" 인증 실패");
-                MessageBox(L"관리자 인증에 실패했습니다.", L"오류", MB_ICONERROR);
             }
         }
-        // 1. 채팅 요청 (사장님이 고객센터 버튼 눌렀을 때)
-        else if (pkt->cmdId == CmdID::REQ_CHAT_CONNECT)
-        {
-            m_tabChatDlg.AddChatRequest(resJson);
-
-            if (m_tabCtrl.GetCurSel() != 0) {
-                m_tabCtrl.SetCurSel(0);
-                NMHDR nmhdr = { m_tabCtrl.GetSafeHwnd(), (UINT_PTR)IDC_TAB, TCN_SELCHANGE };
-                SendMessage(WM_NOTIFY, IDC_TAB, (LPARAM)&nmhdr);
-            }
-        }
+        // 1. 채팅 요청은 pre-try 블록에서 처리 (위에서 return)
         // 2. 새 채팅 메시지 수신
-        else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG)
+        else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG) // 9030
         {
+            // userId 또는 requesterId 포함 시 채팅 요청으로 처리
+            if (resJson.contains("userId") || resJson.contains("requesterId"))
+                m_tabChatDlg.AddChatRequest(resJson);
+            else
+                m_tabChatDlg.AddChatMessage(resJson);
+        }
+        else if (pkt->cmdId == CmdID::RES_REQUEST_OK)
+        {
+            json resJson = json::parse(pkt->body);
+            int roomId = resJson.value("roomId", -1);
+            m_tabChatDlg.UpdateRoomId(m_tabChatDlg.GetSelectedRequesterId(), roomId);
+        }
+        // NOTIFY_MSG_TO_ADMIN (9033) - store/고객 메시지 수신
+        else if (pkt->cmdId == CmdID::NOTIFY_MSG_TO_ADMIN)
+        {
+            json resJson = json::parse(pkt->body);
             m_tabChatDlg.AddChatMessage(resJson);
         }
         // 3. 기존 기능들
         else if (pkt->cmdId == CmdID::RES_ADMIN_ORDER_LIST)
         {
             m_tabRefundDlg.OnSearchResult(resJson);
+        }
+        else if (pkt->cmdId == CmdID::NOTIFY_MSG_TO_ADMIN)  // 9033
+        {
+            json resJson = json::parse(pkt->body);
+            m_tabChatDlg.AddChatMessage(resJson);
         }
         else if (pkt->cmdId == CmdID::RES_REVIEW_LIST)
         {
@@ -208,6 +241,13 @@ LRESULT CAdminDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         else if (pkt->cmdId == CmdID::RES_CANCEL)
         {
             m_tabRefundDlg.OnCancelResult(resJson);
+        }
+        else if (pkt->cmdId == CmdID::NOTIFY_CHAT_EXIT)
+        {
+            json resJson = json::parse(pkt->body);
+            int roomId = resJson.value("roomId", -1);
+            m_tabChatDlg.RemoveChatUserByRoomId(roomId);
+            MessageBox(L"채팅이 종료되었습니다.", L"상담 종료", MB_OK | MB_ICONINFORMATION);
         }
     }
 

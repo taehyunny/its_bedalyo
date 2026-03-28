@@ -39,16 +39,14 @@ BOOL CChatRoomDlg::OnInitDialog()
 void CChatRoomDlg::AddMessage(const json& msgJson)
 {
     std::string senderId = msgJson.value("senderId", "");
-    std::string content = msgJson.value("content", "");  // ✅ "message" → "content"
+    std::string content = msgJson.value("content", "");
+
+    // 내가 보낸 메시지는 이미 로컬에 추가했으므로 skip
+    if (senderId == m_userId) return;
 
     CString strMsg = CA2W(content.c_str(), CP_UTF8);
-
     CString strLine;
-    if (senderId == m_userId)
-        strLine.Format(L"[나] %s", (LPCTSTR)strMsg);
-    else
-        strLine.Format(L"[관리자] %s", (LPCTSTR)strMsg);
-
+    strLine.Format(L"[관리자] %s", (LPCTSTR)strMsg);
     m_listChatLog.AddString(strLine);
     m_listChatLog.SetCurSel(m_listChatLog.GetCount() - 1);
 }
@@ -59,7 +57,7 @@ void CChatRoomDlg::AddMessage(const json& msgJson)
 void CChatRoomDlg::OnBnClickedBtnChatRoomSend()
 {
     if (!m_pNet) return;
-    if (m_roomId == -1)  // ✅ roomId 없으면 전송 불가
+    if (m_roomId == -1)  //  roomId 없으면 전송 불가
     {
         MessageBox(L"채팅방이 아직 준비되지 않았습니다.", L"알림", MB_OK);
         return;
@@ -69,7 +67,7 @@ void CChatRoomDlg::OnBnClickedBtnChatRoomSend()
     m_editChatMsg.GetWindowText(strMsg);
     if (strMsg.IsEmpty()) return;
 
-    // ✅ roomId 사용, "content" 키 사용
+    //  roomId 사용, "content" 키 사용
     json body;
     body["roomId"] = m_roomId;
     body["senderId"] = m_userId;
@@ -91,6 +89,12 @@ void CChatRoomDlg::OnBnClickedBtnChatRoomSend()
 // =========================================================
 void CChatRoomDlg::OnBnClickedBtnChatRoomClose()
 {
+    if (m_pNet && m_roomId != -1)
+    {
+        json body;
+        body["roomId"] = m_roomId;
+        m_pNet->Send(CmdID::REQ_CHAT_CLOSE, body);
+    }
     ShowWindow(SW_HIDE);
 }
 

@@ -122,7 +122,7 @@ enum class CmdID : uint16_t
     RES_CHAT_CONNECT = 2091, // 채팅방 입장 응답
     REQ_CHAT_SEND = 2092,    // 메시지 전송 요청 (WebSocket 방식 검토 필요)
     RES_CHAT_SEND = 2093,    // 메시지 전송 응답
-
+    REQ_CHAT_CLOSE = 2098,
     // 마이페이지 (2100 ~ 2109)
     REQ_MY_INFO = 2100, // 마이페이지 통합 정보 요청 (리뷰수, 주문수, 즐겨찾기수, 좋아요수)
     RES_MY_INFO = 2101, // 마이페이지 통합 정보 응답
@@ -190,6 +190,8 @@ enum class CmdID : uint16_t
 
     REQ_ADMIN_ORDER_LIST = 5020, // 주문 내역 검색 (관리자용, 고객 2050과 별도)
     RES_ADMIN_ORDER_LIST = 5021, // 주문 내역 응답
+    REQ_CHAT_ROOM_LIST = 5022, // 관리자 채팅방 목록 요청  
+    RES_CHAT_ROOM_LIST = 5023, // 관리자 채팅방 목록 응답  
 
     REQ_RIDER_COUNT = 5030, // 출근한 라이더 수 요청
     RES_RIDER_COUNT = 5031, // 출근한 라이더 수 응답
@@ -201,13 +203,20 @@ enum class CmdID : uint16_t
     RES_REVIEW_DELETE_NO = 5051, // 악성 리뷰 삭제 비동의
     REQ_ADMIN_INIT = 5090,  // 관리자 백그라운드 인증 요청
     RES_ADMIN_INIT = 5091,  // 관리자 인증 완료 응답
+
     // ---------------------------------------------------------
     // [9000번대] 서버 푸시 알림 (Server Broadcast)
     // ---------------------------------------------------------
     NOTIFY_NEW_ORDER = 9000,     // 서버 -> 사장님: 새 주문 발생 알림
     NOTIFY_ORDER_STATE = 9010,   // 서버 -> 고객: 조리 시작, 배달 출발 등 상태 변경 알림
     NOTIFY_DELIVERY_CALL = 9020, // 서버 -> 라이더들: 주변 매장의 새 배달 콜 알림
-    NOTIFY_CHAT_MSG = 9030,      // 서버 -> 고객: 관리자 채팅 메시지 수신 알림
+    NOTIFY_CHAT_MSG = 9030,          // 서버 -> 고객/사장님: 관리자 채팅 메시지 수신 알림
+    NOTIFY_CHAT_ROOM_OPENED = 9031, //: 관리자가 채팅을 수락했을 때 사장님 / 고객 앱으로 전송되는 알림입니다. (이걸 받아야 채팅창이 활성화됩니다!)
+    NOTIFY_MSG_TO_USER = 9032, // : 관리자가 보낸 메시지를 사장님 / 고객이 받을 때 사용하는 ID입니다.
+
+    NOTIFY_MSG_TO_ADMIN = 9033, // : 반대로 사장님 / 고객이 보낸 메시지를 관리자가 받을 때 사용합니다.
+    NOTIFY_CHAT_EXIT = 5002, // 서버 → 양쪽: 채팅방 종료 알림
+    NOTIFY_ADMIN_CHAT_REQ = 9040
 };
 
 // =========================================================================

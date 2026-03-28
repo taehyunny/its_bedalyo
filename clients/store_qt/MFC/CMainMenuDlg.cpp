@@ -15,7 +15,7 @@ CMainMenuDlg::CMainMenuDlg(int storeId, CNetworkHelper* pNet,
     const CString& closeTime, const CString& ownerName,
     const CString& ownerPhone, const CString& accountNumber,
     const CString& approvalStatus,
-    int deliveryFee,
+    int deliveryFee, const CString& loginId,
     CWnd* pParent)
     : CDialogEx(IDD_MAIN_MENU, pParent)
     , m_storeId(storeId), m_pNet(pNet), m_storeName(storeName)
@@ -26,6 +26,7 @@ CMainMenuDlg::CMainMenuDlg(int storeId, CNetworkHelper* pNet,
     , m_ownerPhone(ownerPhone), m_accountNumber(accountNumber)
     , m_approvalStatus(approvalStatus)
     , m_deliveryFee(deliveryFee)
+    , m_loginId(loginId)
 {
 }
 
@@ -165,7 +166,7 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     auto* pkt = reinterpret_cast<ReceivedPacket*>(lParam);
     if (!pkt) return 0;
 
-    // [디버그 수정한 부분] 한글 깨짐 방지 처리
+    // 한글 깨짐 방지 처리
     CString strUnicodeBody = CA2W(pkt->body.c_str(), CP_UTF8);
     CString dbgPkt;
     dbgPkt.Format(L"[DEBUG] RECV Packet ID: %d, Body: %s\n", pkt->cmdId, (LPCTSTR)strUnicodeBody);
@@ -243,6 +244,21 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         json resJson = json::parse(pkt->body);
         m_tabOrderDlg.OnOrderRejectResult(resJson);
     }
+    else if (pkt->cmdId == CmdID::NOTIFY_CHAT_ROOM_OPENED)  // 9031
+    {
+        json resJson = json::parse(pkt->body);
+        int roomId = resJson.value("roomId", -1);
+
+        if (!m_pChatRoomDlg)
+        {
+            std::string userId = (const char*)CT2A(m_loginId, CP_UTF8);
+            m_pChatRoomDlg = new CChatRoomDlg(m_pNet, userId, this);
+            m_pChatRoomDlg->Create(IDD_CHAT_ROOM, this);
+        }
+        m_pChatRoomDlg->SetRoomId(roomId);
+        m_pChatRoomDlg->ShowWindow(SW_SHOW);
+        m_btnChatRequest.EnableWindow(FALSE);
+    }
     else if (pkt->cmdId == CmdID::RES_SALES_STAT)
     {
         json resJson = json::parse(pkt->body);
@@ -259,10 +275,24 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     {
         json resJson = json::parse(pkt->body);
         int status = resJson.value("status", 0);
+        int roomId = resJson.value("roomId", -1);
 
-        if (status == 200 || status == 202)
+        if (status == 200 && roomId != -1)
         {
-            // 대기 메시지만 표시, 채팅창은 열지 않음
+            // 수락됨 + roomId 유효 → 채팅창 오픈
+            if (!m_pChatRoomDlg)
+            {
+                std::string userId = (const char*)CT2A(m_ownerName, CP_UTF8);
+                m_pChatRoomDlg = new CChatRoomDlg(m_pNet, userId, this);
+                m_pChatRoomDlg->Create(IDD_CHAT_ROOM, this);
+            }
+            m_pChatRoomDlg->SetRoomId(roomId);
+            m_pChatRoomDlg->ShowWindow(SW_SHOW);
+            m_btnChatRequest.EnableWindow(FALSE);
+        }
+        else if (status == 200 || status == 202 || status == 0)
+        {
+            // roomId 아직 -1 = 대기 중
             MessageBox(
                 L"관리자에게 요청을 보냈습니다.\n수락 시 채팅창이 자동으로 열립니다.",
                 L"고객센터", MB_OK | MB_ICONINFORMATION);
@@ -276,7 +306,21 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
             m_btnChatRequest.SetWindowText(L"고객센터");
         }
     }
+    else if (pkt->cmdId == CmdID::NOTIFY_CHAT_ROOM_OPENED)  // 9031
+    {
+        json resJson = json::parse(pkt->body);
+        int roomId = resJson.value("roomId", -1);
 
+        if (!m_pChatRoomDlg)
+        {
+            std::string userId = (const char*)CT2A(m_ownerName, CP_UTF8);
+            m_pChatRoomDlg = new CChatRoomDlg(m_pNet, userId, this);
+            m_pChatRoomDlg->Create(IDD_CHAT_ROOM, this);
+        }
+        m_pChatRoomDlg->SetRoomId(roomId);
+        m_pChatRoomDlg->ShowWindow(SW_SHOW);
+        m_btnChatRequest.EnableWindow(FALSE);
+        }
         //  RES_REQUEST_OK (5000) - 관리자 수락 시 채팅창 오픈
     else if (pkt->cmdId == CmdID::RES_REQUEST_OK)
     {
@@ -297,12 +341,12 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         }
 
         //  NOTIFY_CHAT_MSG (9030) - 메시지 수신 시 채팅창에 추가
-    else if (pkt->cmdId == CmdID::NOTIFY_CHAT_MSG)
+    else if (pkt->cmdId == CmdID::NOTIFY_MSG_TO_USER)  // 9032
     {
         json resJson = json::parse(pkt->body);
         if (m_pChatRoomDlg && m_pChatRoomDlg->IsWindowVisible())
             m_pChatRoomDlg->AddMessage(resJson);
-    }
+}
     else if (pkt->cmdId == CmdID::RES_ORDER_LIST)
     {
         json resJson = json::parse(pkt->body);
@@ -326,17 +370,19 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
         // orderId로 리스트 탐색 후 상태 변경
         m_tabOrderDlg.UpdateOrderStatus(orderId, strStatus);
     }
-    // [새로 추가] 서버에서 채팅 종료 통보를 보냈을 때 (예: CmdID::NOTIFY_CHAT_EXIT)
-    //else if (pkt->cmdId == CmdID::NOTIFY_CHAT_EXIT)
-    //{
-    //    if (m_pChatRoomDlg && ::IsWindow(m_pChatRoomDlg->GetSafeHwnd()))
-    //    {
-    //        m_pChatRoomDlg->ShowWindow(SW_HIDE);
-    //        MessageBox(L"관리자에 의해 상담이 종료되었습니다.", L"알림", MB_OK | MB_ICONINFORMATION);
-    //    }
-    //    m_btnChatRequest.EnableWindow(TRUE);
-    //    m_btnChatRequest.SetWindowText(L"고객센터");
-    //}
+    else if (pkt->cmdId == CmdID::NOTIFY_CHAT_EXIT)
+    {
+        if (m_pChatRoomDlg && ::IsWindow(m_pChatRoomDlg->GetSafeHwnd()))
+            m_pChatRoomDlg->ShowWindow(SW_HIDE);
+
+        delete m_pChatRoomDlg;
+        m_pChatRoomDlg = nullptr;
+
+        m_btnChatRequest.EnableWindow(TRUE);
+        m_btnChatRequest.SetWindowText(L"고객센터");
+        MessageBox(L"채팅이 종료되었습니다.", L"상담 종료", MB_OK | MB_ICONINFORMATION);
+        }
+
 
     delete pkt;
     return 0;
@@ -353,7 +399,7 @@ void CMainMenuDlg::OnBnClickedBtnChatRequest()
 
         json body;
         body["storeId"] = m_storeId;
-        body["userId"] = (const char*)CT2A(m_ownerName, CP_UTF8);
+        body["userId"] = (const char*)CT2A(m_loginId, CP_UTF8);
 
         std::string dumped = body.dump();
         CString strUnicodeSend = CA2W(dumped.c_str(), CP_UTF8);

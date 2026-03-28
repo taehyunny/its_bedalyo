@@ -104,7 +104,12 @@ void CTabOrderDlg::SetOrderList(const json& orderArray)
         std::string menuSummary = order.value("menuSummary", "");
         int         totalPrice = order.value("totalPrice", 0);
         std::string createdAt = order.value("createdAt", "");
-        int         status = order.value("orderStatus", 0);
+
+        // 서버 키 이름 호환: "orderStatus" → "state" → "status" 순서로 시도
+        int status = 0;
+        if (order.contains("orderStatus")) status = order["orderStatus"].get<int>();
+        else if (order.contains("state"))       status = order["state"].get<int>();
+        else if (order.contains("status"))      status = order["status"].get<int>();
 
         // 상태 텍스트 변환
         CString strStatus;
@@ -221,9 +226,19 @@ void CTabOrderDlg::AddNewOrder(const json& orderJson)
 // =========================================================================
 void CTabOrderDlg::UpdateButtonState()
 {
-    bool bSelected = (GetSelectedIndex() != -1);
-    m_btnOrderAccept.EnableWindow(bSelected);
-    m_btnOrderReject.EnableWindow(bSelected);
+    int nIdx = GetSelectedIndex();
+    if (nIdx == -1)
+    {
+        m_btnOrderAccept.EnableWindow(FALSE);
+        m_btnOrderReject.EnableWindow(FALSE);
+        return;
+    }
+
+    // 대기 상태일 때만 수락/거절 활성화
+    CString strStatus = m_listOrder.GetItemText(nIdx, 3);
+    bool bPending = (strStatus == L"대기");
+    m_btnOrderAccept.EnableWindow(bPending);
+    m_btnOrderReject.EnableWindow(bPending);
 }
 
 int CTabOrderDlg::GetSelectedIndex()
@@ -387,7 +402,7 @@ void CTabOrderDlg::OnOrderAcceptResult(const json& resJson)
 // =========================================================
 void CTabOrderDlg::OnOrderRejectResult(const json& resJson)
 {
-    if (resJson.value("status", 0) == 200)
+    if (resJson.value("status", 0) == 0)
     {
         std::string orderId = resJson.value("orderId", "");
         if (!orderId.empty())
