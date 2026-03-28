@@ -181,8 +181,7 @@ signals:
     void onStoreListReceived(QList<TopStoreInfoQt> stores);
 
     // ── 1등 가게 새로고침(홈화면) (RES_HEARTBEAT = 1001) ──
-    void onHeartbeatReceived(QList<CategoryInfoQt> categories,
-                             QList<TopStoreInfoQt> topStores);
+    void onHeartbeatReceived(QList<TopStoreInfoQt> topStores);
 
     // ── 매장 검색 결과 수신 (RES_SEARCH_STORE = 2117) ──
     void onSearchResultReceived(QList<TopStoreInfoQt> stores);

@@ -31,9 +31,7 @@ void NetworkManager::connectToServer(const QString &ip, quint16 port)
 
 void NetworkManager::sendHeartbeat()
 {
-    nlohmann::json body;
-    body["status"] = 0;
-    sendPacket(CmdID::REQ_HEARTBEAT, body);
+    sendPacket(CmdID::REQ_HEARTBEAT, nlohmann::json::object());
 }
 
 // ── 인증 관련 ──
@@ -425,35 +423,25 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 int status = j.value("status", 1);
                 if (status != 0) return;
 
-                // 🚀 카테고리 파싱 로직 삭제 완료 (로그인 시 한 번만 받음)
-
-                // 🚀 오직 매출 1등 매장 리스트만 갱신!
                 QList<TopStoreInfoQt> topStores;
                 if (j.contains("topStores")) {
-                    for (const auto &store : j["topStores"]) {
-                        TopStoreInfoQt s;
-                        s.storeId           = store.value("storeId", 0);
-                        s.storeName         = QString::fromStdString(store.value("storeName", ""));
-                        s.rating            = store.value("rating", 0.0);
-
-                        // --- UI 상세 데이터 파싱 ---
-                        s.deliveryFee       = store.value("deliveryFee", 0);
-                        s.minOrderAmount    = store.value("minOrderAmount", 0);
-                        s.reviewCount       = store.value("reviewCount", 0);
-                        s.deliveryTimeRange = QString::fromStdString(store.value("deliveryTimeRange", ""));
-                        s.iconName          = QString::fromStdString(store.value("iconName", ""));
-
-                        topStores.append(s);
+                    for (const auto &s : j["topStores"]) {
+                        TopStoreInfoQt store;
+                        store.storeId          = s.value("storeId", 0);
+                        store.storeName        = QString::fromStdString(s.value("storeName", ""));
+                        store.rating           = s.value("rating", 0.0);
+                        store.deliveryFee      = s.value("deliveryFee", 0);
+                        store.minOrderAmount   = s.value("minOrderAmount", 0);
+                        store.reviewCount      = s.value("reviewCount", 0);
+                        store.deliveryTimeRange = QString::fromStdString(s.value("deliveryTimeRange", ""));
+                        store.iconPath         = QString::fromStdString(s.value("iconName", ""));
+                        topStores.append(store);
                     }
                 }
-
-                // 🚀 시그널 방출 (이제 파라미터는 topStores 딱 하나!)
                 emit onHeartbeatReceived(topStores);
-
             } catch (const std::exception &e) {
                 qWarning() << "[NetworkManager] RES_HEARTBEAT 파싱 에러:" << e.what();
             }
-
         } else if (cmdId == CmdID::RES_SEARCH_STORE) {
             ResSearchStoreDTO dto = j.get<ResSearchStoreDTO>();
 

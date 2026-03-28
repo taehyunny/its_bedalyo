@@ -176,8 +176,8 @@ bool menuoption::validateRequiredOptions()
             QMessageBox::warning(this, "알림", "필수 옵션을 선택해주세요.");
             return false;
         }
-    return true;
     }
+    return true;
 }
 
 

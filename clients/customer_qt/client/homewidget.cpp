@@ -107,9 +107,6 @@ HomeWidget::HomeWidget(NetworkManager *network, QWidget *parent)
     connect(m_network, &NetworkManager::onMainHomeReceived,
             this, &HomeWidget::onMainHomeReceived);
 
-    connect(m_network, &NetworkManager::onHeartbeatReceived,
-            this, &HomeWidget::onMainHomeReceived);
-
     // CartBar: 클릭 시 cartRequested 시그널 발사
     connect(ui->cartBar, &CartBarWidget::cartRequested,
             this, &HomeWidget::cartRequested);
@@ -133,8 +130,8 @@ void HomeWidget::on_btnAddress_clicked()
 // ============================================================
 // 서버 데이터 수신
 // ============================================================
-void HomeWidget::onMainHomeReceived(QList<CategoryInfoQt> categories,
-                                     QList<TopStoreInfoQt> topStores)
+void HomeWidget::onMainHomeReceived(const QList<CategoryInfoQt>& categories,
+                                    const QList<TopStoreInfoQt>& topStores)
 {
     qDebug() << "[HomeWidget] 카테고리:" << categories.size()
              << "가게:" << topStores.size();
@@ -158,6 +155,21 @@ void HomeWidget::onMainHomeReceived(QList<CategoryInfoQt> categories,
         storeLayout->addWidget(makeStoreCard(store));
     static_cast<QVBoxLayout*>(storeLayout)->addStretch();
 }
+
+// void HomeWidget::onHeartbeatReceived(QList<TopStoreInfoQt> topStores)
+// {
+//     qDebug() << "[HomeWidget] 하트비트 갱신 - 가게:" << topStores.size();
+
+//     QLayout *storeLayout = ui->storeContent->layout();
+//     QLayoutItem *child;
+//     while ((child = storeLayout->takeAt(0)) != nullptr) {
+//         if (child->widget()) delete child->widget();
+//         delete child;
+//     }
+//     for (const TopStoreInfoQt &store : topStores)
+//         storeLayout->addWidget(makeStoreCard(store));
+//     static_cast<QVBoxLayout*>(storeLayout)->addStretch();
+// }
 
 // ============================================================
 // 카테고리 아이템

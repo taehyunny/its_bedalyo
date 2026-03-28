@@ -55,6 +55,7 @@ public:
     QString storeAddress;      // 가게주소 (UI 표시용)
     QString deliveryTimeRange; // 배달 / 포장 시간
     int minOrderAmount = 0;
+    int totalWithDelivery = 0;
 
     // ── 메뉴 목록 ──
     QList<CartItemQt> items; // 담긴 메뉴 리스트

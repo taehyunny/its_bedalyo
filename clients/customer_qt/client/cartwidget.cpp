@@ -564,6 +564,7 @@ void CartWidget::updateBottomBar()
         int  total    = calcTotal();
         int  discount = calcDiscount();
         int  original = CartSession::instance().totalPrice() + m_deliveryFee;
+        CartSession::instance().totalWithDelivery = original;
 
         // WOW 배너
         if (isWow && discount > 0) {
@@ -712,6 +713,7 @@ void CartWidget::on_btnPay_clicked()
     dto.totalPrice      = calcTotal();
     dto.deliveryAddress = m_selectedAddress.toStdString(); // ← 수정
     dto.couponId        = -1;
+    dto.totalPrice = CartSession::instance().totalWithDelivery;
 
     for (const CartItemQt &item : CartSession::instance().items) {
         OrderItemDTO orderItem;

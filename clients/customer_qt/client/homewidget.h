@@ -46,6 +46,10 @@ public:
     void setAddress(const QString &address);
     void updateCartBar(); // CartBar show/hide 갱신
 
+public slots:
+    void onMainHomeReceived(const QList<CategoryInfoQt>& categories,
+                            const QList<TopStoreInfoQt>& topStores);
+
 signals:
     void addressRequested();
     void searchRequested();
@@ -64,8 +68,8 @@ private slots:
     void on_navFavorite_clicked();
     void on_navOrder_clicked();
     void on_navMy_clicked();
-    void onMainHomeReceived(QList<CategoryInfoQt> categories,
-                            QList<TopStoreInfoQt> topStores);
+    // void onMainHomeReceived(QList<CategoryInfoQt> categories,
+    //                         QList<TopStoreInfoQt> topStores);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

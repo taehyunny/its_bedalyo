@@ -67,6 +67,11 @@ MainWindow::MainWindow(QWidget* parent)
     connect(m_homeWidget, &HomeWidget::storeSelected, this, &MainWindow::onStoreSelected);
     connect(m_homeWidget, &HomeWidget::cartRequested, this, &MainWindow::onCartRequested);
 
+    connect(m_network, &NetworkManager::onHeartbeatReceived,
+            this, [this](QList<TopStoreInfoQt> topStores) {
+                m_homeWidget->onMainHomeReceived(m_cachedCategories, topStores);
+            });
+
     // ── 카테고리 ──
     connect(m_menuWidget, &menucategori::backRequested, this, &MainWindow::onBackToHome);
     connect(m_menuWidget, &menucategori::storeSelected, this, &MainWindow::onStoreSelected);
@@ -386,7 +391,8 @@ void MainWindow::onNetworkOrderCreated(int status, QString message, QString orde
             }
 
             QString storeName = CartSession::instance().storeName;
-            int     totalPrice = CartSession::instance().totalPrice();
+            // int     totalPrice = CartSession::instance().totalPrice();
+            int total = CartSession::instance().totalWithDelivery;
 
             // 2. Form 화면에 데이터 세팅
             m_formWidget->setCurrentOrderId(orderId);
@@ -399,7 +405,7 @@ void MainWindow::onNetworkOrderCreated(int status, QString message, QString orde
             }
 
             // 3. 주문 내역에 추가
-            m_orderHistoryWidget->addPendingOrder(orderId, storeName, menuSummary, totalPrice);
+            m_orderHistoryWidget->addPendingOrder(orderId, storeName, menuSummary, total);
         }
 }
 
