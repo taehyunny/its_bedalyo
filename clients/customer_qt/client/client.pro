@@ -28,7 +28,8 @@ SOURCES += \
     settingswidget.cpp \
     addresswidget.cpp \
     addressdetailwidget.cpp \
-    cartwidget.cpp
+    cartwidget.cpp \
+    wowmembershipdialog.cpp
 
 
 HEADERS += \
@@ -58,7 +59,8 @@ HEADERS += \
     settingswidget.h \
     addresswidget.h \
     addressdetailwidget.h \
-    cartwidget.h
+    cartwidget.h \
+    wowmembershipdialog.h
 b
 
 FORMS += \
@@ -83,6 +85,7 @@ FORMS += \
     addresswidget.ui \
     addressdetailwidget.ui \
     cartwidget.ui \
+    wowmembershipdialog.ui
 
 
 

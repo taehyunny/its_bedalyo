@@ -48,8 +48,8 @@ public:
 
 public slots:
     void onMainHomeReceived(const QList<CategoryInfoQt>& categories,
+                            const QStringList& brandCategories,
                             const QList<TopStoreInfoQt>& topStores);
-
 signals:
     void addressRequested();
     void searchRequested();

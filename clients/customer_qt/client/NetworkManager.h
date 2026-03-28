@@ -160,11 +160,15 @@ public:
     void sendOrderHistoryRequest(const QString &userId);
     void sendOrderDetailRequest(const QString &orderId);
 
+    // 등급 변경 요청 전용 함수 추가
+    void sendGradeUpdate(const ReqGradeUpdateDTO &req);
+
 signals:
     void onConnected();
 
     // ── 로그인 응답 ──
-    void onLoginResponse(int status, QString message, QString userName, QString address, QString phoneNumber);
+    void onLoginResponse(int status, QString message, QString userName,
+                         QString address, QString phoneNumber);
 
     // ── 회원가입 응답 ──
     void onSignupResponse(int status, QString message);
@@ -175,6 +179,7 @@ signals:
 
     // ── 메인 홈 데이터 수신 (RES_CATEGORY) ──
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
+                            QStringList brandCategories,
                             QList<TopStoreInfoQt> topStores);
 
     // ── 카테고리별 가게 목록 수신 (RES_STORE_LIST = 2001) ──
@@ -216,6 +221,8 @@ signals:
     void onCheckoutInfoReceived(int status, QString customerGrade,
                                 int deliveryFee, int minOrderAmount,
                                 QString pickupTime, QString cardNumber, QString accountNumber);
+
+    void onGradeUpdateResponse(int status, QString message);
 
 
 private slots:

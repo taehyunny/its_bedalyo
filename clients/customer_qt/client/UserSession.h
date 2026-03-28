@@ -24,6 +24,7 @@ public:
     QString address;     // 주소 (홈 화면 헤더에 표시)
     QString userId;      // 아이디 (필요 시 사용)
     QString phoneNumber; // 전화번호 (마이페이지에서 표시)
+    QString customerGrade;
 
     // 로그인/회원가입 성공 시 한 번에 저장
     void set(const QString &name, const QString &addr,

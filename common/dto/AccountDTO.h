@@ -118,11 +118,16 @@ struct AuthResDTO
     int deliveryFee = 0;        // 배달비
     int approvalStatus = 0;     // 0: 대기, 1: 승인
 
+    //std::vector<nlohmann::json> foodCategories;
+    //std::vector<nlohmann::json> brandCategories;
+    //std::vector<nlohmann::json> topStores;
+
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(AuthResDTO,
-                                   status, message, userId, address, userName, phoneNumber, role, errorType,
-                                   storeId, storeName, category, storeAddress,
-                                   cookTime, minOrderAmount, openTime, closeTime,
-                                   accountNumber, deliveryFee, approvalStatus, businessNumber, grade)
+        status, message, userId, address, userName, phoneNumber, role, errorType,
+        storeId, storeName, category, storeAddress,
+        cookTime, minOrderAmount, openTime, closeTime,
+        accountNumber, deliveryFee, approvalStatus, businessNumber, grade)
+        //foodCategories, brandCategories, topStores)
 };
 // ---------------------------------------------------------
 // [5] 중복 확인 DTO (1040 ~ 1043)

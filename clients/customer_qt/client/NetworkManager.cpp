@@ -345,7 +345,6 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                                  QString::fromStdString(dto.userName),
                                  QString::fromStdString(dto.address),
                                  QString::fromStdString(dto.phoneNumber));
-
         } else if (cmdId == CmdID::RES_SIGNUP) {
             AuthResDTO dto = j.get<AuthResDTO>();
             emit onSignupResponse(dto.status,
@@ -391,7 +390,7 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 qWarning() << "[NetworkManager] 수신된 원문 확인 필요:" << jsonStr;
             }
             
-            }else if (cmdId == CmdID::RES_CATEGORY) {
+            } else if (cmdId == CmdID::RES_CATEGORY) {
             MainHomeResDTO dto = j.get<MainHomeResDTO>();
 
             QList<CategoryInfoQt> categories;
@@ -403,11 +402,17 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 categories.append(item);
             }
 
+            // ← 추가
+            QStringList brandCategories;
+            for (const auto &brand : dto.brandCategories) {
+                brandCategories.append(QString::fromStdString(brand.brandName));
+            }
+
             QList<TopStoreInfoQt> topStores;
             for (const auto &s : dto.topStores)
                 topStores.append(toQt(s));
 
-            emit onMainHomeReceived(categories, topStores);
+            emit onMainHomeReceived(categories, brandCategories, topStores); // ← 수정
 
         } else if (cmdId == CmdID::RES_STORE_LIST) {
             StoreListResDTO dto = j.get<StoreListResDTO>();
@@ -429,6 +434,7 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                         TopStoreInfoQt store;
                         store.storeId          = s.value("storeId", 0);
                         store.storeName        = QString::fromStdString(s.value("storeName", ""));
+                        store.category     = QString::fromStdString(s.value("categoryName", ""));
                         store.rating           = s.value("rating", 0.0);
                         store.deliveryFee      = s.value("deliveryFee", 0);
                         store.minOrderAmount   = s.value("minOrderAmount", 0);
@@ -438,7 +444,9 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                         topStores.append(store);
                     }
                 }
+
                 emit onHeartbeatReceived(topStores);
+
             } catch (const std::exception &e) {
                 qWarning() << "[NetworkManager] RES_HEARTBEAT 파싱 에러:" << e.what();
             }
@@ -671,17 +679,27 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 qWarning() << "2087 파싱 에러:" << e.what();
             }
 
-        } else if (cmdId == CmdID::RES_ORDER_HISTORY) { // 2081 수신
-            qDebug() << "[NetworkManager] 과거 주문 내역 응답(2081) 수신!";
+        } else if (cmdId == CmdID::RES_ORDER_HISTORY) { 
+            // ... (기존 코드) ...
+        } 
+        // ✅ 2095번 등급 변경 응답 처리 추가
+        else if (cmdId == CmdID::RES_GRADE_UPDATE) { 
             try {
-                ResOrderHistoryDTO dto = j.get<ResOrderHistoryDTO>();
-                emit onOrderHistoryReceived(dto);
-            } catch(const std::exception &e) {
-                qWarning() << "2081 파싱 에러:" << e.what();
-            }
+                auto res = j.get<ResGradeUpdateDTO>();
+                
+                // 📝 요청하신 로그 출력
+                qDebug() << "==========================================";
+                qDebug() << "[RES_RECV] 등급 변경 응답 도착 (2095)";
+                qDebug() << "[DEBUG] 결과:" << res.status << ", 메시지:" << QString::fromStdString(res.message);
+                qDebug() << "==========================================";
 
-        // ── 여기서부터는 기존 else if 체인과 맞춰서 닫힙니다 ──
-        } else {
+                // 시그널 발사! (UI 창이 이 소리를 듣게 됩니다)
+                emit onGradeUpdateResponse(res.status, QString::fromStdString(res.message));
+            } catch (const std::exception &e) {
+                qWarning() << "2095 파싱 에러:" << e.what();
+            }
+        }
+        else {
             qWarning() << "[NetworkManager] 처리되지 않은 CmdID:"
                        << static_cast<uint16_t>(cmdId);
         }
@@ -718,4 +736,12 @@ void NetworkManager::sendOrderDetailRequest(const QString &orderId)
     nlohmann::json j;
     j["orderId"] = orderId.toStdString(); 
     sendPacket(CmdID::REQ_ORDER_DETAIL, j);
+}
+
+// 등급 변경 요청 (REQ_GRADE_UPDATE = 2094)
+void NetworkManager::sendGradeUpdate(const ReqGradeUpdateDTO &req)
+{
+    qDebug() << "[NetworkManager] 등급 변경 요청 - UserID:" << QString::fromStdString(req.userId);
+    nlohmann::json j = req;
+    sendPacket(CmdID::REQ_GRADE_UPDATE, j);
 }

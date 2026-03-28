@@ -69,7 +69,9 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(m_network, &NetworkManager::onHeartbeatReceived,
             this, [this](QList<TopStoreInfoQt> topStores) {
-                m_homeWidget->onMainHomeReceived(m_cachedCategories, topStores);
+                m_homeWidget->onMainHomeReceived(m_cachedCategories,
+                                                 m_cachedBrands,
+                                                 topStores);
             });
 
     // ── 카테고리 ──
@@ -232,10 +234,14 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow() { delete ui; }
 
+// onLoginSuccess 슬롯 수정
 void MainWindow::onLoginSuccess()
 {
     m_homeWidget->setUserName(UserSession::instance().userName);
     m_homeWidget->setAddress(UserSession::instance().address);
+    m_homeWidget->onMainHomeReceived(m_cachedCategories,
+                                     m_cachedBrands,
+                                     m_cachedTopStores);
     ui->stackedWidget->setCurrentWidget(m_homeWidget);
 }
 
@@ -248,9 +254,13 @@ void MainWindow::onLogoutRequested()
     ui->stackedWidget->setCurrentWidget(m_loginWidget);
 }
 
-void MainWindow::onMainHomeReceived(QList<CategoryInfoQt> categories, QList<TopStoreInfoQt>)
+void MainWindow::onMainHomeReceived(QList<CategoryInfoQt> categories,
+                                    QStringList brandCategories,
+                                    QList<TopStoreInfoQt> topStores)
 {
-    m_cachedCategories = categories;
+    m_cachedCategories    = categories;
+    m_cachedBrands        = brandCategories;  // ← 추가
+    m_cachedTopStores     = topStores;        // ← 추가
 }
 
 void MainWindow::onCategorySelected(int categoryId, const QString& categoryName)

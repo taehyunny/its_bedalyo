@@ -131,11 +131,10 @@ void HomeWidget::on_btnAddress_clicked()
 // 서버 데이터 수신
 // ============================================================
 void HomeWidget::onMainHomeReceived(const QList<CategoryInfoQt>& categories,
+                                    const QStringList& brandCategories,
                                     const QList<TopStoreInfoQt>& topStores)
 {
-    qDebug() << "[HomeWidget] 카테고리:" << categories.size()
-             << "가게:" << topStores.size();
-
+    // 음식 카테고리 (catContent1 - 윗줄)
     QLayout *catLayout = ui->catContent1->layout();
     QLayoutItem *child;
     while ((child = catLayout->takeAt(0)) != nullptr) {
@@ -146,6 +145,17 @@ void HomeWidget::onMainHomeReceived(const QList<CategoryInfoQt>& categories,
         catLayout->addWidget(makeCategoryItem(cat.id, cat.name, cat.iconPath));
     static_cast<QHBoxLayout*>(catLayout)->addStretch();
 
+    // 브랜드 카테고리 (catContent2 - 아랫줄 편의점/마트)
+    QLayout *brandLayout = ui->catContent2->layout();  // catContent2 있어야 함
+    while ((child = brandLayout->takeAt(0)) != nullptr) {
+        if (child->widget()) delete child->widget();
+        delete child;
+    }
+    for (const QString &brand : brandCategories)
+        brandLayout->addWidget(makeCategoryItem(0, brand, ""));
+    static_cast<QHBoxLayout*>(brandLayout)->addStretch();
+
+    // 가게 목록
     QLayout *storeLayout = ui->storeContent->layout();
     while ((child = storeLayout->takeAt(0)) != nullptr) {
         if (child->widget()) delete child->widget();
@@ -155,21 +165,6 @@ void HomeWidget::onMainHomeReceived(const QList<CategoryInfoQt>& categories,
         storeLayout->addWidget(makeStoreCard(store));
     static_cast<QVBoxLayout*>(storeLayout)->addStretch();
 }
-
-// void HomeWidget::onHeartbeatReceived(QList<TopStoreInfoQt> topStores)
-// {
-//     qDebug() << "[HomeWidget] 하트비트 갱신 - 가게:" << topStores.size();
-
-//     QLayout *storeLayout = ui->storeContent->layout();
-//     QLayoutItem *child;
-//     while ((child = storeLayout->takeAt(0)) != nullptr) {
-//         if (child->widget()) delete child->widget();
-//         delete child;
-//     }
-//     for (const TopStoreInfoQt &store : topStores)
-//         storeLayout->addWidget(makeStoreCard(store));
-//     static_cast<QVBoxLayout*>(storeLayout)->addStretch();
-// }
 
 // ============================================================
 // 카테고리 아이템

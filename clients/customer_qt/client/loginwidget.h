@@ -45,7 +45,8 @@ private slots:
     void onSignupFieldChanged();        // 회원가입 버튼 활성화 조건 재검사
 
     // ── 서버 응답 슬롯 ──
-    void onLoginResponse(int status, QString message, QString userName, QString address, QString phoneNumber);
+    void onLoginResponse(int status, QString message, QString userName,
+                         QString address, QString phoneNumber);
     void onSignupResponse(int status, QString message); // ← 회원가입 전용 (분리)
     void onIdCheckResponse(int status, QString message, bool isAvailable);
     void onPhoneCheckResponse(int status, QString message, bool isAvailable);

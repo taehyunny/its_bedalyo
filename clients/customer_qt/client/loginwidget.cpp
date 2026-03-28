@@ -271,13 +271,9 @@ void LoginWidget::on_signupButton_clicked()
 // 로그인 응답 처리 (RES_LOGIN)
 // 서버가 userName, address 채워서 줌
 // ============================================================
-void LoginWidget::onLoginResponse(int status, QString message, QString userName, QString address, QString phoneNumber)
+void LoginWidget::onLoginResponse(int status, QString message, QString userName,
+                                  QString address, QString phoneNumber)
 {
-    qDebug() << "[LoginResponse] status:" << status
-             << "userName:" << userName
-             << "address:" << address        // ← 이게 뭐가 오는지 확인
-             << "phoneNumber:" << phoneNumber;
-
     if (status == 200) {
         UserSession::instance().set(userName, address, ui->idEdit->text(), phoneNumber);
         emit loginSuccess();
@@ -285,7 +281,6 @@ void LoginWidget::onLoginResponse(int status, QString message, QString userName,
         QMessageBox::warning(this, "로그인 실패", message);
     }
 }
-
 // ============================================================
 // 회원가입 응답 처리 (RES_SIGNUP)
 // 서버는 성공/실패만 알려줌 → 클라 입력값으로 UserSession 저장 후 바로 홈 전환
@@ -293,20 +288,17 @@ void LoginWidget::onLoginResponse(int status, QString message, QString userName,
 void LoginWidget::onSignupResponse(int status, QString message)
 {
     if (status == 200) {
-        // 서버 응답 대신 직접 입력했던 값으로 UserSession 저장
         UserSession::instance().set(
             ui->nameEdit->text(),
             ui->addressEdit->text(),
             ui->signupIdEdit->text(),
             ui->phoneEdit->text()
-        );
-        // 로그인한 것과 동일하게 홈 화면으로 전환
+            );
         emit loginSuccess();
     } else {
         QMessageBox::warning(this, "회원가입 실패", message);
     }
 }
-
 // ── 아이디 중복확인 응답 (RES_AUTH_CHECK) ──
 void LoginWidget::onIdCheckResponse(int status, QString message, bool isAvailable)
 {

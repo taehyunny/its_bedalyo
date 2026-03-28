@@ -57,6 +57,7 @@ private slots:
     void onAddressDetailCompleted(const AddressItem &item);
     void onAddressDeleteRequested(int addressId);
     void onMainHomeReceived(QList<CategoryInfoQt> categories,
+                            QStringList brandCategories,
                             QList<TopStoreInfoQt> topStores);
     void onCartRequested();
     void onCartClose();
@@ -88,6 +89,8 @@ private:
     menureview              *m_menureviewWidget;
     CartBarWidget           *m_cartBar = nullptr; // MainWindow가 직접 소유
     QList<CategoryInfoQt>   m_cachedCategories;
+    QStringList             m_cachedBrands;
+    QList<TopStoreInfoQt>   m_cachedTopStores;
     QWidget                 *m_prevWidget = nullptr;
     DeliveryCompleteWidget  *m_deliveryCompleteWidget;
 
