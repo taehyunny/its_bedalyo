@@ -166,7 +166,7 @@ LRESULT CMainMenuDlg::OnPacketReceived(WPARAM wParam, LPARAM lParam)
     auto* pkt = reinterpret_cast<ReceivedPacket*>(lParam);
     if (!pkt) return 0;
 
-    // [디버그 수정한 부분] 한글 깨짐 방지 처리
+    // 한글 깨짐 방지 처리
     CString strUnicodeBody = CA2W(pkt->body.c_str(), CP_UTF8);
     CString dbgPkt;
     dbgPkt.Format(L"[DEBUG] RECV Packet ID: %d, Body: %s\n", pkt->cmdId, (LPCTSTR)strUnicodeBody);

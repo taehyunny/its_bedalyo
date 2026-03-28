@@ -10,9 +10,7 @@ CChatDlg::CChatDlg(CWnd* pParent)
 }
 
 CChatDlg::~CChatDlg() {
-    for (int i = 0; i < m_listChatUsers.GetItemCount(); ++i) {
-        delete reinterpret_cast<ChatUserData*>(m_listChatUsers.GetItemData(i));
-    }
+
 }
 
 void CChatDlg::DoDataExchange(CDataExchange* pDX)
@@ -56,6 +54,15 @@ void CChatDlg::InitListCtrl()
 
 void CChatDlg::SetNetworkHelper(CNetworkHelper* pNet) { m_pNet = pNet; }
 
+void CChatDlg::OnDestroy()
+{
+    // HWND가 살아있는 시점에 정리
+    for (int i = 0; i < m_listChatUsers.GetItemCount(); ++i) {
+        auto* pData = reinterpret_cast<ChatUserData*>(m_listChatUsers.GetItemData(i));
+        if (pData) delete pData;
+    }
+    CDialogEx::OnDestroy();
+}
 
 void CChatDlg::UpdateRoomId(const std::string& requesterId, int roomId)
 {

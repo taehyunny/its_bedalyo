@@ -33,7 +33,7 @@ BOOL CAdminDlg::OnInitDialog()
     CString strAddr;
     CString strIp = CA2W(m_serverIp.c_str(), CP_UTF8);
     strAddr.Format(L"서버: %s : %d", (LPCTSTR)strIp, m_serverPort);
-    m_staticServerAddress.SetWindowText(strAddr);
+    //m_staticServerAddress.SetWindowText(strAddr);
 
     // 연결 해제 버튼 초기 비활성화
     m_btnConnectOff.EnableWindow(FALSE);
@@ -93,7 +93,7 @@ void CAdminDlg::OnBnClickedBtnConnect()
 
     // ✅ 버튼은 RES_ADMIN_INIT 수신 후 활성화 (아직 비활성)
     m_btnConnect.EnableWindow(FALSE);
-    m_staticServerAddress.SetWindowText(L"⏳ 인증 중...");
+    m_staticServerAddress.SetWindowText(L" 인증 중...");
 }
 
 // =========================================================
@@ -109,7 +109,7 @@ void CAdminDlg::OnBnClickedBtnConnectOff()
     CString strAddr;
     CString strIp = CA2W(m_serverIp.c_str(), CP_UTF8);
     strAddr.Format(L"서버: %s : %d", (LPCTSTR)strIp, m_serverPort);
-    m_staticServerAddress.SetWindowText(strAddr);
+    m_staticServerAddress.SetWindowText(L"연결 해제");
 }
 
 // =========================================================

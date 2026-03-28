@@ -31,7 +31,7 @@ protected:
     virtual BOOL OnInitDialog();
     virtual void OnOK() override {}
     virtual void OnCancel() override {}
-
+    void CChatDlg::OnDestroy();
     afx_msg void OnBnClickedBtnChatSend();
     afx_msg void OnBnClickedBtnChatAccept();
     afx_msg void OnBnClickedBtnChatReject();

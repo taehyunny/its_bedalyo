@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "MFC.h"
 #include "afxdialogex.h"
 #include "CMenuEditDlg.h"

@@ -15,7 +15,6 @@ CRiderMainDlg::~CRiderMainDlg() {}
 void CRiderMainDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_STATIC_SERVER, m_staticServer);
     DDX_Control(pDX, IDC_BTN_CONNECT, m_btnConnect);
     DDX_Control(pDX, IDC_BTN_DISCONNECT, m_btnDisconnect);
     DDX_Control(pDX, IDC_BTN_REFRESH, m_btnRefresh);
@@ -29,10 +28,6 @@ BOOL CRiderMainDlg::OnInitDialog()
     CDialogEx::OnInitDialog();
     SetWindowText(L"ITS_Bedalyo - 라이더");
 
-    CString strAddr;
-    CString strIp = CA2W(m_serverIp.c_str(), CP_UTF8);
-    strAddr.Format(L"서버: %s : %d", (LPCTSTR)strIp, m_serverPort);
-    m_staticServer.SetWindowText(strAddr);
 
     // 초기 버튼 상태
     m_btnDisconnect.EnableWindow(FALSE);
@@ -102,7 +97,6 @@ void CRiderMainDlg::OnBnClickedBtnConnect()
     m_btnConnect.EnableWindow(FALSE);
     m_btnDisconnect.EnableWindow(TRUE);
     m_btnRefresh.EnableWindow(TRUE);
-    m_staticServer.SetWindowText(L"✅ 서버 연결됨");
 
     // 연결 즉시 조리중 주문 목록 요청
     json body;
@@ -125,7 +119,6 @@ void CRiderMainDlg::OnBnClickedBtnDisconnect()
     CString strAddr;
     CString strIp = CA2W(m_serverIp.c_str(), CP_UTF8);
     strAddr.Format(L"서버: %s : %d", (LPCTSTR)strIp, m_serverPort);
-    m_staticServer.SetWindowText(strAddr);
 }
 
 // =========================================================
