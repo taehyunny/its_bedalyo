@@ -41,18 +41,24 @@ OrderHistoryWidget::OrderHistoryWidget(NetworkManager *network, QWidget *parent)
         }
 
         if ((resDto.status == 200 || resDto.status == 0) && !resDto.historyList.empty()) {
+            int cardCount = 0;  // ← 추가
             for (const auto& itemData : resDto.historyList) {
+                if (itemData.status != 3 && itemData.status != 9) continue;
                 OrderHistoryCard* card = new OrderHistoryCard(itemData, this);
                 connect(card, &OrderHistoryCard::receiptRequested,
                         m_network, &NetworkManager::sendOrderDetailRequest);
-                // ui->historyListLayout->insertWidget(0, card);
                 ui->historyListLayout->addWidget(card);
+                cardCount++;  // ← 추가
             }
-            // 빈 상태 숨기고 스크롤 영역 표시
-            ui->historyEmptyWidget->hide();
-            ui->historyScrollArea->show();
+            // 카드가 실제로 있을 때만 스크롤 표시
+            if (cardCount > 0) {
+                ui->historyEmptyWidget->hide();
+                ui->historyScrollArea->show();
+            } else {
+                ui->historyEmptyWidget->show();
+                ui->historyScrollArea->hide();
+            }
         } else {
-            // 빈 상태 표시하고 스크롤 영역 숨기기
             ui->historyEmptyWidget->show();
             ui->historyScrollArea->hide();
         }

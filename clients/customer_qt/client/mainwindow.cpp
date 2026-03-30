@@ -194,15 +194,18 @@ MainWindow::MainWindow(QWidget* parent)
     // ── 주문 상태 변경 알림 ──
     connect(m_network, &NetworkManager::onOrderStateChanged, this, [=](int state, QString orderId) {
         m_orderHistoryWidget->updateOrderState(orderId, state);
-        if (ui->stackedWidget->currentWidget() == m_formWidget &&
-            m_formWidget->currentOrderId() == orderId) {
+
+        // 현재 화면과 상관없이 항상 Form 업데이트
+        if (m_formWidget->currentOrderId() == orderId) {
             m_formWidget->updateStatus(state);
+
+            // state가 3이면 배달완료 화면으로 전환
+            if (state == 3) {
+                m_deliveryCompleteWidget->setOrderId(orderId);
+                ui->stackedWidget->setCurrentWidget(m_deliveryCompleteWidget);
+            }
         }
-        if (state == 3) {
-            m_deliveryCompleteWidget->setOrderId(orderId);
-            ui->stackedWidget->setCurrentWidget(m_deliveryCompleteWidget);
-        }
-        // ← 추가
+
         if (state == 9) {
             m_orderHistoryWidget->moveToHistory(orderId, "배달거절");
         }

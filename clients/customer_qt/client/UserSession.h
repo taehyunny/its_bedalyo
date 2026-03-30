@@ -28,12 +28,14 @@ public:
 
     // 로그인/회원가입 성공 시 한 번에 저장
     void set(const QString &name, const QString &addr,
-             const QString &id = "", const QString &phone = "")
+             const QString &id = "", const QString &phone = "",
+             const QString &grade = "")
     {
-        userName    = name;
-        address     = addr;
-        userId      = id;
-        phoneNumber = phone;
+        userName      = name;
+        address       = addr;
+        userId        = id;
+        phoneNumber   = phone;
+        customerGrade = grade;  // ← 추가
     }
 
     // 로그아웃 시 전체 초기화

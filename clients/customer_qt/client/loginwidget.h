@@ -46,7 +46,8 @@ private slots:
 
     // ── 서버 응답 슬롯 ──
     void onLoginResponse(int status, QString message, QString userName,
-                         QString address, QString phoneNumber);
+                         QString address, QString phoneNumber,
+                         QString grade);
     void onSignupResponse(int status, QString message); // ← 회원가입 전용 (분리)
     void onIdCheckResponse(int status, QString message, bool isAvailable);
     void onPhoneCheckResponse(int status, QString message, bool isAvailable);

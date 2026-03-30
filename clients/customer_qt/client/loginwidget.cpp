@@ -272,10 +272,10 @@ void LoginWidget::on_signupButton_clicked()
 // 서버가 userName, address 채워서 줌
 // ============================================================
 void LoginWidget::onLoginResponse(int status, QString message, QString userName,
-                                  QString address, QString phoneNumber)
+                                  QString address, QString phoneNumber, QString grade)
 {
     if (status == 200) {
-        UserSession::instance().set(userName, address, ui->idEdit->text(), phoneNumber);
+        UserSession::instance().set(userName, address, ui->idEdit->text(), phoneNumber, grade);
         emit loginSuccess();
     } else {
         QMessageBox::warning(this, "로그인 실패", message);

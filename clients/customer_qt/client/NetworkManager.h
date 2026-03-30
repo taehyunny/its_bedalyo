@@ -168,7 +168,8 @@ signals:
 
     // ── 로그인 응답 ──
     void onLoginResponse(int status, QString message, QString userName,
-                         QString address, QString phoneNumber);
+                         QString address, QString phoneNumber,
+                         QString grade);
 
     // ── 회원가입 응답 ──
     void onSignupResponse(int status, QString message);

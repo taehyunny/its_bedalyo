@@ -344,7 +344,8 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                                  QString::fromStdString(dto.message),
                                  QString::fromStdString(dto.userName),
                                  QString::fromStdString(dto.address),
-                                 QString::fromStdString(dto.phoneNumber));
+                                 QString::fromStdString(dto.phoneNumber),
+                                 QString::fromStdString(dto.grade));
         } else if (cmdId == CmdID::RES_SIGNUP) {
             AuthResDTO dto = j.get<AuthResDTO>();
             emit onSignupResponse(dto.status,

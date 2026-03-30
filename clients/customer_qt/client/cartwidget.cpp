@@ -706,33 +706,27 @@ void CartWidget::on_btnRequestToggle_clicked()
 void CartWidget::on_btnPay_clicked()
 {
     if (!m_serverDataLoaded || !isMinOrderMet() || CartSession::instance().isEmpty()) return;
-
     OrderCreateReqDTO dto;
     dto.userId          = UserSession::instance().userId.toStdString();
     dto.storeId         = CartSession::instance().storeId;
-    dto.totalPrice      = calcTotal();
-    dto.deliveryAddress = m_selectedAddress.toStdString(); // ← 수정
+    dto.deliveryAddress = m_selectedAddress.toStdString();
     dto.couponId        = -1;
-    dto.totalPrice = CartSession::instance().totalWithDelivery;
-
+    dto.totalPrice      = calcTotal();        // ← 이걸로 하나만 사용
+    dto.deliveryFee     = calcDeliveryFee();  // ← calcDeliveryFee() 사용
+    dto.wowDiscount     = calcDiscount();
     for (const CartItemQt &item : CartSession::instance().items) {
         OrderItemDTO orderItem;
         orderItem.menuId    = item.menuId;
         orderItem.quantity  = item.quantity;
         orderItem.unitPrice = item.unitPrice;
         orderItem.menuName  = item.menuName.toStdString();
-
         nlohmann::json optArr = nlohmann::json::array();
         for (int id : item.optionIds) optArr.push_back(id);
         orderItem.selectedOptions = optArr;
-
         dto.items.push_back(orderItem);
     }
-
-    // ← storeRequest/riderRequest 소스 수정
     dto.storeRequest = ui->storeRequestEdit->toPlainText().toStdString();
     dto.riderRequest = m_riderRequest.toStdString();
-
     m_network->sendOrderCreate(dto);
 }
 

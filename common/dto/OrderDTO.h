@@ -39,8 +39,10 @@ struct OrderCreateReqDTO // 주문 생성 요청 DTO (클라이언트 -> 서버)
     std::vector<OrderItemDTO> items; // 주문 아이템 목록
     std::string storeRequest;        // 매장 요청사항 (예: "매운맛으로 해주세요!")
     std::string riderRequest;        // 라이더 요청사항 (예: "문 앞에 놔주세요!")
+    int deliveryFee = 0;
+    int wowDiscount = 0;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(OrderCreateReqDTO, userId, storeId, totalPrice, deliveryAddress, storeRequest, riderRequest, items)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(OrderCreateReqDTO, userId, storeId, totalPrice, deliveryAddress, storeRequest, riderRequest, items, deliveryFee, wowDiscount)
 };
 
 struct OrderCreateResDTO
