@@ -679,8 +679,14 @@ void NetworkManager::processPacket(CmdID cmdId, const QByteArray &body)
                 qWarning() << "2087 파싱 에러:" << e.what();
             }
 
-        } else if (cmdId == CmdID::RES_ORDER_HISTORY) { 
-            // ... (기존 코드) ...
+        } else if (cmdId == CmdID::RES_ORDER_HISTORY) {
+            qDebug() << "[NetworkManager] 과거 주문 내역 응답(2081) 수신!";
+            try {
+                ResOrderHistoryDTO dto = j.get<ResOrderHistoryDTO>();
+                emit onOrderHistoryReceived(dto);
+            } catch(const std::exception &e) {
+                qWarning() << "2081 파싱 에러:" << e.what();
+            }
         } 
         // ✅ 2095번 등급 변경 응답 처리 추가
         else if (cmdId == CmdID::RES_GRADE_UPDATE) { 
